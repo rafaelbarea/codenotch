@@ -17654,6 +17654,12 @@
             "state": "translated",
             "value": "Тижневе кільце"
           }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Anel semanal"
+          }
         }
       }
     },
@@ -17688,6 +17694,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "Поверхня"
+          }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Superfície"
           }
         }
       }
@@ -17759,6 +17771,12 @@
             "state": "translated",
             "value": "Виберіть, який ліміт показувати в основному вирізі для Antigravity."
           }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Escolha qual limite aparece no notch principal para o Antigravity."
+          }
         }
       }
     },
@@ -17793,6 +17811,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "Вимк."
+          }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Desligado"
           }
         }
       }
@@ -18459,6 +18483,12 @@
             "state": "translated",
             "value": "Підключення"
           }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Conexão"
+          }
         }
       }
     },
@@ -18493,6 +18523,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "Стандартний"
+          }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Predefinição"
           }
         }
       }
@@ -18564,6 +18600,12 @@
             "state": "translated",
             "value": "Стандартний розмір"
           }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Tamanho predefinido"
+          }
         }
       }
     },
@@ -18598,6 +18640,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "Масштабує всю поверхню — кільця, текст і підказку разом, — щоб пропорції лишалися як у макеті. 100% — розмір, для якого створювали виріз."
+          }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Escala a superfície inteira, anéis, texto e card juntos, mantendo as proporções. 100% é o tamanho em que o notch foi desenhado."
           }
         }
       }
@@ -18634,6 +18682,12 @@
             "state": "translated",
             "value": "API-ключ Ollama"
           }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Chave de API do Ollama"
+          }
         }
       }
     },
@@ -18669,6 +18723,12 @@
             "state": "translated",
             "value": "Вставте ключ"
           }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Cole sua chave"
+          }
         }
       }
     },
@@ -18703,6 +18763,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "Зберегти"
+          }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Salvar"
           }
         }
       }
@@ -18913,6 +18979,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "Думає"
+          }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Pensando"
           }
         }
       }
@@ -19252,6 +19324,12 @@
             "state": "translated",
             "value": "Codenotch уже знає момент, коли агент завершує роботу або зупиняється, щоб щось запитати. Клік по відкритому вирізу виводить наперед застосунок цієї сесії — саме застосунок, не вкладку: лише деякі термінали дозволяють вибирати вкладку ззовні, тому підказка натомість називає сесію."
           }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "O Codenotch já sabe o momento em que um agente termina ou para para perguntar algo. Clicar no notch enquanto ele está aberto traz o app daquela sessão para a frente. O app, e não a aba: só alguns terminais deixam algo de fora escolher a aba, por isso o card diz o nome da sessão."
+          }
         }
       }
     },
@@ -19280,6 +19358,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "Звук відтворюється через звичайний вихід, а не через канал звукових ефектів інтерфейсу — тож його чути навіть тоді, коли «Відтворювати звукові ефекти інтерфейсу» вимкнено в Системних налаштуваннях → Звук."
+          }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "O som toca na saída normal, não no canal de efeitos sonoros da interface. Por isso continua audível mesmo com “Reproduzir efeitos sonoros da interface” desligado em Ajustes do Sistema → Som."
           }
         }
       }
@@ -20170,6 +20254,12 @@
             "state": "translated",
             "value": "Видалити"
           }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Remover"
+          }
         }
       }
     },
@@ -20477,6 +20567,12 @@
             "state": "translated",
             "value": "Дозволити телефони в цій мережі"
           }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Permitir celulares nesta rede"
+          }
         }
       }
     },
@@ -20494,6 +20590,12 @@
             "state": "translated",
             "value": "Телефон читає дані про використання з цього Mac через ваш Wi-Fi. Нічого не виходить за межі мережі."
           }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Seu celular lê o uso deste Mac pelo Wi-Fi. Nada sai da sua rede."
+          }
         }
       }
     },
@@ -20510,6 +20612,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "Запуск…"
+          }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Iniciando…"
           }
         }
       }
@@ -20545,6 +20653,12 @@
             "state": "translated",
             "value": "Цей Mac не в локальній мережі"
           }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Este Mac não está numa rede local"
+          }
         }
       }
     },
@@ -20561,6 +20675,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "Підключити телефон…"
+          }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Conectar um celular…"
           }
         }
       }
@@ -20579,6 +20699,12 @@
             "state": "translated",
             "value": "Спарені телефони"
           }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Celulares pareados"
+          }
         }
       }
     },
@@ -20595,6 +20721,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "Поки що немає телефонів."
+          }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Nenhum celular ainda."
           }
         }
       }
@@ -20663,6 +20795,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "Щоб підключитися знову, телефон має відсканувати новий код."
+          }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ele vai precisar ler um novo código para conectar de novo."
           }
         }
       }
@@ -21512,6 +21650,12 @@
             "state": "translated",
             "value": "Коли ліміт вичерпано"
           }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Quando um limite é atingido"
+          }
         }
       }
     },
@@ -21534,6 +21678,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "Показувати сповіщення про ліміт сесії"
+          }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Mostrar aviso do limite da sessão"
           }
         }
       }
@@ -21558,6 +21708,12 @@
             "state": "translated",
             "value": "Показувати сповіщення про тижневий ліміт"
           }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Mostrar aviso do limite semanal"
+          }
         }
       }
     },
@@ -21580,6 +21736,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "Звук сповіщення"
+          }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Som do alerta"
           }
         }
       }
@@ -21604,6 +21766,12 @@
             "state": "translated",
             "value": "Показати сповіщення про ліміт сесії"
           }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ver exemplo do limite da sessão"
+          }
         }
       }
     },
@@ -21626,6 +21794,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "Показати сповіщення про тижневий ліміт"
+          }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ver exemplo do limite semanal"
           }
         }
       }
@@ -21650,6 +21824,12 @@
             "state": "translated",
             "value": "Показує картку сповіщення збоку від вирізу, коли досягнуто сесійний або тижневий ліміт провайдера."
           }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Mostra um card ao lado do notch quando o limite de sessão ou semanal de um provedor é atingido."
+          }
         }
       }
     },
@@ -21672,6 +21852,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "Коли ліміт скидається"
+          }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Quando um limite renova"
           }
         }
       }
@@ -21696,6 +21882,12 @@
             "state": "translated",
             "value": "Показувати сповіщення з вирізу"
           }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Mostrar aviso a partir do notch"
+          }
         }
       }
     },
@@ -21718,6 +21910,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "Звук скидання"
+          }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Som da renovação"
           }
         }
       }
@@ -21742,6 +21940,12 @@
             "state": "translated",
             "value": "Показати сповіщення"
           }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ver um exemplo"
+          }
         }
       }
     },
@@ -21764,6 +21968,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "Показує картку сповіщення збоку від вирізу, коли ліміт провайдера скидається."
+          }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Mostra um card ao lado do notch quando o limite de uso de um provedor renova."
           }
         }
       }
@@ -21922,6 +22132,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "Підключити телефон…"
+          }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Conectar celular…"
           }
         }
       }
@@ -22501,6 +22717,12 @@
             "state": "translated",
             "value": "Міжнародний"
           }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Internacional"
+          }
         }
       }
     },
@@ -22569,6 +22791,12 @@
             "state": "translated",
             "value": "Згортати для повноекранних застосунків"
           }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Recolher em apps em tela cheia"
+          }
         }
       }
     },
@@ -22585,6 +22813,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "Материковий Китай"
+          }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "China continental"
           }
         }
       }
@@ -22620,6 +22854,12 @@
             "state": "translated",
             "value": "Заголовок Cookie (необовʼязково)"
           }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Cabeçalho Cookie (opcional)"
+          }
         }
       }
     },
@@ -22627,6 +22867,12 @@
       "extractionState": "manual",
       "localizations": {
         "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Cookie: …"
+          }
+        },
+        "pt-BR": {
           "stringUnit": {
             "state": "translated",
             "value": "Cookie: …"
@@ -22648,6 +22894,12 @@
             "state": "translated",
             "value": "Ключ MiniMax Coding Plan"
           }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Chave do MiniMax Coding Plan"
+          }
         }
       }
     },
@@ -22664,6 +22916,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "Дані моделі"
+          }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Dados do modelo"
           }
         }
       }
@@ -22682,6 +22940,12 @@
             "state": "translated",
             "value": "Більшість показників беруться з інструмента, який уже тримає цей акаунт. Винятки — DeepSeek і MiniMax: натискання «Увійти» відкриває вікно Codenotch для цього акаунта, а вихід тут очищає лише цю сесію та її збережений показник."
           }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "A maioria das leituras vem de uma ferramenta que já tem a conta. DeepSeek e MiniMax são as exceções: Entrar abre uma janela do Codenotch para essa conta, e sair aqui apaga só essa sessão e a leitura guardada."
+          }
         }
       }
     },
@@ -22698,6 +22962,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "Телефон"
+          }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Celular"
           }
         }
       }
@@ -22716,6 +22986,12 @@
             "state": "translated",
             "value": "Після оновлення підключіть телефон заново"
           }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Pareie o celular de novo depois de atualizar"
+          }
         }
       }
     },
@@ -22732,6 +23008,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "Регіон"
+          }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Região"
           }
         }
       }
@@ -22750,6 +23032,12 @@
             "state": "translated",
             "value": "Показувати Spark і перевірку коду"
           }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Mostrar Spark e revisão de código"
+          }
         }
       }
     },
@@ -22766,6 +23054,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "Показувати маркер переміщення"
+          }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Mostrar alça de mover"
           }
         }
       }
@@ -22784,6 +23078,12 @@
             "state": "translated",
             "value": "Увійдіть у MiniMax просто в Codenotch або вставте ключ Coding Plan. Заголовок Cookie можна не вказувати. Codenotch ніколи не читає кукі браузера."
           }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Entre no MiniMax pelo Codenotch ou cole uma chave do Coding Plan. O cabeçalho Cookie é opcional. O Codenotch nunca lê os cookies do navegador."
+          }
         }
       }
     },
@@ -22800,6 +23100,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "Дуга над вирізом. Утримуйте її, щоб перенести виріз на інший край — те саме робить «Край» вище."
+          }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "O arco acima do notch. Segure para levar o notch a outra borda; a opção Borda acima faz o mesmo."
           }
         }
       }
@@ -22818,6 +23124,12 @@
             "state": "translated",
             "value": "Виріз згортається, поки попереду повноекранний застосунок, і повертається, коли ви його залишите. Вимкнено — виріз лишається поверх повноекранних застосунків."
           }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "O notch se recolhe enquanto um app em tela cheia está na frente e volta quando você sai dele. Desligado mantém o notch no lugar sobre apps em tela cheia."
+          }
         }
       }
     },
@@ -22835,27 +23147,62 @@
             "state": "translated",
             "value": "Кільце й далі стежить за основним вікном ліміту Codex. Spark і перевірка коду лишаються в картці при наведенні."
           }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "O anel continua seguindo a janela principal do Codex. Spark e revisão de código ficam no card."
+          }
         }
       }
     },
     "Usage Limits": {
       "extractionState": "manual",
-      "localizations": {}
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Limites de uso"
+          }
+        }
+      }
     },
     "Watch limit": {
       "extractionState": "manual",
-      "localizations": {}
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Limite de atenção"
+          }
+        }
+      }
     },
     "Critical limit": {
       "extractionState": "manual",
-      "localizations": {}
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Limite crítico"
+          }
+        }
+      }
     },
     "Reset to defaults": {
       "extractionState": "manual",
       "localizations": {}
     },
     "Dashed weekly ring": {
-      "extractionState": "manual"
+      "extractionState": "manual",
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Anel semanal tracejado"
+          }
+        }
+      }
     },
     "1 USD = %@": {
       "extractionState": "manual",
@@ -24008,6 +24355,138 @@
           "stringUnit": {
             "state": "translated",
             "value": "O nome é como o notch, os cards e o lançador do shell chamam esta conta. Vazio volta ao padrão."
+          }
+        }
+      }
+    },
+    "Sources": {
+      "extractionState": "manual",
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Fontes"
+          }
+        }
+      }
+    },
+    "Work": {
+      "extractionState": "manual",
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Trabalho"
+          }
+        }
+      }
+    },
+    "The logins the notch reads, and the order of its rings.": {
+      "extractionState": "manual",
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "As contas que o notch lê e a ordem dos anéis."
+          }
+        }
+      }
+    },
+    "Your usage on a phone, over the local network.": {
+      "extractionState": "manual",
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Seu uso no celular, pela rede local."
+          }
+        }
+      }
+    },
+    "Per-token prices and the off-peak discount.": {
+      "extractionState": "manual",
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Preço por token e o desconto fora de pico."
+          }
+        }
+      }
+    },
+    "The local runtime and what its models report.": {
+      "extractionState": "manual",
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "O runtime local e o que os modelos dele informam."
+          }
+        }
+      }
+    },
+    "Where the notch sits, how big it is, and what it shows.": {
+      "extractionState": "manual",
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Onde o notch fica, o tamanho e o que ele mostra."
+          }
+        }
+      }
+    },
+    "Sounds, cards and banners when something finishes, stalls or resets.": {
+      "extractionState": "manual",
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Sons, cards e avisos quando algo termina, trava ou renova."
+          }
+        }
+      }
+    },
+    "Plans and market data, the task source, focus blocks and the session launcher.": {
+      "extractionState": "manual",
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Planos e dados de mercado, fonte das tarefas, blocos de foco e o lançador de sessão."
+          }
+        }
+      }
+    },
+    "Sessions, active time and estimated cost by day, week and month.": {
+      "extractionState": "manual",
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Sessões, tempo ativo e custo estimado por dia, semana e mês."
+          }
+        }
+      }
+    },
+    "Focus blocks by day, week and month, per project.": {
+      "extractionState": "manual",
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Blocos de foco por dia, semana e mês, por projeto."
+          }
+        }
+      }
+    },
+    "Launch at login, updates and language.": {
+      "extractionState": "manual",
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Abrir ao iniciar, atualizações e idioma."
           }
         }
       }

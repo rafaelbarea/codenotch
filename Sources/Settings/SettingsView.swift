@@ -35,6 +35,47 @@ private enum SettingsSection: String, CaseIterable, Identifiable, Hashable {
 
     var id: String { rawValue }
 
+    /// The sidebar's groups: where readings come from, the notch itself, the
+    /// work it tracks, and the app.
+    enum Group: String, CaseIterable, Identifiable {
+        case sources, notch, work, app
+        var id: String { rawValue }
+        var title: String {
+            switch self {
+            case .sources: return L10n.t("Sources")
+            case .notch:   return L10n.t("Notch")
+            case .work:    return L10n.t("Work")
+            case .app:     return L10n.t("App")
+            }
+        }
+    }
+
+    var group: Group {
+        switch self {
+        case .accounts, .phone, .deepseek, .ollama, .lmstudio: return .sources
+        case .appearance, .notifications: return .notch
+        case .brink, .activity, .focus: return .work
+        case .general: return .app
+        }
+    }
+
+    /// One line under the pane's title: what is decided here.
+    var subtitle: String {
+        switch self {
+        case .accounts:      return L10n.t("The logins the notch reads, and the order of its rings.")
+        case .phone:         return L10n.t("Your usage on a phone, over the local network.")
+        case .deepseek:      return L10n.t("Per-token prices and the off-peak discount.")
+        case .ollama:        return L10n.t("The local runtime and what its models report.")
+        case .lmstudio:      return L10n.t("The local runtime and what its models report.")
+        case .appearance:    return L10n.t("Where the notch sits, how big it is, and what it shows.")
+        case .notifications: return L10n.t("Sounds, cards and banners when something finishes, stalls or resets.")
+        case .brink:         return L10n.t("Plans and market data, the task source, focus blocks and the session launcher.")
+        case .activity:      return L10n.t("Sessions, active time and estimated cost by day, week and month.")
+        case .focus:         return L10n.t("Focus blocks by day, week and month, per project.")
+        case .general:       return L10n.t("Launch at login, updates and language.")
+        }
+    }
+
     var title: String {
         switch self {
         case .accounts:      return L10n.t("Accounts")
@@ -53,38 +94,20 @@ private enum SettingsSection: String, CaseIterable, Identifiable, Hashable {
 
     var icon: String {
         switch self {
-        case .accounts:      return "person.crop.circle.fill"
+        case .accounts:      return "person.crop.circle"
         case .phone:         return "iphone"
         case .deepseek:      return "chart.line.uptrend.xyaxis"
         case .ollama:        return "desktopcomputer"
         case .lmstudio:      return "cpu"
-        case .appearance:    return "paintbrush.fill"
-        case .notifications: return "bell.badge.fill"
+        case .appearance:    return "paintbrush"
+        case .notifications: return "bell.badge"
         case .brink:         return "checklist"
         case .activity:      return "chart.bar.xaxis"
         case .focus:         return "timer"
-        case .general:       return "gearshape.fill"
+        case .general:       return "gearshape"
         }
     }
 
-    /// The badge colour behind the symbol — the part of System Settings'
-    /// sidebar that actually makes it recognisable at a glance, monochrome
-    /// icons are not.
-    var tint: Color {
-        switch self {
-        case .accounts:      return .blue
-        case .phone:         return .green
-        case .deepseek:      return .orange
-        case .ollama:        return .teal
-        case .lmstudio:      return .purple
-        case .appearance:    return .indigo
-        case .notifications: return .red
-        case .brink:         return .mint
-        case .activity:      return .orange
-        case .focus:         return .purple
-        case .general:       return .gray
-        }
-    }
 }
 
 /// Real window vibrancy, which SwiftUI's own `Material` cannot give here.
@@ -318,20 +341,35 @@ struct SettingsView: View {
     /// traffic lights land inside it, which is why the rows start a clear
     /// `trafficLightClearance` below the top rather than at it.
     private var sidebar: some View {
-        List(SettingsSection.visible, selection: $selection) { section in
-            Label {
-                Text(section.title)
-            } icon: {
-                SidebarIcon(systemName: section.icon, tint: section.tint)
+        List(selection: $selection) {
+            // Four quiet groups instead of one flat run of eleven rows, and
+            // one symbol weight throughout: the selection pill is the only
+            // colour the list needs to say where you are.
+            ForEach(SettingsSection.Group.allCases) { group in
+                let rows = SettingsSection.visible.filter { $0.group == group }
+                if !rows.isEmpty {
+                    Section {
+                        ForEach(rows) { section in
+                            Label {
+                                Text(section.title)
+                            } icon: {
+                                Image(systemName: section.icon)
+                                    .font(.system(size: 13, weight: .medium))
+                                    .frame(width: 20, height: 20)
+                            }
+                            .padding(.vertical, 3)
+                            .listRowInsets(EdgeInsets(top: 0, leading: 0, bottom: 0, trailing: 10))
+                            .tag(section)
+                        }
+                    } header: {
+                        Text(group.title)
+                            .font(.system(size: 11, weight: .semibold))
+                            .foregroundStyle(.tertiary)
+                            .textCase(nil)
+                            .padding(.leading, 6)
+                    }
+                }
             }
-            // System Settings' row rhythm: a 32pt pitch, and the badge close
-            // to the left edge of its selection pill. The list adds an inset
-            // of its own inside the row, so this stays small — 10pt here put
-            // the badge some 20pt into the pill, which read as a column of
-            // icons floating in the middle of the sidebar.
-            .padding(.vertical, 4)
-            .listRowInsets(EdgeInsets(top: 0, leading: 0, bottom: 0, trailing: 10))
-            .tag(section)
         }
         .listStyle(.sidebar)
         .environment(\.defaultMinListRowHeight, 24)
@@ -384,16 +422,18 @@ struct SettingsView: View {
                                          style: .continuous)
                             .strokeBorder(Color(nsColor: .separatorColor), lineWidth: 1)
                     )
-            } else if #available(macOS 26.0, *) {
-                Color.clear.glassEffect(
-                    .regular,
-                    in: RoundedRectangle(cornerRadius: SettingsView.sidebarCornerRadius,
-                                         style: .continuous)
-                )
             } else {
+                // The sidebar material rather than glass: glass takes the
+                // wallpaper's colour, and a settings pane is read against
+                // whatever happens to be behind it.
                 RoundedRectangle(cornerRadius: SettingsView.sidebarCornerRadius,
                                  style: .continuous)
                     .fill(.regularMaterial)
+                    .overlay(
+                        RoundedRectangle(cornerRadius: SettingsView.sidebarCornerRadius,
+                                         style: .continuous)
+                            .strokeBorder(Color.primary.opacity(0.06), lineWidth: 1)
+                    )
             }
         }
         .padding(SettingsView.sidebarInset)
@@ -463,17 +503,29 @@ struct SettingsView: View {
                     collapsedSidebarToggle
                 }
                 Text(section.title)
-                    .font(.title2.weight(.semibold))
+                    .font(.system(size: 22, weight: .bold))
                 Spacer(minLength: 0)
             }
             .frame(height: SettingsView.headerHeight)
-            .padding(.leading, isSidebarVisible ? 20 : 12)
+            .padding(.leading, isSidebarVisible ? SettingsView.paneGutter : 12)
+            Text(section.subtitle)
+                .font(.system(size: 13))
+                .foregroundStyle(.secondary)
+                .padding(.leading, isSidebarVisible ? SettingsView.paneGutter : 12)
+                .padding(.bottom, 4)
             paneContent(for: section)
                 // The pane sits directly on the window's own background, the
                 // way the sidebar card floats on it — a `Form`'s opaque
                 // grouped backing would paint a second, squarer surface over
                 // the top of it.
                 .scrollContentBackground(.hidden)
+                // Read from the left, under the title, at a measure a form
+                // can be scanned at: not an island centred in a wide window.
+                .frame(maxWidth: SettingsView.paneMaxWidth, alignment: .leading)
+                // A grouped form keeps a margin of its own inside the frame;
+                // pulled back by that much, its cards start under the title.
+                .padding(.leading, -SettingsView.formInset)
+                .frame(maxWidth: .infinity, alignment: .leading)
         }
     }
 
@@ -532,19 +584,19 @@ struct SettingsView: View {
                 if connected.isEmpty {
                     Text(L10n.t("Nothing is connected, so the notch has no rings to draw."))
                         .font(.caption)
-                        .foregroundStyle(.tertiary)
+                        .foregroundStyle(.secondary)
                         .fixedSize(horizontal: false, vertical: true)
                 } else if !connected.isEmpty {
                     Text(L10n.t("The notch draws these in this order. Drag one by its handle to move it."))
                         .font(.caption)
-                        .foregroundStyle(.tertiary)
+                        .foregroundStyle(.secondary)
                         .fixedSize(horizontal: false, vertical: true)
                 }
                 // Beside the switches it explains, not stranded at the end of
                 // the page.
                 Text(L10n.t("Most readings are borrowed from a tool that already holds the account. DeepSeek and MiniMax are the exceptions: clicking Sign in opens a Codenotch window for that account, and signing out here clears only that session and its saved reading."))
                     .font(.caption)
-                    .foregroundStyle(.tertiary)
+                    .foregroundStyle(.secondary)
                     .fixedSize(horizontal: false, vertical: true)
             }
 
@@ -568,7 +620,7 @@ struct SettingsView: View {
                     // only question this group raises.
                     Text(L10n.t("These have no ring to place. Switch one on and it joins the end of the list above."))
                         .font(.caption)
-                        .foregroundStyle(.tertiary)
+                        .foregroundStyle(.secondary)
                         .fixedSize(horizontal: false, vertical: true)
                 }
             }
@@ -903,7 +955,7 @@ struct SettingsView: View {
 
                 Text(L10n.t("The sound plays on the ordinary output, not the interface sound-effects channel — so it is still heard with \u{201C}Play user interface sound effects\u{201D} switched off in System Settings → Sound."))
                     .font(.caption)
-                    .foregroundStyle(.tertiary)
+                    .foregroundStyle(.secondary)
                     .fixedSize(horizontal: false, vertical: true)
             }
 
@@ -1078,6 +1130,11 @@ struct SettingsView: View {
     /// row rather than as three things that happen to be near the top.
     /// `SettingsWindowController` positions the lights against this too.
     static let headerHeight: CGFloat = 52
+    /// The pane's left gutter, and the widest a form is allowed to run.
+    static let paneGutter: CGFloat = 20
+    static let paneMaxWidth: CGFloat = 900
+    /// The grouped form's own leading margin, measured on the rendered pane.
+    static let formInset: CGFloat = 78
 
     /// How much room the three lights take across, for the one layout that
     /// has to start to the right of them: the collapsed pane's header.
