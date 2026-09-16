@@ -8,16 +8,18 @@ struct TasksCard: View {
     @ObservedObject var store: TodoStore = .shared
     @ObservedObject var focus: FocusStore = .shared
     let now: Date
+    /// Rows the screen has room for (solved by the view model).
+    var rows: Int = TasksCard.maxRows
 
-    static let maxRows = 8
+    static let maxRows = 10
 
-    private var rows: [Todo] { Array((store.todos[store.tab] ?? []).prefix(Self.maxRows)) }
+    private var listed: [Todo] { Array((store.todos[store.tab] ?? []).prefix(min(rows, Self.maxRows))) }
 
     /// Reserved by `NotchLayout` before the card is drawn, so it must count
     /// exactly what `body` lays out.
-    @MainActor static func height() -> CGFloat {
+    @MainActor static func height(rows cap: Int = TasksCard.maxRows) -> CGFloat {
         let store = TodoStore.shared, focus = FocusStore.shared
-        let rows = min((store.todos[store.tab] ?? []).count, maxRows)
+        let rows = min((store.todos[store.tab] ?? []).count, min(cap, maxRows))
         let line = NotchLayout.cardBodyLineHeight
         var h = 2 * NotchLayout.cardPadding
             + max(NotchLayout.glyphSize, NotchLayout.cardTitleLineHeight)   // header
@@ -117,12 +119,12 @@ struct TasksCard: View {
     }
 
     @ViewBuilder private var list: some View {
-        if rows.isEmpty {
+        if listed.isEmpty {
             Text(store.refreshedAt == nil ? L10n.t("Reading \(store.source.title)…") : L10n.t("Nothing here. Enjoy it."))
                 .font(Typography.cardBody).foregroundStyle(Palette.textSecondary)
         } else {
             VStack(alignment: .leading, spacing: NotchLayout.sessionRowGap) {
-                ForEach(rows) { todo in
+                ForEach(listed) { todo in
                     TaskRow(todo: todo, busy: store.busy.contains(todo.id), focused: focus.taskID == todo.id,
                             onComplete: { store.complete(todo); if focus.taskID == todo.id { focus.stop() } },
                             onFocus: { focus.taskID == todo.id ? focus.stop() : focus.start(id: todo.id, name: todo.name, project: todo.project) },

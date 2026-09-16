@@ -44,7 +44,7 @@ private enum SettingsSection: String, CaseIterable, Identifiable, Hashable {
         case .lmstudio:      return "LM Studio"
         case .appearance:    return L10n.t("Appearance")
         case .notifications: return L10n.t("Notifications")
-        case .brink:         return "Brink"
+        case .brink:         return L10n.t("Costs & Tasks")
         case .general:       return L10n.t("General")
         }
     }
@@ -1080,10 +1080,10 @@ struct SettingsView: View {
 
     /// The sidebar plus a detail pane wide enough for an account row's name,
     /// buttons and switch without crowding.
-    static let width: CGFloat = 680
+    static let width: CGFloat = 840
     /// Each pane scrolls on its own now, so this no longer has to fit every
     /// section in the app at once — just a comfortable account list.
-    static let height: CGFloat = 520
+    static let height: CGFloat = 660
 
     /// The rows the notch actually draws, in the order it draws them.
     ///

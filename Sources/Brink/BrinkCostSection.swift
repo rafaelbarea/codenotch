@@ -7,6 +7,8 @@ import SwiftUI
 /// `NotchLayout.cardHeight` reserved for it.
 struct BrinkCostSection: View {
     @ObservedObject var model: CostModel
+    /// Rows the screen has room for (solved by the view model); never more than `maxRows`.
+    var rows: Int = BrinkCostSection.maxRows
 
     static let maxRows = 5
 
@@ -17,7 +19,7 @@ struct BrinkCostSection: View {
         return min(m.rows.count, maxRows)
     }
 
-    private var rows: [ProjectCost] { Array(model.rows.prefix(Self.maxRows)) }
+    private var shown: [ProjectCost] { Array(model.rows.prefix(min(rows, Self.maxRows))) }
     private var title: String {
         model.creditBacked ? L10n.t("This cycle") : (model.quotaBacked ? L10n.t("This week") : L10n.t("This month"))
     }
@@ -28,7 +30,7 @@ struct BrinkCostSection: View {
                 .font(Typography.cardBody)
                 .foregroundStyle(Palette.textPrimary)
                 .padding(.top, NotchLayout.blockSpacing)
-            ForEach(rows) { row in
+            ForEach(shown) { row in
                 HStack(spacing: Design.px(12)) {
                     Text(row.displayName)
                         .font(Typography.cardBody)

@@ -106,6 +106,8 @@ struct NotchRootView: View {
                         now: model.now,
                         direction: model.edge.tooltipDirection,
                         sessionCap: model.sessionCap,
+                        brinkCostRows: model.brinkCostRows(for: snapshot),
+                        brinkTaskRows: model.brinkTaskRows(),
                         resetTimeFormat: model.resetTimeFormat,
                         deepSeekPricingEnabled: model.deepSeekPricingEnabled,
                         deepSeekPricingSchedule: model.deepSeekPricingSchedule,
@@ -414,7 +416,8 @@ struct NotchRootView: View {
                 showsLocalPerformance: snapshot.showsLocalPerformance,
                 localLedgerRows: snapshot.localLedgerRowCount,
                 compactRowCount: snapshot.compactRowCount,
-                showsDeepSeekPricing: model.deepSeekPricingEnabled
+                showsDeepSeekPricing: model.deepSeekPricingEnabled,
+                brinkCostRows: model.brinkCostRows(for: snapshot)
             )
             : NotchLayout.cardWidth
     }

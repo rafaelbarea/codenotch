@@ -576,9 +576,45 @@ final class NotchViewModel: ObservableObject {
                                            hasResetCredits: hasResetCredits)
     }
 
+    /// How many of Brink's rows a card may show: the rows it has, cut until
+    /// the panel that must hold the card still fits the screen.
+    ///
+    /// Solved against `panelSize` itself, the one constraint that matters, by
+    /// pinning a candidate count and asking the panel how big it would be. The
+    /// pin is what stops the question recursing: while one card is being
+    /// solved every other card answers with the pin or with nothing.
+    private var brinkRowPins: [String: Int] = [:]
+    private var solvingBrinkRows = false
+
+    private func brinkRowsFitting(id: String, wanted: Int) -> Int {
+        if let pinned = brinkRowPins[id] { return pinned }
+        guard wanted > 0, !solvingBrinkRows else { return 0 }
+        guard screenSize != .zero else { return wanted }
+        solvingBrinkRows = true
+        defer { solvingBrinkRows = false; brinkRowPins[id] = nil }
+        for n in stride(from: wanted, through: 0, by: -1) {
+            brinkRowPins[id] = n
+            let size = panelSize(cellCount: snapshots.count)
+            if size.height <= screenSize.height && size.width <= screenSize.width { return n }
+        }
+        return 0
+    }
+
+    func brinkCostRows(for snapshot: ProviderSnapshot) -> Int {
+        brinkRowsFitting(id: snapshot.id, wanted: BrinkCostSection.rowCount(for: snapshot))
+    }
+
+    /// Task rows the tasks card may list on this screen.
+    func brinkTaskRows() -> Int {
+        if let pinned = brinkRowPins[TasksProvider.providerID] { return pinned }
+        guard !solvingBrinkRows, screenSize != .zero else { return solvingBrinkRows ? 1 : TasksCard.maxRows }
+        return max(1, brinkRowsFitting(id: TasksProvider.providerID, wanted: TasksCard.maxRows))
+    }
+
     private func contentCardHeight(sessionCap: Int) -> CGFloat {
         snapshots.map { snapshot in
-            NotchLayout.cardHeight(windowCount: snapshot.windows.count,
+            if snapshot.id == TasksProvider.providerID { return TasksCard.height(rows: brinkTaskRows()) }
+            return NotchLayout.cardHeight(windowCount: snapshot.windows.count,
                 groupCount: Set(snapshot.windows.compactMap(\.group)).count,
                 moneyWindowCount: snapshot.windows.filter { $0.money != nil }.count,
                 usageDetailGroupCount: snapshot.usageDetail?.visibleGroups.count ?? 0,
@@ -593,7 +629,8 @@ final class NotchViewModel: ObservableObject {
                 showsLocalPerformance: snapshot.showsLocalPerformance,
                 localLedgerRows: snapshot.localLedgerRowCount,
                 compactRowCount: snapshot.compactRowCount,
-                showsDeepSeekPricing: deepSeekPricingEnabled)
+                showsDeepSeekPricing: deepSeekPricingEnabled,
+                brinkCostRows: brinkCostRows(for: snapshot))
         }.max() ?? 0
     }
 

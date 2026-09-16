@@ -73,3 +73,12 @@ enum Brink {
         activityWindow?.makeKeyAndOrderFront(nil)
     }
 }
+
+
+/// Target for the notch's context menu entries (AppKit needs an object).
+final class BrinkMenuActions: NSObject {
+    @MainActor static let shared = BrinkMenuActions()
+    @MainActor @objc func newSession(_ sender: Any?) { NewSession.launch() }
+    @MainActor @objc func openActivity(_ sender: Any?) { Brink.showActivity() }
+    @MainActor @objc func openFocus(_ sender: Any?) { Brink.showFocus() }
+}

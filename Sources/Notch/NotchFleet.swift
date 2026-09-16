@@ -130,8 +130,15 @@ final class NotchFleet {
     // MARK: - Settings
 
     func apply(scope: NotchScreenScope) {
+        let changed = self.scope != scope
         self.scope = scope
         guard hasShown else { return }
+        // A scope change rebuilds from scratch: the "move the one notch" fast
+        // path must not keep a single panel where every display now needs one.
+        if changed {
+            for id in controllers.keys { controllers[id]?.retire() }
+            controllers.removeAll()
+        }
         reconcile(screens: NSScreen.screens)
     }
 

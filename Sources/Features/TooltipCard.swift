@@ -1004,6 +1004,9 @@ struct TooltipCard: View {
     /// How many sessions this screen has room to list. Solved from the display
     /// rather than fixed, so a big screen hides nothing.
     var sessionCap: Int = NotchLayout.defaultSessionCap
+    /// Brink rows the view model solved against the screen's budget.
+    var brinkCostRows: Int = 0
+    var brinkTaskRows: Int = TasksCard.maxRows
     var resetTimeFormat: ResetTimeFormat = .automatic
     var deepSeekPricingEnabled: Bool = true
     var deepSeekPricingSchedule: DeepSeekPricing.Schedule = .current
@@ -1023,7 +1026,7 @@ struct TooltipCard: View {
     /// The same figure the hover region uses, so what is drawn and what is
     /// reachable can never drift apart.
     private var height: CGFloat {
-        if snapshot.id == TasksProvider.providerID { return TasksCard.height() }
+        if snapshot.id == TasksProvider.providerID { return TasksCard.height(rows: brinkTaskRows) }
         return NotchLayout.cardHeight(
             windowCount: snapshot.windows.count,
             groupCount: snapshot.windowGroupCount,
@@ -1041,7 +1044,7 @@ struct TooltipCard: View {
                 localLedgerRows: snapshot.localLedgerRowCount,
             compactRowCount: snapshot.compactRowCount,
             showsDeepSeekPricing: deepSeekPricingEnabled,
-            brinkCostRows: BrinkCostSection.rowCount(for: snapshot)
+            brinkCostRows: brinkCostRows
         )
     }
 
@@ -1053,7 +1056,7 @@ struct TooltipCard: View {
             // drifts while the card resizes around them.
             ZStack(alignment: .topLeading) {
                 if snapshot.id == TasksProvider.providerID {
-                    TasksCard(now: now)
+                    TasksCard(now: now, rows: brinkTaskRows)
                         .id(snapshot.id)
                         .transition(.opacity.animation(NotchMotion.crossfade))
                 } else {
@@ -1075,8 +1078,8 @@ struct TooltipCard: View {
                         SessionList(summary: activity, now: now, cap: sessionCap,
                                     onFocus: onFocusSession)
                     }
-                    if let model = CostModels.model(for: snapshot.id), BrinkCostSection.rowCount(for: snapshot) > 0 {
-                        BrinkCostSection(model: model)
+                    if brinkCostRows > 0, let model = CostModels.model(for: snapshot.id) {
+                        BrinkCostSection(model: model, rows: brinkCostRows)
                     }
                 }
                 // An identity, so one provider's rows are never interpolated

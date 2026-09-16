@@ -476,7 +476,7 @@ final class NotchWindowController {
     private func tooltipRect(index: Int) -> CGRect? {
         guard model.snapshots.indices.contains(index) else { return nil }
         let snapshot = model.snapshots[index]
-        let cardHeight = NotchLayout.cardHeight(
+        let cardHeight = snapshot.id == TasksProvider.providerID ? TasksCard.height(rows: model.brinkTaskRows()) : NotchLayout.cardHeight(
             windowCount: snapshot.windows.count,
             groupCount: snapshot.windowGroupCount,
             moneyWindowCount: snapshot.windows.filter { $0.money != nil }.count,
@@ -492,7 +492,8 @@ final class NotchWindowController {
             showsLocalPerformance: snapshot.showsLocalPerformance,
                 localLedgerRows: snapshot.localLedgerRowCount,
             compactRowCount: snapshot.compactRowCount,
-            showsDeepSeekPricing: model.deepSeekPricingEnabled
+            showsDeepSeekPricing: model.deepSeekPricingEnabled,
+            brinkCostRows: model.brinkCostRows(for: snapshot)
         )
         // Across the stack the region is the card, its tail, and the gap the
         // pointer has to cross. Along it, the card's own extent.
@@ -1199,6 +1200,15 @@ final class NotchWindowController {
             )
             item.target = menuActions
             item.tag = index
+            item.isEnabled = true
+            menu.addItem(item)
+        }
+        menu.addItem(.separator())
+        for (title, selector) in [(L10n.t("New session…"), #selector(BrinkMenuActions.newSession(_:))),
+                                  (L10n.t("Activity…"), #selector(BrinkMenuActions.openActivity(_:))),
+                                  (L10n.t("Focus…"), #selector(BrinkMenuActions.openFocus(_:)))] {
+            let item = NSMenuItem(title: title, action: selector, keyEquivalent: "")
+            item.target = BrinkMenuActions.shared
             item.isEnabled = true
             menu.addItem(item)
         }
