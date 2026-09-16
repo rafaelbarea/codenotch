@@ -1023,7 +1023,8 @@ struct TooltipCard: View {
     /// The same figure the hover region uses, so what is drawn and what is
     /// reachable can never drift apart.
     private var height: CGFloat {
-        NotchLayout.cardHeight(
+        if snapshot.id == TasksProvider.providerID { return TasksCard.height() }
+        return NotchLayout.cardHeight(
             windowCount: snapshot.windows.count,
             groupCount: snapshot.windowGroupCount,
             moneyWindowCount: snapshot.windows.filter { $0.money != nil }.count,
@@ -1039,7 +1040,8 @@ struct TooltipCard: View {
             showsLocalPerformance: snapshot.showsLocalPerformance,
                 localLedgerRows: snapshot.localLedgerRowCount,
             compactRowCount: snapshot.compactRowCount,
-            showsDeepSeekPricing: deepSeekPricingEnabled
+            showsDeepSeekPricing: deepSeekPricingEnabled,
+            brinkCostRows: BrinkCostSection.rowCount(for: snapshot)
         )
     }
 
@@ -1050,6 +1052,11 @@ struct TooltipCard: View {
             // instead of shoving each other around. Top-aligned so neither
             // drifts while the card resizes around them.
             ZStack(alignment: .topLeading) {
+                if snapshot.id == TasksProvider.providerID {
+                    TasksCard(now: now)
+                        .id(snapshot.id)
+                        .transition(.opacity.animation(NotchMotion.crossfade))
+                } else {
                 VStack(alignment: .leading, spacing: 0) {
                     ProviderTooltip(activityNote: localActivityNote, snapshot: snapshot, now: now, resetTimeFormat: resetTimeFormat,
                                     showUsagePace: showUsagePace)
@@ -1068,6 +1075,9 @@ struct TooltipCard: View {
                         SessionList(summary: activity, now: now, cap: sessionCap,
                                     onFocus: onFocusSession)
                     }
+                    if let model = CostModels.model(for: snapshot.id), BrinkCostSection.rowCount(for: snapshot) > 0 {
+                        BrinkCostSection(model: model)
+                    }
                 }
                 // An identity, so one provider's rows are never interpolated
                 // into another's — that is what slid text through positions
@@ -1076,6 +1086,7 @@ struct TooltipCard: View {
                 // of a cut in the middle of it.
                 .id(snapshot.id)
                 .transition(.opacity.animation(NotchMotion.crossfade))
+                }
             }
             .frame(maxWidth: .infinity, alignment: .topLeading)
         }

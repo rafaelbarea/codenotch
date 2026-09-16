@@ -92,7 +92,13 @@ final class StatusItemController: NSObject, NSMenuDelegate {
             ).target = self
         }
         menu.addItem(
+            withTitle: L10n.t("New session…"), action: #selector(newSession), keyEquivalent: "n"
+        ).target = self
+        menu.addItem(
             withTitle: L10n.t("Activity…"), action: #selector(openActivity), keyEquivalent: "a"
+        ).target = self
+        menu.addItem(
+            withTitle: L10n.t("Focus…"), action: #selector(openFocus), keyEquivalent: "f"
         ).target = self
         menu.addItem(
             withTitle: L10n.t("Settings…"), action: #selector(openSettings), keyEquivalent: ","
@@ -130,6 +136,8 @@ final class StatusItemController: NSObject, NSMenuDelegate {
 
     @objc private func openSettings() { onOpenSettings() }
     @objc private func openActivity() { Brink.showActivity() }
+    @objc private func openFocus() { Brink.showFocus() }
+    @objc private func newSession() { NewSession.launch() }
     @objc private func quit() { NSApp.terminate(nil) }
 
     @objc private func refreshProvider(_ sender: NSMenuItem) {

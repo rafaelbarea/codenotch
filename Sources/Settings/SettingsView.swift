@@ -26,7 +26,7 @@ extension View {
 /// crossing-and-notification machinery it switches is Notifications' to
 /// explain.
 private enum SettingsSection: String, CaseIterable, Identifiable, Hashable {
-    case accounts, phone, deepseek, ollama, lmstudio, appearance, notifications, general
+    case accounts, phone, deepseek, ollama, lmstudio, appearance, notifications, brink, general
 
     /// The sections the sidebar lists; Phone only once pairing is offered.
     static var visible: [SettingsSection] {
@@ -44,6 +44,7 @@ private enum SettingsSection: String, CaseIterable, Identifiable, Hashable {
         case .lmstudio:      return "LM Studio"
         case .appearance:    return L10n.t("Appearance")
         case .notifications: return L10n.t("Notifications")
+        case .brink:         return "Brink"
         case .general:       return L10n.t("General")
         }
     }
@@ -57,6 +58,7 @@ private enum SettingsSection: String, CaseIterable, Identifiable, Hashable {
         case .lmstudio:      return "cpu"
         case .appearance:    return "paintbrush.fill"
         case .notifications: return "bell.badge.fill"
+        case .brink:         return "checklist"
         case .general:       return "gearshape.fill"
         }
     }
@@ -73,6 +75,7 @@ private enum SettingsSection: String, CaseIterable, Identifiable, Hashable {
         case .lmstudio:      return .purple
         case .appearance:    return .indigo
         case .notifications: return .red
+        case .brink:         return .mint
         case .general:       return .gray
         }
     }
@@ -466,6 +469,7 @@ struct SettingsView: View {
         case .accounts:      accountsPane
         case .phone:         phonePane
         case .deepseek:      DeepSeekPricingSettingsView(preferences: preferences)
+        case .brink:         BrinkSettingsPane()
         case .ollama:
             if let usageStore {
                 Form {

@@ -343,7 +343,8 @@ enum NotchLayout {
                            localModelName: String? = nil, showsLocalPerformance: Bool = false,
                            localLedgerRows: Int = 0,
                            compactRowCount: Int = 0,
-                           showsDeepSeekPricing: Bool = true) -> CGFloat {
+                           showsDeepSeekPricing: Bool = true,
+                           brinkCostRows: Int = 0) -> CGFloat {
         let header = max(glyphSize, cardTitleLineHeight)
             + (hasPlan ? cardBodyLineHeight : 0)
         var height = 2 * cardPadding + header
@@ -395,6 +396,12 @@ enum NotchLayout {
 
         if hasResetCredits {
             height += codexUsageTop + hairline + codexResetCreditsHeight
+        }
+
+        // Brink's "what used it": a title line, then one line per project.
+        if brinkCostRows > 0 {
+            height += blockSpacing + cardBodyLineHeight
+                + CGFloat(brinkCostRows) * (cardBodyLineHeight + sessionRowGap)
         }
 
         height += usageDetailHeight(usageDetailGroupCount,

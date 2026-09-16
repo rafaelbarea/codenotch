@@ -151,6 +151,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
                        Preferences.storedGeminiAPIMonthlyTokenBudget()
                    })]
                 + webProviders
+                + [TasksProvider()]
             preferences.reconcile(discoveredIDs: allProviders.map(\.id))
             let store = UsageStore(
                 providers: allProviders,

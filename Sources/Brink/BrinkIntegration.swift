@@ -7,9 +7,14 @@ import SwiftUI
 @MainActor
 enum Brink {
     private static var subscription: AnyCancellable?
+    private static var focusTick: AnyCancellable?
+    private static var todoTick: AnyCancellable?
     private static var activityWindow: NSWindow?
+    private static var focusWindow: NSWindow?
+    private static weak var store: UsageStore?
 
     static func attach(to store: UsageStore) {
+        self.store = store
         _ = PlanCatalog.shared
         _ = PriceTable.shared
         _ = CostAccountStore.shared
@@ -19,6 +24,37 @@ enum Brink {
                 CostAccountStore.shared.rediscover()
                 CostModels.all.forEach { $0.observe(snapshots) }
             }
+        // The tasks ring follows the timer and the list without waiting for
+        // the next poll: a few seconds while a focus runs, at once on changes.
+        focusTick = FocusStore.shared.$now
+            .throttle(for: .seconds(5), scheduler: RunLoop.main, latest: true)
+            .sink { [weak store] _ in
+                guard FocusStore.shared.isActive else { return }
+                _ = store?.refresh(providerID: TasksProvider.providerID)
+            }
+        todoTick = Publishers.Merge3(
+            TodoStore.shared.$todos.map { _ in () }.eraseToAnyPublisher(),
+            TodoStore.shared.$completedToday.map { _ in () }.eraseToAnyPublisher(),
+            FocusStore.shared.$taskID.map { _ in () }.eraseToAnyPublisher())
+            .dropFirst(3)
+            .debounce(for: .milliseconds(200), scheduler: RunLoop.main)
+            .sink { [weak store] _ in _ = store?.refresh(providerID: TasksProvider.providerID) }
+    }
+
+    static func showFocus() {
+        if focusWindow == nil {
+            let w = NSWindow(contentRect: NSRect(x: 0, y: 0, width: 1100, height: 720),
+                             styleMask: [.titled, .closable, .miniaturizable, .resizable],
+                             backing: .buffered, defer: false)
+            w.title = L10n.t("Focus")
+            w.minSize = NSSize(width: 900, height: 560)
+            w.contentViewController = NSHostingController(rootView: FocusPane().frame(minWidth: 900, minHeight: 560))
+            w.isReleasedWhenClosed = false
+            w.center()
+            focusWindow = w
+        }
+        NSApp.activate(ignoringOtherApps: true)
+        focusWindow?.makeKeyAndOrderFront(nil)
     }
 
     static func showActivity() {
