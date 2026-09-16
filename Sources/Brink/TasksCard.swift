@@ -81,6 +81,7 @@ struct TasksCard: View {
                              accent: Palette.textSecondary, id: "draft", editing: $store.editing) {
                 store.create(store.draft, project: store.draftProject.isEmpty ? nil : store.draftProject)
                 store.draft = ""; store.draftProject = ""
+                store.focusedField = nil; store.editing = false
             }
             .padding(.top, Self.quickAddTop)
             if !focus.isActive {
@@ -91,6 +92,7 @@ struct TasksCard: View {
                     focus.start(id: "free-\(Int(Date().timeIntervalSince1970))", name: name.isEmpty ? L10n.t("Focus") : name,
                                 project: store.freeProject.isEmpty ? nil : store.freeProject)
                     store.freeFocus = ""; store.freeProject = ""
+                    store.focusedField = nil; store.editing = false
                 }
                 .padding(.top, Self.freeFocusTop)
             }
@@ -285,7 +287,10 @@ struct BrinkTaggedField: View {
                     .onAppear {
                         // Back to the field that was being typed in when the
                         // card last folded, the moment it is on screen again.
-                        if TodoStore.shared.focusedField == id {
+                        // Only with unsent text in it: an empty field taking
+                        // the keyboard on every open pinned the card shut to
+                        // the other rings.
+                        if TodoStore.shared.focusedField == id, !text.isEmpty {
                             DispatchQueue.main.async { focused = true }
                         }
                     }

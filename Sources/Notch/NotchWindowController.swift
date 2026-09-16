@@ -185,6 +185,17 @@ final class NotchWindowController {
         }
         .store(in: &cancellables)
 
+        // The keyboard going elsewhere (a click in another app) ends any
+        // typing in the card, whatever the field's focus state last said.
+        NotificationCenter.default.publisher(for: NSWindow.didResignKeyNotification)
+            .sink { [weak self] note in
+                MainActor.assumeIsolated {
+                    guard let self, let panel = self.panel, (note.object as? NSWindow) === panel else { return }
+                    if TodoStore.shared.editing { TodoStore.shared.editing = false }
+                }
+            }
+            .store(in: &cancellables)
+
         // While a tasks field is being typed in the card holds still; once it
         // is done the pointer decides again, and the keyboard goes back.
         TodoStore.shared.$editing
@@ -631,9 +642,19 @@ final class NotchWindowController {
     // drive the event fold through handleActiveSpaceOrAppChange.
     func cursorMoved() {
         guard let panel, !isOptionDragging else { return }
-        // Typing in the tasks card: the pointer's wanderings do not fold it.
-        if TodoStore.shared.editing, panel.isKeyWindow { return }
         let local = localCursor(in: panel.frame)
+        // Typing in the tasks card: the pointer's wanderings do not fold it.
+        // Reaching for another ring is not a wandering, though: that ends the
+        // typing and the other card comes up as it always does.
+        if TodoStore.shared.editing, panel.isKeyWindow {
+            let onOtherRing = model.isExpanded && notchRect.contains(local)
+                && cellIndex(along: placement.along(of: local)).map { index in
+                    model.snapshots.indices.contains(index) && model.snapshots[index].id != TasksProvider.providerID
+                } == true
+            guard onOtherRing else { return }
+            panel.makeFirstResponder(nil)
+            TodoStore.shared.editing = false
+        }
         let overTooltip = model.hoveredIndex
             .flatMap(tooltipRect(index:))
             .map { model.isExpanded && $0.contains(local) } ?? false

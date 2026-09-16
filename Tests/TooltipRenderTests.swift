@@ -23,7 +23,7 @@ final class TooltipRenderTests: XCTestCase {
         let pace = try XCTUnwrap(window.usagePace(now: now))
         let summary = "\(window.summary) · \(pace.summary)"
         XCTAssertEqual(summary, "100% Used · 0% left · 100% deficit")
-        let font = NSFont.systemFont(ofSize: Design.fontSize(capPixels: 18))
+        let font = NSFont.systemFont(ofSize: Design.fontSize(capPixels: Typography.cardBodyCapPixels))
         let width = (summary as NSString).size(withAttributes: [.font: font]).width
         XCTAssertLessThanOrEqual(width * 0.85, NotchLayout.cardTextWidth)
     }

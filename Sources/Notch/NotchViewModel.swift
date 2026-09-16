@@ -614,10 +614,12 @@ final class NotchViewModel: ObservableObject {
             // Along the stack the card slides to stay on screen, so only the
             // screen itself bounds it (less a margin for the menu bar).
             let room = screenSize.height - 2 * NotchLayout.cardCorner - Self.cardScreenMargin
-            fit = room / card
+            fit = (room - 0.5) / card
         } else {
             let room = screenSize.height - (contentInset + NotchLayout.bodyDepth(for: edge)) * sizeScale
-            fit = room / (card + NotchLayout.tailLength + NotchLayout.tailGap)
+            // Half a point short of exact, so rounding never lands the panel
+            // a hair past the screen.
+            fit = (room - 0.5) / (card + NotchLayout.tailLength + NotchLayout.tailGap)
         }
         return max(min(Self.cardBase(for: sizeScale), fit), 0.5)
     }
