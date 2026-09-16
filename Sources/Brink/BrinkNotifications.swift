@@ -35,8 +35,10 @@ enum BrinkNotifications {
     static var focus: Bool { UserDefaults.standard.object(forKey: focusKey) as? Bool ?? true }
 
     /// Set by the app: what "notify in the notch" does for an event that has
-    /// no card of its own (a focus block ending): the peek, and the chime.
-    static var notchAlert: (() -> Void)?
+    /// no card of its own (a focus block ending, a test): a card beside the
+    /// notch with these words, and the chime. Returns false when the notch
+    /// could not show it (hidden), so the caller can fall back to a banner.
+    static var notchAlert: ((_ title: String, _ body: String) -> Bool)?
 
     /// Without a delegate, macOS delivers an app's own notifications quietly
     /// to the list while that app is frontmost: the test sent from Settings,
@@ -70,7 +72,9 @@ enum BrinkNotifications {
     /// for Codenotch there. On the notch channel, the peek and the chime.
     static func test() {
         guard usesMac else {
-            DispatchQueue.main.async { notchAlert?() }
+            DispatchQueue.main.async {
+                _ = notchAlert?(L10n.t("Codenotch test"), L10n.t("This is what one looks like."))
+            }
             return
         }
         let center = UNUserNotificationCenter.current()
@@ -79,7 +83,7 @@ enum BrinkNotifications {
             switch settings.authorizationStatus {
             case .notDetermined:
                 center.requestAuthorization(options: [.alert, .sound]) { ok, _ in
-                    if ok { post(title: L10n.t("Codenotch notifications are on"), body: L10n.t("This is what one looks like.")) }
+                    if ok { post(title: L10n.t("Codenotch test"), body: L10n.t("This is what one looks like.")) }
                 }
             case .denied:
                 DispatchQueue.main.async {
@@ -89,7 +93,7 @@ enum BrinkNotifications {
                     }
                 }
             default:
-                post(title: L10n.t("Codenotch notifications are on"), body: L10n.t("This is what one looks like."))
+                post(title: L10n.t("Codenotch test"), body: L10n.t("This is what one looks like."))
             }
         }
     }
@@ -106,7 +110,9 @@ enum BrinkNotifications {
         if usesMac {
             post(title: title, body: body)
         } else {
-            DispatchQueue.main.async { notchAlert?() }
+            DispatchQueue.main.async {
+                if notchAlert?(title, body) != true { post(title: title, body: body) }
+            }
         }
     }
 

@@ -71,7 +71,11 @@ enum ThresholdAlerts {
         // The one channel choice covers these too: on the notch channel the
         // crossing is a peek, not a banner.
         guard BrinkNotifications.usesMac else {
-            DispatchQueue.main.async { BrinkNotifications.notchAlert?() }
+            let title = alert.threshold >= 100
+                ? L10n.t("\(alert.providerName) limit reached")
+                : L10n.t("\(alert.providerName) is at \(alert.usedPercent)%")
+            let body = L10n.t("\(alert.usedPercent)% of its \(alert.windowLabel.lowercased()) limit used.")
+            DispatchQueue.main.async { _ = BrinkNotifications.notchAlert?(title, body) }
             return
         }
         let center = UNUserNotificationCenter.current()

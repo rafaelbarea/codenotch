@@ -17,6 +17,11 @@ struct UsageAlertEvent: Equatable {
     let previousFraction: Double
     let currentFraction: Double
     let resetsAt: Date?
+    /// Set for a notice that is not about a limit (a focus block ending, a
+    /// test): the card shows these words instead of the kind's own.
+    var noticeTitle: String? = nil
+    var noticeSubtitle: String? = nil
+    var noticeStatus: String? = nil
 
     init(
         kind: UsageAlertKind = .reset,

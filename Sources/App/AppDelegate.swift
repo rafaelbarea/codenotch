@@ -343,10 +343,16 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
             Brink.openSettingsSection = { [weak settings] in settings?.show(section: $0) }
             // "In the notch" for an event with no card of its own: the peek
             // and the session chime.
-            BrinkNotifications.notchAlert = { [weak fleet, weak preferences] in
-                guard let fleet, let preferences else { return }
+            BrinkNotifications.notchAlert = { [weak fleet, weak preferences] title, body in
+                guard let fleet, let preferences else { return false }
                 if preferences.sessionEndSound { SessionChime.play(preferences.sessionEndSoundName) }
-                fleet.peek(for: preferences.peekDuration.seconds, focusing: nil)
+                var notice = UsageResetEvent(providerID: "codenotch", providerName: "Codenotch",
+                                             windowLabel: "", glyph: .tasks,
+                                             previousFraction: 0, currentFraction: 0, resetsAt: nil)
+                notice.noticeTitle = title
+                notice.noticeSubtitle = body
+                notice.noticeStatus = ""
+                return fleet.showResetAlert(notice, duration: 6.0)
             }
             // A session row answers where it runs by taking you there.
             fleet.onFocusSession = { pid in

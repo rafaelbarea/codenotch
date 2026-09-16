@@ -24874,6 +24874,17 @@
           }
         }
       }
+    },
+    "Codenotch test": {
+      "extractionState": "manual",
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Teste do Codenotch"
+          }
+        }
+      }
     }
   },
   "version": "1.0"
