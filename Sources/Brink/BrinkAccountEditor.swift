@@ -11,13 +11,9 @@ struct BrinkAccountEditButton: View {
 
     var body: some View {
         if accounts.account(providerID) != nil {
-            Button { editing.toggle() } label: {
-                Image(systemName: "pencil")
-                    .font(.system(size: 11))
-                    .foregroundStyle(.secondary)
+            SettingsIconButton(systemName: "pencil", help: L10n.t("Name, plan and price for this login")) {
+                editing.toggle()
             }
-            .buttonStyle(.borderless)
-            .help(L10n.t("Name, plan and price for this login"))
             .popover(isPresented: $editing, arrowEdge: .bottom) {
                 BrinkAccountEditor(providerID: providerID)
             }

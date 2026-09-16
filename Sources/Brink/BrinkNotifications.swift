@@ -74,15 +74,13 @@ struct BrinkNotificationsSection: View {
     @AppStorage(BrinkNotifications.focusKey) private var focus = true
 
     var body: some View {
-        Section(L10n.t("System notifications")) {
-            Toggle(L10n.t("Session finished or waiting on you"), isOn: $sessions)
-            Toggle(L10n.t("Limit reached and limit reset"), isOn: $limits)
-            Toggle(L10n.t("Focus block done, long focus"), isOn: $focus)
-            HStack {
-                Text(L10n.t("Banners in Notification Center, on top of the notch's own peek, cards and sounds: they reach you on another display or with the notch hidden."))
-                    .font(.caption).foregroundStyle(.secondary).fixedSize(horizontal: false, vertical: true)
-                Spacer()
-                Button(L10n.t("Send a test")) { BrinkNotifications.test() }
+        SettingsGroup(title: L10n.t("System notifications"),
+                      footer: L10n.t("Banners in Notification Center, on top of the notch's own peek, cards and sounds: they reach you on another display or with the notch hidden.")) {
+            SettingsToggleRow(title: L10n.t("Session finished or waiting on you"), isOn: $sessions)
+            SettingsToggleRow(title: L10n.t("Limit reached and limit reset"), isOn: $limits)
+            SettingsToggleRow(title: L10n.t("Focus block done, long focus"), isOn: $focus)
+            SettingsRow(title: L10n.t("Send a test"), description: L10n.t("Opens System Settings when banners are off for Codenotch.")) {
+                Button(L10n.t("Send")) { BrinkNotifications.test() }
             }
         }
         .onChange(of: sessions) { _, _ in BrinkNotifications.requestAuthorizationIfNeeded() }

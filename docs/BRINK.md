@@ -38,6 +38,9 @@ Everything under `Sources/Brink/`, plus small hooks in `AppDelegate`, `StatusIte
 - **Cost tabs**: Today / Week (Cycle for credit plans) / Month in each account's card. Double-click a
   ring to open a terminal on that account (its config directory exported); the tasks ring opens the
   task app.
+- **Settings**: a flat sidebar with search, coloured symbols and four groups; each pane is a
+  measured column of cards, one setting per row (name, what it does, the control on the right);
+  Accounts is a plain list with an Add menu for anything not connected.
 - **Right-click on the notch**: New session…, Activity…, Focus… (both open as Settings sections) and
   Settings…. Settings is resizable.
 - **Displays**: Appearance → Displays: All displays puts one notch on every screen, each honouring the

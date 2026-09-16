@@ -16750,6 +16750,12 @@
             "state": "translated",
             "value": "Liquid Glass"
           }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Liquid Glass"
+          }
         }
       }
     },
@@ -16784,6 +16790,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "Суцільний чорний"
+          }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Preto sólido"
           }
         }
       }
@@ -16820,6 +16832,12 @@
             "state": "translated",
             "value": "Темне скло"
           }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Vidro escuro"
+          }
         }
       }
     },
@@ -16854,6 +16872,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "Системне Liquid Glass. Відповідає налаштуванням вигляду цього Mac, зокрема прозорому чи тонованому склу та світлому або темному режиму."
+          }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Liquid Glass do sistema. Segue os ajustes de Aparência deste Mac, incluindo vidro transparente ou colorido e modo claro ou escuro."
           }
         }
       }
@@ -16890,6 +16914,12 @@
             "state": "translated",
             "value": "Початковий непрозорий чорний виріз. Завжди темний, незалежно від вигляду Mac."
           }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "O notch preto opaco original. Sempre escuro, seja qual for a aparência do Mac."
+          }
         }
       }
     },
@@ -16924,6 +16954,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "Liquid Glass з чорним відтінком. Завжди темний, незалежно від вигляду Mac."
+          }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Liquid Glass tingido de preto. Sempre escuro, seja qual for a aparência do Mac."
           }
         }
       }
@@ -22343,6 +22379,12 @@
             "state": "translated",
             "value": "Закріплено біля нижнього краю екрана. Перетягування з Option рухає ліворуч чи праворуч."
           }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Preso à borda inferior da tela. Arraste com ⌥ para mover para os lados."
+          }
         }
       }
     },
@@ -22360,6 +22402,12 @@
             "state": "translated",
             "value": "Закріплено біля лівого краю екрана. Перетягування з Option рухає вгору чи вниз."
           }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Preso à borda esquerda da tela. Arraste com ⌥ para subir ou descer."
+          }
         }
       }
     },
@@ -22376,6 +22424,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "Закріплено біля правого краю екрана. Перетягування з Option рухає вгору чи вниз."
+          }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Preso à borda direita da tela. Arraste com ⌥ para subir ou descer."
           }
         }
       }
@@ -24487,6 +24541,171 @@
           "stringUnit": {
             "state": "translated",
             "value": "Abrir ao iniciar, atualizações e idioma."
+          }
+        }
+      }
+    },
+    "Connect another source. It joins the end of the list with a ring of its own.": {
+      "extractionState": "manual",
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Conectar outra fonte. Ela entra no fim da lista com um anel próprio."
+          }
+        }
+      }
+    },
+    "Search settings…": {
+      "extractionState": "manual",
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Buscar nos ajustes…"
+          }
+        }
+      }
+    },
+    "Rings": {
+      "extractionState": "manual",
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Anéis"
+          }
+        }
+      }
+    },
+    "Position": {
+      "extractionState": "manual",
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Posição"
+          }
+        }
+      }
+    },
+    "Reset": {
+      "extractionState": "manual",
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Redefinir"
+          }
+        }
+      }
+    },
+    "Preview": {
+      "extractionState": "manual",
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Exemplo"
+          }
+        }
+      }
+    },
+    "Session limit": {
+      "extractionState": "manual",
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Limite da sessão"
+          }
+        }
+      }
+    },
+    "Check for updates": {
+      "extractionState": "manual",
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Buscar atualizações"
+          }
+        }
+      }
+    },
+    "Rings turn amber at the watch limit and red at the critical one.": {
+      "extractionState": "manual",
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Os anéis ficam âmbar no limite de atenção e vermelhos no crítico."
+          }
+        }
+      }
+    },
+    "Send": {
+      "extractionState": "manual",
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Enviar"
+          }
+        }
+      }
+    },
+    "Opens System Settings when banners are off for Codenotch.": {
+      "extractionState": "manual",
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Abre os Ajustes do Sistema se os avisos do Codenotch estiverem desligados."
+          }
+        }
+      }
+    },
+    "Refresh": {
+      "extractionState": "manual",
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Atualizar"
+          }
+        }
+      }
+    },
+    "Add a source": {
+      "extractionState": "manual",
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Adicionar fonte"
+          }
+        }
+      }
+    },
+    "Connect another source": {
+      "extractionState": "manual",
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Conectar outra fonte"
+          }
+        }
+      }
+    },
+    "It joins the end of the list above with a ring of its own.": {
+      "extractionState": "manual",
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Entra no fim da lista acima com um anel próprio."
           }
         }
       }
