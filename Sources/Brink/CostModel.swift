@@ -88,6 +88,9 @@ final class CostModel: ObservableObject {
             default:
                 if w.id.lowercased().contains("credit") || w.label.lowercased().contains("credit") { window = .credits } else { return nil }
             }
+            if window == .credits, let used = w.used, let remaining = w.remaining {
+                CostAccountStore.shared.setCreditLimit(account.id, Double(used + remaining))
+            }
             return (window, f * 100, w.resetsAt)
         }
         if samples.isEmpty {
