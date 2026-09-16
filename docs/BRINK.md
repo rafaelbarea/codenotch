@@ -1,4 +1,4 @@
-# Brink features (fork: rafaelbarea/codenotch, branch `brink-features`)
+# Brink features (fork: rafaelbarea/codenotch, branch `feature/costs-tasks-and-settings`)
 
 Everything under `Sources/Brink/`, plus small hooks in `AppDelegate`, `StatusItemController`,
 `TooltipCard`, `NotchLayout`, `SettingsView`, `ProviderGlyph` and `CodexUsage`.
