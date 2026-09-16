@@ -68,6 +68,12 @@ final class ThresholdNotifier {
 /// run reads as an app grabbing, one earned by a real event reads as a service.
 enum ThresholdAlerts {
     static func deliver(_ alert: ThresholdAlert) {
+        // The one channel choice covers these too: on the notch channel the
+        // crossing is a peek, not a banner.
+        guard BrinkNotifications.usesMac else {
+            DispatchQueue.main.async { BrinkNotifications.notchAlert?() }
+            return
+        }
         let center = UNUserNotificationCenter.current()
         center.requestAuthorization(options: [.alert]) { granted, _ in
             guard granted else { return }

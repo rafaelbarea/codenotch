@@ -341,6 +341,13 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
             // The gear toggles; everything else that opens settings opens it.
             fleet.onOpenSettings = { [weak settings] in settings?.toggle() }
             Brink.openSettingsSection = { [weak settings] in settings?.show(section: $0) }
+            // "In the notch" for an event with no card of its own: the peek
+            // and the session chime.
+            BrinkNotifications.notchAlert = { [weak fleet, weak preferences] in
+                guard let fleet, let preferences else { return }
+                if preferences.sessionEndSound { SessionChime.play(preferences.sessionEndSoundName) }
+                fleet.peek(for: preferences.peekDuration.seconds, focusing: nil)
+            }
             // A session row answers where it runs by taking you there.
             fleet.onFocusSession = { pid in
                 Task { _ = await SessionFocus.focus(pid: pid) }
@@ -800,8 +807,11 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
                               ? preferences.sessionBlockedSoundName
                               : preferences.sessionEndSoundName)
         }
-        BrinkNotifications.sessionEnded(name: event.session.name, blocked: event.reason == .blocked)
         guard preferences.announceSessionEnd else { return }
+        if BrinkNotifications.usesMac {
+            BrinkNotifications.sessionEnded(name: event.session.name, blocked: event.reason == .blocked)
+            return
+        }
         fleet.peek(for: preferences.peekDuration.seconds,
                    focusing: event.session.processID)
     }
@@ -815,14 +825,10 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
         if preferences.usageResetSound {
             SessionChime.play(preferences.usageResetSoundName)
         }
-        // A banner as well as the card when asked for; the card's own
-        // fallback already sends one when the notch cannot show it.
-        if BrinkNotifications.limits, preferences.announceUsageReset, fleet.showResetAlert(event, duration: 5.0) {
-            UsageAlertNotifications.deliver(event)
-            return
-        }
         guard preferences.announceUsageReset else { return }
-        if !fleet.showResetAlert(event, duration: 5.0) {
+        // The channel decides the form: a banner, or the notch's card (with
+        // the banner only where the notch cannot show it).
+        if BrinkNotifications.usesMac || !fleet.showResetAlert(event, duration: 5.0) {
             UsageAlertNotifications.deliver(event)
         }
     }
@@ -867,7 +873,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
         if preferences.limitReachedSound {
             SessionChime.play(preferences.limitReachedSoundName)
         }
-        if !fleet.showResetAlert(event, duration: 6.0) || BrinkNotifications.limits {
+        if BrinkNotifications.usesMac || !fleet.showResetAlert(event, duration: 6.0) {
             UsageAlertNotifications.deliver(event)
         }
     }

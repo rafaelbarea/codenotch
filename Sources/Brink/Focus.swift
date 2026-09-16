@@ -232,6 +232,7 @@ final class FocusStore: ObservableObject {
 enum BrinkNotify {
     static func post(title: String, body: String) {
         guard BrinkNotifications.focus else { return }
+        guard BrinkNotifications.usesMac else { BrinkNotifications.alert(title: title, body: body); return }
         let center = UNUserNotificationCenter.current()
         center.getNotificationSettings { settings in
             let deliver = {

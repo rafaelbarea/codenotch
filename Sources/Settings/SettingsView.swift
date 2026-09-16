@@ -860,19 +860,27 @@ struct SettingsView: View {
         }
     }
 
+    @AppStorage(BrinkNotifications.channelKey) private var notificationChannel = BrinkNotifications.Channel.mac.rawValue
+    private var notifiesInNotch: Bool { notificationChannel == BrinkNotifications.Channel.notch.rawValue }
+
     private var notificationsPane: some View {
         SettingsPage {
+            BrinkNotificationsSection()
+
             SettingsGroup(title: L10n.t("When a session ends"),
                           footer: L10n.t("Codenotch already knows the moment an agent stops working or stops to ask you something. Clicking the notch while it is open brings that session's app to the front — the app, not the tab: only some terminals let anything outside them choose a tab, so the tooltip names the session instead.")) {
-                SettingsToggleRow(title: L10n.t("Open the notch for a moment"),
-                                  description: preferences.peekDuration.explanation,
+                SettingsToggleRow(title: L10n.t("Notify"),
+                                  description: notifiesInNotch ? preferences.peekDuration.explanation
+                                      : L10n.t("A banner names the session and whether it finished or is waiting on you."),
                                   isOn: $preferences.announceSessionEnd)
-                SettingsRow(title: L10n.t("For")) {
-                    Picker("", selection: $preferences.peekDuration) {
-                        ForEach(PeekDuration.allCases) { Text($0.title).tag($0) }
+                if notifiesInNotch {
+                    SettingsRow(title: L10n.t("For")) {
+                        Picker("", selection: $preferences.peekDuration) {
+                            ForEach(PeekDuration.allCases) { Text($0.title).tag($0) }
+                        }
+                        .labelsHidden().pickerStyle(.segmented).fixedSize()
+                        .disabled(!preferences.announceSessionEnd)
                     }
-                    .labelsHidden().pickerStyle(.segmented).fixedSize()
-                    .disabled(!preferences.announceSessionEnd)
                 }
                 SettingsToggleRow(title: L10n.t("Play a sound"),
                                   description: L10n.t("The sound plays on the ordinary output, not the interface sound-effects channel — so it is still heard with \u{201C}Play user interface sound effects\u{201D} switched off in System Settings → Sound."),
@@ -884,9 +892,9 @@ struct SettingsView: View {
             }
 
             SettingsGroup(title: L10n.t("When a limit is reached"),
-                          footer: L10n.t("Displays a notification card from the side of the notch when a provider's session or weekly usage limit is reached.")) {
-                SettingsToggleRow(title: L10n.t("Show notification for session limit"), isOn: $preferences.announceSessionLimitReached)
-                SettingsToggleRow(title: L10n.t("Show notification for weekly limit"), isOn: $preferences.announceWeeklyLimitReached)
+                          footer: notifiesInNotch ? L10n.t("Displays a notification card from the side of the notch when a provider's session or weekly usage limit is reached.") : L10n.t("A banner names the provider and the limit that was reached.")) {
+                SettingsToggleRow(title: L10n.t("Session limit"), isOn: $preferences.announceSessionLimitReached)
+                SettingsToggleRow(title: L10n.t("Weekly limit"), isOn: $preferences.announceWeeklyLimitReached)
                 SettingsToggleRow(title: L10n.t("Play a sound"), isOn: $preferences.limitReachedSound)
                 SoundRow(label: L10n.t("Alert sound"), name: $preferences.limitReachedSoundName,
                          pickerEnabled: preferences.limitReachedSound)
@@ -905,8 +913,8 @@ struct SettingsView: View {
             }
 
             SettingsGroup(title: L10n.t("When a limit resets"),
-                          footer: L10n.t("Displays a notification card from the side of the notch when a provider's usage limit resets.")) {
-                SettingsToggleRow(title: L10n.t("Show notification from notch"), isOn: $preferences.announceUsageReset)
+                          footer: notifiesInNotch ? L10n.t("Displays a notification card from the side of the notch when a provider's usage limit resets.") : L10n.t("A banner names the provider and the limit that is available again.")) {
+                SettingsToggleRow(title: L10n.t("Notify"), isOn: $preferences.announceUsageReset)
                 SettingsToggleRow(title: L10n.t("Play a sound"), isOn: $preferences.usageResetSound)
                 SoundRow(label: L10n.t("Reset sound"), name: $preferences.usageResetSoundName,
                          pickerEnabled: preferences.usageResetSound)
@@ -917,7 +925,7 @@ struct SettingsView: View {
                 }
             }
 
-            BrinkNotificationsSection()
+            BrinkFocusNotificationGroup()
 
             SettingsGroup(title: L10n.t("Threshold alerts")) {
                 SettingsNote(text: L10n.t("A system notification the moment a provider's headline limit crosses 80%, and again at 100% — once per crossing, and again only after the window rolls over. Mute one from the bell beside its row in Accounts."))
