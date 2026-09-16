@@ -9,6 +9,7 @@ enum Brink {
     private static var subscription: AnyCancellable?
     private static var focusTick: AnyCancellable?
     private static var todoTick: AnyCancellable?
+    private static var accountTick: AnyCancellable?
     private static var activityWindow: NSWindow?
     private static var focusWindow: NSWindow?
     private static weak var store: UsageStore?
@@ -37,6 +38,12 @@ enum Brink {
         _ = PriceTable.shared
         _ = CostAccountStore.shared
         BrinkNotifications.requestAuthorizationIfNeeded()
+        // A nickname typed in Settings shows on the ring's card at once, not
+        // at the next poll.
+        accountTick = CostAccountStore.shared.$accounts
+            .dropFirst()
+            .debounce(for: .milliseconds(300), scheduler: RunLoop.main)
+            .sink { [weak store] _ in store?.republish() }
         subscription = store.$snapshots
             .receive(on: RunLoop.main)
             .sink { snapshots in

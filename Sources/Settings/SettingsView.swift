@@ -548,6 +548,7 @@ struct SettingsView: View {
                 }
             }
             .frame(height: SettingsView.headerHeight)
+            .padding(.top, 18)
             .padding(.leading, isSidebarVisible ? SettingsView.paneGutter : 12)
             .frame(maxWidth: SettingsChrome.measure + 2 * SettingsChrome.gutter, alignment: .leading)
             .frame(maxWidth: .infinity)
@@ -601,12 +602,12 @@ struct SettingsView: View {
         Menu {
             ForEach(notConnected) { account in
                 Button {
-                    connect(account.id)
+                    addSource(account.id)
                 } label: {
                     Label {
                         Text(account.name)
                     } icon: {
-                        ProviderGlyphView(glyph: account.glyph, size: 14)
+                        Image(nsImage: account.glyph.menuImage)
                     }
                 }
             }
@@ -1055,6 +1056,17 @@ struct SettingsView: View {
     /// providers lives here — `providerOrder` is empty until someone drags
     /// something, and "the end of the connected ones" cannot be expressed
     /// against an order that does not exist yet.
+    /// The menu's version of switching a row on: connect, place it, and open
+    /// wherever it signs in.
+    private func addSource(_ providerID: String) {
+        preferences.setConnected(true, for: providerID)
+        connect(providerID)
+        if let summary = accounts.first(where: { $0.id == providerID }), summary.localModel == nil {
+            _ = signIn(providerID)
+        }
+        usageStore?.refresh(providerID: providerID)
+    }
+
     private func connect(_ providerID: String) {
         let ids = ProviderOrder.joiningConnected(providerID,
                                                  in: accounts.map(\.id),

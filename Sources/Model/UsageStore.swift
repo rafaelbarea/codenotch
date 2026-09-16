@@ -603,6 +603,13 @@ final class UsageStore: ObservableObject {
         }
     }
 
+    /// Publish the snapshots again as they are, for a decoration that changed
+    /// outside them (an account's nickname): no fetch, just the cells redrawn.
+    func republish() {
+        snapshots = snapshots
+        updateNotchSnapshots()
+    }
+
     func reevaluate(providerID: String) {
         guard let provider = providers.first(where: { $0.id == providerID }) else { return }
         if let idx = snapshots.firstIndex(where: { $0.id == providerID }) {
