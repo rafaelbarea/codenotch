@@ -655,6 +655,11 @@ final class NotchWindowController {
                 withAnimation(.spring(response: 0.18, dampingFraction: 0.85)) {
                     model.hoveredIndex = target
                 }
+                // Reopening the tasks card mid-typing: hand it the keyboard
+                // again so the remembered field can take it back.
+                if panel.allowsKeyboard, TodoStore.shared.focusedField != nil, !panel.isKeyWindow {
+                    panel.makeKey()
+                }
             }
         } else if model.hoveredIndex != nil, clearHoverWork == nil {
             let work = DispatchWorkItem { [weak self] in

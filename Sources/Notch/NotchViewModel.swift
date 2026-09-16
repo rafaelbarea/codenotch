@@ -546,9 +546,18 @@ final class NotchViewModel: ObservableObject {
     var slack: CGFloat { slack(cellCount: snapshots.count) }
 
     func slack(cellCount: Int) -> CGFloat {
-        NotchLayout.slack(for: edge,
-                          maxCardHeight: maxCardHeight(cellCount: cellCount),
-                          notchScale: sizeScale, cardScale: cardScale(cellCount: cellCount))
+        let full = NotchLayout.slack(for: edge,
+                                     maxCardHeight: maxCardHeight(cellCount: cellCount),
+                                     notchScale: sizeScale, cardScale: cardScale(cellCount: cellCount))
+        // The card is clamped into the visible range (`tooltipAlong`), so the
+        // panel need not reserve half a card past each end of the stack: on a
+        // screen with no room for that it reserves what is left instead, and
+        // never less than the resting margin.
+        let along = edge.isVertical ? screenSize.height : screenSize.width
+        guard along > 0 else { return full }
+        let least = NotchLayout.slack(for: edge, maxCardHeight: 0, notchScale: sizeScale)
+        let room = (along - shapeLength(cellCount: cellCount) * sizeScale) / 2
+        return max(least, min(full, room))
     }
 
     /// The hover card follows the notch's size setting, as far as the screen
@@ -562,7 +571,9 @@ final class NotchViewModel: ObservableObject {
         guard card > 0, screenSize.height > 0 else { return sizeScale }
         let fit: CGFloat
         if edge.isVertical {
-            let room = screenSize.height - shapeLength(cellCount: cellCount) * sizeScale - 2 * NotchLayout.cardCorner
+            // Along the stack the card slides to stay on screen, so only the
+            // screen itself bounds it (less a margin for the menu bar).
+            let room = screenSize.height - 2 * NotchLayout.cardCorner - Self.cardScreenMargin
             fit = room / card
         } else {
             let room = screenSize.height - (contentInset + NotchLayout.bodyDepth(for: edge)) * sizeScale
@@ -573,7 +584,9 @@ final class NotchViewModel: ObservableObject {
 
     /// The card as upstream drew it is the small setting; medium and large
     /// grow it by the same steps as the notch.
-    static let cardScaleBoost: CGFloat = 1.25
+    static let cardScaleBoost: CGFloat = 1.35
+    /// Room kept for the menu bar when a side-edge card is sized to the screen.
+    static let cardScreenMargin: CGFloat = 44
 
     /// How many sessions a tooltip may list here before it has to summarise
     /// the rest — as many as this screen has room for.
@@ -769,8 +782,7 @@ final class NotchViewModel: ObservableObject {
         let cardScale = cardScale(cellCount: cellCount)
         return NotchPlacement.panelSize(
             edge: edge,
-            length: shapeLength(cellCount: cellCount) * sizeScale
-                + 2 * NotchLayout.slack(for: edge, maxCardHeight: card, notchScale: sizeScale, cardScale: cardScale),
+            length: shapeLength(cellCount: cellCount) * sizeScale + 2 * slack(cellCount: cellCount),
             depth: (contentInset + NotchLayout.bodyDepth(for: edge)) * sizeScale
                 + NotchLayout.tooltipDepth(for: edge, maxCardHeight: card, cardScale: cardScale)
         )

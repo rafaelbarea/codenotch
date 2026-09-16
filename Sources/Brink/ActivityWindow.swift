@@ -317,6 +317,13 @@ struct TimelinePane: View {
 
     // MARK: Bars per day (week / month)
 
+    @State private var hoveredDay: Date?
+
+    static func dayTitle(_ d: Date) -> String {
+        let f = DateFormatter(); f.locale = L10n.locale; f.dateFormat = "EEE d MMM"
+        return f.string(from: d).capitalized
+    }
+
     private var dayBars: some View {
         var d = interval.start
         var days: [Date] = []
@@ -332,14 +339,16 @@ struct TimelinePane: View {
                 ForEach(days, id: \.self) { dd in
                     let c = cost[dd] ?? 0
                     VStack(spacing: 4) {
-                        Text(c > 0 ? MoneyFormat.string(c, currency: prices.currency) : " ")
+                        // A month of bars has no room for a label each: the
+                        // hovered bar reads out in the caption instead.
+                        Text(period == .week && c > 0 ? MoneyFormat.string(c, currency: prices.currency) : " ")
                             .font(.system(size: 9)).foregroundColor(.secondary).monospacedDigit().lineLimit(1)
-                            .opacity(period == .week || c > 0 ? 1 : 0)
                         RoundedRectangle(cornerRadius: 3, style: .continuous)
-                            .fill(cal.isDateInToday(dd) ? Color(red: 0.85, green: 0.47, blue: 0.34) : Color(red: 0.85, green: 0.47, blue: 0.34).opacity(0.55))
+                            .fill(cal.isDateInToday(dd) || hoveredDay == dd ? Color(red: 0.85, green: 0.47, blue: 0.34) : Color(red: 0.85, green: 0.47, blue: 0.34).opacity(0.55))
                             .frame(height: max(3, 120 * CGFloat(c / maxV)))
                             .frame(maxWidth: .infinity)
-                            .help("\(Self.duration(time[dd] ?? 0)) · \(MoneyFormat.string(c, currency: prices.currency))")
+                            .contentShape(Rectangle())
+                            .onHover { hoveredDay = $0 ? dd : (hoveredDay == dd ? nil : hoveredDay) }
                         Text(f.string(from: dd).capitalized)
                             .font(.system(size: 10, weight: cal.isDateInToday(dd) ? .semibold : .regular))
                             .foregroundColor(cal.isDateInToday(dd) ? .primary : .secondary)
@@ -348,7 +357,17 @@ struct TimelinePane: View {
                 }
             }
             .frame(height: 160)
-            Text(L10n.t("Estimated cost per day; hover a bar for active time")).font(.system(size: 10.5)).foregroundColor(.secondary)
+            HStack {
+                if let dd = hoveredDay {
+                    Text("\(Self.dayTitle(dd)) · \(MoneyFormat.string(cost[dd] ?? 0, currency: prices.currency)) · \(Self.duration(time[dd] ?? 0))")
+                        .font(.system(size: 11, weight: .medium)).monospacedDigit()
+                } else {
+                    Text(L10n.t("Estimated cost per day; hover a bar for active time")).font(.system(size: 10.5)).foregroundColor(.secondary)
+                }
+                Spacer()
+                Text("\(L10n.t("Total")) \(MoneyFormat.string(cost.values.reduce(0, +), currency: prices.currency)) · \(Self.duration(time.values.reduce(0, +)))")
+                    .font(.system(size: 11, weight: .medium)).monospacedDigit().foregroundColor(.secondary)
+            }
         }
         .padding(16)
         .background(RoundedRectangle(cornerRadius: 8, style: .continuous).fill(Color(nsColor: .controlBackgroundColor)))

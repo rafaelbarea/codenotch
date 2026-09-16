@@ -130,6 +130,8 @@ struct FocusPane: View {
         return out
     }
 
+    @State private var hoveredDay: Date?
+
     private var chart: some View {
         let perDay = Dictionary(grouping: blocks, by: { cal.startOfDay(for: $0.start) }).mapValues { $0.map(\.seconds).reduce(0, +) }
         let maxV = max(perDay.values.max() ?? 1, 1)
@@ -140,13 +142,14 @@ struct FocusPane: View {
                 ForEach(days, id: \.self) { d in
                     let v = perDay[d] ?? 0
                     VStack(spacing: 4) {
-                        Text(v > 0 ? TimelinePane.duration(v) : " ")
+                        Text(period == .week && v > 0 ? TimelinePane.duration(v) : " ")
                             .font(.system(size: 9)).foregroundColor(.secondary).monospacedDigit().lineLimit(1)
-                            .opacity(period == .week || v > 0 ? 1 : 0)
                         RoundedRectangle(cornerRadius: 3, style: .continuous)
-                            .fill(cal.isDateInToday(d) ? BrinkColors.violet : BrinkColors.violet.opacity(0.55))
+                            .fill(cal.isDateInToday(d) || hoveredDay == d ? BrinkColors.violet : BrinkColors.violet.opacity(0.55))
                             .frame(height: max(3, 120 * CGFloat(v / maxV)))
                             .frame(maxWidth: .infinity)
+                            .contentShape(Rectangle())
+                            .onHover { hoveredDay = $0 ? d : (hoveredDay == d ? nil : hoveredDay) }
                         Text(f.string(from: d).capitalized)
                             .font(.system(size: 10, weight: cal.isDateInToday(d) ? .semibold : .regular))
                             .foregroundColor(cal.isDateInToday(d) ? .primary : .secondary)
@@ -155,6 +158,17 @@ struct FocusPane: View {
                 }
             }
             .frame(height: 160)
+            HStack {
+                if let d = hoveredDay {
+                    Text("\(TimelinePane.dayTitle(d)) · \(TimelinePane.duration(perDay[d] ?? 0))")
+                        .font(.system(size: 11, weight: .medium)).monospacedDigit()
+                } else {
+                    Text(L10n.t("Focus per day; hover a bar for its total")).font(.system(size: 10.5)).foregroundColor(.secondary)
+                }
+                Spacer()
+                Text("\(L10n.t("Total")) \(TimelinePane.duration(perDay.values.reduce(0, +)))")
+                    .font(.system(size: 11, weight: .medium)).monospacedDigit().foregroundColor(.secondary)
+            }
         }
         .padding(16)
         .background(RoundedRectangle(cornerRadius: 8, style: .continuous).fill(Color(nsColor: .controlBackgroundColor)))

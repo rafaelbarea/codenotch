@@ -1094,14 +1094,14 @@ struct SettingsView: View {
 
     /// The sidebar plus a detail pane wide enough for an account row's name,
     /// buttons and switch without crowding.
-    static let width: CGFloat = 960
+    static let width: CGFloat = 1040
     static let minWidth: CGFloat = 820
     static let minHeight: CGFloat = 600
     /// Posted with a "section" raw value to open the window on that section.
     static let openSection = Notification.Name("CodenotchSettingsOpenSection")
     /// Each pane scrolls on its own now, so this no longer has to fit every
     /// section in the app at once — just a comfortable account list.
-    static let height: CGFloat = 720
+    static let height: CGFloat = 760
 
     /// The rows the notch actually draws, in the order it draws them.
     ///

@@ -152,8 +152,22 @@ final class CostModel: ObservableObject {
                 let (byProject, _) = store.weightsPublic(from: from - 1, to: now)
                 costs = (monthlyLocal > 0 && month > 0) ? byProject.mapValues { monthlyLocal * $0 / month } : [:]
             }
+            // Inside the allowance window every row's share is already the
+            // share of that window, so its money is that share of the plan:
+            // the same number for every row, whether its share came from a
+            // recorded jump or from the gap spread over the tokens.
+            let perPoint: Double?
+            switch account.billing {
+            case .subscription where quotaBacked && creditPoint != nil && range == .weekly:
+                perPoint = creditPoint
+            case .subscription where quotaBacked && range == .weekly:
+                let weekly = monthlyLocal / CostEstimator.weeksPerMonth
+                perPoint = weekly > 0 ? weekly / 100 : nil
+            default:
+                perPoint = nil
+            }
             for i in fresh.indices where !fresh[i].isUnexplained {
-                fresh[i].cost = costs[fresh[i].project]
+                fresh[i].cost = perPoint.map { $0 * fresh[i].pct } ?? costs[fresh[i].project]
             }
             let done = fresh.presentable()
             await MainActor.run {

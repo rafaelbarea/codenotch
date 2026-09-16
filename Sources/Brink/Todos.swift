@@ -280,6 +280,9 @@ final class TodoStore: ObservableObject {
     @Published var tab: Tab = .today
     /// True while the quick-add field has the keyboard: the card must stay open.
     @Published var editing = false
+    /// The field last typed in, so the card gives the keyboard back to it
+    /// when it reopens.
+    @Published var focusedField: String?
     /// Bumped when the card's own layout changes (e.g. "@" suggestions appear),
     /// so the panel re-measures the card.
     @Published var layoutTick = 0

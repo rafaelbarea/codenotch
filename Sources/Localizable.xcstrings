@@ -23738,6 +23738,28 @@
           }
         }
       }
+    },
+    "Total": {
+      "extractionState": "manual",
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Total"
+          }
+        }
+      }
+    },
+    "Focus per day; hover a bar for its total": {
+      "extractionState": "manual",
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Foco por dia; passe o cursor numa barra para ver o total"
+          }
+        }
+      }
     }
   },
   "version": "1.0"

@@ -24,7 +24,7 @@ struct TasksCard: View {
         var h = 2 * NotchLayout.cardPadding
             + max(NotchLayout.glyphSize, NotchLayout.cardTitleLineHeight)   // header
             + NotchLayout.headerToBlock + line                              // tabs
-        if focus.isActive { h += NotchLayout.blockSpacing + 2 * line }      // focus banner
+        if focus.isActive { h += NotchLayout.blockSpacing + 2 * line + 2 * bannerPadV }   // focus banner
         h += NotchLayout.blockSpacing
         h += rows == 0 ? line : CGFloat(rows) * (2 * line + NotchLayout.sessionRowGap)
         h += NotchLayout.blockSpacing + line                                // quick add
@@ -42,7 +42,7 @@ struct TasksCard: View {
             list.padding(.top, NotchLayout.blockSpacing)
             BrinkTaggedField(text: $store.draft, project: $store.draftProject, lists: store.lists,
                              prompt: L10n.t("New task in \(store.title(for: store.tab))"), icon: "plus",
-                             accent: Palette.textSecondary, editing: $store.editing) {
+                             accent: Palette.textSecondary, id: "draft", editing: $store.editing) {
                 store.create(store.draft, project: store.draftProject.isEmpty ? nil : store.draftProject)
                 store.draft = ""; store.draftProject = ""
             }
@@ -50,7 +50,7 @@ struct TasksCard: View {
             if !focus.isActive {
                 BrinkTaggedField(text: $store.freeFocus, project: $store.freeProject, lists: store.lists,
                                  prompt: L10n.t("Focus without a task…"), icon: "timer",
-                                 accent: BrinkColors.violet, editing: $store.editing) {
+                                 accent: BrinkColors.violet, id: "free", editing: $store.editing) {
                     let name = store.freeFocus.trimmingCharacters(in: .whitespaces)
                     focus.start(id: "free-\(Int(Date().timeIntervalSince1970))", name: name.isEmpty ? L10n.t("Focus") : name,
                                 project: store.freeProject.isEmpty ? nil : store.freeProject)
@@ -103,9 +103,9 @@ struct TasksCard: View {
 
     private var focusBanner: some View {
         HStack(spacing: Design.px(10)) {
-            Image(systemName: focus.isRunning ? "timer" : "pause.fill").font(Typography.cardBody).foregroundStyle(BrinkColors.violet)
+            Image(systemName: focus.isRunning ? "timer" : "pause.fill").font(Typography.cardBody.weight(.semibold)).foregroundStyle(BrinkColors.violet)
             VStack(alignment: .leading, spacing: 0) {
-                Text(focus.taskName ?? "").font(Typography.cardBody).foregroundStyle(Palette.textPrimary).lineLimit(1)
+                Text(focus.taskName ?? "").font(Typography.cardBody.weight(.semibold)).foregroundStyle(Palette.textPrimary).lineLimit(1)
                 Text("\(FocusStore.clock(focus.elapsed)) · \(L10n.t("target \(focus.targetMinutes) min"))" + (focus.project.map { " · \($0)" } ?? ""))
                     .font(Typography.cardBody).monospacedDigit().foregroundStyle(Palette.textSecondary).lineLimit(1)
             }
@@ -116,7 +116,13 @@ struct TasksCard: View {
             Button { focus.stop() } label: { Image(systemName: "stop.circle").font(Typography.cardTitle) }
                 .buttonStyle(.plain).foregroundStyle(Palette.textSecondary)
         }
+        .padding(.horizontal, Self.bannerPadH)
+        .padding(.vertical, Self.bannerPadV)
+        .background(RoundedRectangle(cornerRadius: Design.px(18), style: .continuous).fill(BrinkColors.violet.opacity(0.16)))
     }
+
+    static let bannerPadH = Design.px(22)
+    static let bannerPadV = Design.px(14)
 
     @ViewBuilder private var list: some View {
         if listed.isEmpty {
@@ -196,6 +202,7 @@ struct BrinkTaggedField: View {
     var prompt: String
     var icon: String
     var accent: Color
+    var id: String = ""
     @Binding var editing: Bool
     var action: () -> Void
     @FocusState private var focused: Bool
@@ -217,7 +224,17 @@ struct BrinkTaggedField: View {
                 TextField("", text: $text, prompt: Text(prompt).foregroundStyle(Palette.textSecondary))
                     .textFieldStyle(.plain).font(Typography.cardBody).foregroundStyle(Palette.textPrimary)
                     .focused($focused)
-                    .onChange(of: focused) { _, on in editing = on }
+                    .onChange(of: focused) { _, on in
+                        editing = on
+                        if on { TodoStore.shared.focusedField = id }
+                    }
+                    .onAppear {
+                        // Back to the field that was being typed in when the
+                        // card last folded, the moment it is on screen again.
+                        if TodoStore.shared.focusedField == id {
+                            DispatchQueue.main.async { focused = true }
+                        }
+                    }
                     .onSubmit { if let first = suggestions.first, query != nil { pick(first) } else { action() } }
                 Menu {
                     Button(L10n.t("No project")) { project = "" }

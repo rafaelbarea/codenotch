@@ -168,9 +168,13 @@ final class SettingsWindowController: NSObject, NSWindowDelegate {
             return
         }
 
+        // As large as the screen comfortably allows, never below the design
+        // size: the Activity and Focus sections are charts and tables.
+        let visible = NSScreen.main?.visibleFrame.size ?? CGSize(width: SettingsView.width, height: SettingsView.height)
+        let size = CGSize(width: min(max(SettingsView.width, visible.width * 0.8), 1400),
+                          height: min(max(SettingsView.height, visible.height * 0.85), 1000))
         let window = NSWindow(
-            contentRect: NSRect(x: 0, y: 0,
-                                width: SettingsView.width, height: SettingsView.height),
+            contentRect: NSRect(x: 0, y: 0, width: size.width, height: size.height),
             // `fullSizeContentView` runs the sidebar flush up under the traffic
             // lights, with no separate title strip above it. This reserved a
             // tall blank band once before, but that band was

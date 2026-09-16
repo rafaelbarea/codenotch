@@ -100,7 +100,7 @@ struct ProviderRing: View {
                         .inset(by: NotchLayout.trackStroke / 2)
                         .trim(from: 0, to: sweep)
                         .stroke(
-                            band.color(accent: accentColor),
+                            tint ?? band.color(accent: accentColor),
                             style: StrokeStyle(lineWidth: NotchLayout.progressStroke, lineCap: .round)
                         )
                         // Refreshing spins the reading itself rather than
