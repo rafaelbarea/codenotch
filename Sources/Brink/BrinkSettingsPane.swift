@@ -10,6 +10,7 @@ struct BrinkSettingsPane: View {
     @ObservedObject var focus: FocusStore = .shared
     @State private var command = NewSession.command
     @State private var terminal = NewSession.terminal
+    @State private var accountCommand = NewSession.accountCommand
 
     private var currencyName: String { Locale.current.localizedString(forCurrencyCode: prices.currency) ?? prices.currency }
 
@@ -68,6 +69,10 @@ struct BrinkSettingsPane: View {
                 TextField(L10n.t("Command"), text: $command, prompt: Text("claude"))
                     .onChange(of: command) { _, v in NewSession.command = v }
                 Text(L10n.t("Runs in a new terminal window from the menu's New session… (⌘N). Put your own launcher here, e.g. a shell function that picks the project and the account."))
+                    .font(.caption).foregroundStyle(.secondary).fixedSize(horizontal: false, vertical: true)
+                TextField(L10n.t("Double-click on a ring"), text: $accountCommand, prompt: Text("{cmd}"))
+                    .onChange(of: accountCommand) { _, v in NewSession.accountCommand = v }
+                Text(L10n.t("Runs with the ring's account already chosen. {cmd} is that account's CLI (claude, or env CLAUDE_CONFIG_DIR=… claude), {id} its id, {dir} its config directory, {provider} claude or codex. Empty runs {cmd}."))
                     .font(.caption).foregroundStyle(.secondary).fixedSize(horizontal: false, vertical: true)
             }
         }

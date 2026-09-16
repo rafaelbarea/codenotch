@@ -6,6 +6,16 @@ import Foundation
 enum NewSession {
     static let commandKey = "brinkNewSessionCommand"
     static let terminalKey = "brinkNewSessionTerminal"   // bundle id, "" = automatic
+    /// What a double click on a ring runs, with the account already chosen.
+    /// `{cmd}` is the CLI on that account (`claude`, or `env CLAUDE_CONFIG_DIR=… claude`),
+    /// `{id}` the account id, `{dir}` its config directory, `{provider}` claude or codex.
+    /// Empty runs `{cmd}` itself.
+    static let accountCommandKey = "brinkNewSessionAccountCommand"
+
+    static var accountCommand: String {
+        get { UserDefaults.standard.string(forKey: accountCommandKey)?.trimmingCharacters(in: .whitespaces) ?? "" }
+        set { UserDefaults.standard.set(newValue, forKey: accountCommandKey) }
+    }
 
     static var command: String {
         get { UserDefaults.standard.string(forKey: commandKey)?.trimmingCharacters(in: .whitespaces) ?? "" }
@@ -28,12 +38,23 @@ enum NewSession {
     /// With an account: the terminal opens on that login (its config
     /// directory exported the way the CLI reads it) before the launcher runs.
     @MainActor static func launch(account: CostAccount?) {
-        var cmd = command
-        if cmd.isEmpty { cmd = account?.provider == "codex" ? "codex" : "claude" }
+        var cmd = command.isEmpty ? "claude" : command
         if let account {
-            let env = account.provider == "codex" ? "CODEX_HOME" : "CLAUDE_CONFIG_DIR"
-            let dir = account.configDirectory.path.replacingOccurrences(of: "'", with: "'\\''")
-            cmd = "export \(env)='\(dir)'; \(cmd)"
+            // The CLI on that login, spelled the way a shell launcher expects
+            // (accounts.json uses the same form): the default directory is
+            // the bare command, any other is exported in front of it.
+            let home = FileManager.default.homeDirectoryForCurrentUser.path
+            let dir = account.configDirectory.path
+            let codex = account.provider == "codex"
+            let bare = codex ? "codex" : "claude"
+            let cli = dir == "\(home)/\(codex ? ".codex" : ".claude")"
+                ? bare : "env \(codex ? "CODEX_HOME" : "CLAUDE_CONFIG_DIR")=\(dir) \(bare)"
+            let template = accountCommand
+            cmd = template.isEmpty ? cli : template
+                .replacingOccurrences(of: "{cmd}", with: cli)
+                .replacingOccurrences(of: "{id}", with: account.id)
+                .replacingOccurrences(of: "{dir}", with: dir)
+                .replacingOccurrences(of: "{provider}", with: account.provider)
         }
         let choice = terminal.isEmpty ? (installed().first?.bundleID ?? "com.apple.Terminal") : terminal
         let escaped = cmd.replacingOccurrences(of: "\\", with: "\\\\").replacingOccurrences(of: "\"", with: "\\\"")

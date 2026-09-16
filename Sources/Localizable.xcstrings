@@ -23771,6 +23771,28 @@
           }
         }
       }
+    },
+    "Double-click on a ring": {
+      "extractionState": "manual",
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Duplo clique num anel"
+          }
+        }
+      }
+    },
+    "Runs with the ring's account already chosen. {cmd} is that account's CLI (claude, or env CLAUDE_CONFIG_DIR=… claude), {id} its id, {dir} its config directory, {provider} claude or codex. Empty runs {cmd}.": {
+      "extractionState": "manual",
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Roda com a conta do anel já escolhida. {cmd} é o CLI dessa conta (claude, ou env CLAUDE_CONFIG_DIR=… claude), {id} o id, {dir} a pasta de config, {provider} claude ou codex. Vazio roda {cmd}."
+          }
+        }
+      }
     }
   },
   "version": "1.0"

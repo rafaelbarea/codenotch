@@ -241,6 +241,25 @@ final class NotchWindowController {
             .sink { [weak self] _ in self?.relocate() }
             .store(in: &cancellables)
 
+        // The tasks card changes shape on its own: "@" opens a list of
+        // projects under the field, a tab has more rows, a focus block starts
+        // or stops. None of that goes through the snapshots, so the panel is
+        // re-measured here and the view told to draw again.
+        Publishers.Merge4(
+            TodoStore.shared.$layoutTick.map { _ in () }.eraseToAnyPublisher(),
+            TodoStore.shared.$tab.map { _ in () }.eraseToAnyPublisher(),
+            FocusStore.shared.$taskID.map { _ in () }.eraseToAnyPublisher(),
+            FocusStore.shared.$isRunning.map { _ in () }.eraseToAnyPublisher())
+            .receive(on: RunLoop.main)
+            .sink { [weak self] _ in
+                guard let self else { return }
+                self.model.invalidateGeometry()
+                self.model.objectWillChange.send()
+                self.relocate()
+                self.updateInteractiveRects()
+            }
+            .store(in: &cancellables)
+
         // No `receive(on:)`: the appearance has to be on the window before the
         // next draw, or the frame's hexes and the glass would be resolved
         // against the appearance the panel is about to stop having.

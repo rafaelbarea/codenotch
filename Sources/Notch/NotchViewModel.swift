@@ -622,11 +622,11 @@ final class NotchViewModel: ObservableObject {
         return max(min(Self.cardBase(for: sizeScale), fit), 0.5)
     }
 
-    /// The card as upstream drew it is the small setting; medium and large
-    /// grow it in bigger steps than the notch, since the card is read and the
-    /// notch is glanced at: small 1.0, medium 1.45, large 2.0.
+    /// Medium is the card as Brink drew it (1.45 times upstream's); small and
+    /// large step a quarter down and up from there, gentler than the notch's
+    /// own steps: small 1.2, medium 1.45, large 1.76.
     nonisolated static func cardBase(for sizeScale: CGFloat) -> CGFloat {
-        1.0 + max(0, sizeScale - NotchSize.small.scale) * 2.25
+        max(0.5, 1.45 + (sizeScale - 1) * 1.25)
     }
     /// Room kept for the menu bar when a side-edge card is sized to the screen.
     static let cardScreenMargin: CGFloat = 44
