@@ -24885,6 +24885,182 @@
           }
         }
       }
+    },
+    "Peek": {
+      "extractionState": "manual",
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Espiada"
+          }
+        }
+      }
+    },
+    "How long the notch stays open": {
+      "extractionState": "manual",
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Por quanto tempo o notch fica aberto"
+          }
+        }
+      }
+    },
+    "Events": {
+      "extractionState": "manual",
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Eventos"
+          }
+        }
+      }
+    },
+    "Event": {
+      "extractionState": "manual",
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Evento"
+          }
+        }
+      }
+    },
+    "Sound": {
+      "extractionState": "manual",
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Som"
+          }
+        }
+      }
+    },
+    "Don't play": {
+      "extractionState": "manual",
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Não tocar"
+          }
+        }
+      }
+    },
+    "Session finished": {
+      "extractionState": "manual",
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Sessão concluída"
+          }
+        }
+      }
+    },
+    "Session waiting on you": {
+      "extractionState": "manual",
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Sessão esperando você"
+          }
+        }
+      }
+    },
+    "Session limit reached": {
+      "extractionState": "manual",
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Limite da sessão atingido"
+          }
+        }
+      }
+    },
+    "The 5-hour allowance of a provider is spent.": {
+      "extractionState": "manual",
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "A cota de 5 horas de um provedor acabou."
+          }
+        }
+      }
+    },
+    "Weekly limit reached": {
+      "extractionState": "manual",
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Limite semanal atingido"
+          }
+        }
+      }
+    },
+    "The weekly allowance of a provider is spent.": {
+      "extractionState": "manual",
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "A cota semanal de um provedor acabou."
+          }
+        }
+      }
+    },
+    "Limit reset": {
+      "extractionState": "manual",
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Limite renovado"
+          }
+        }
+      }
+    },
+    "A limit is available again.": {
+      "extractionState": "manual",
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Um limite voltou a ficar disponível."
+          }
+        }
+      }
+    },
+    "Focus block ended": {
+      "extractionState": "manual",
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Bloco de foco terminou"
+          }
+        }
+      }
+    },
+    "The block reached its target, or ran past two hours.": {
+      "extractionState": "manual",
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "O bloco chegou à meta, ou passou de duas horas."
+          }
+        }
+      }
     }
   },
   "version": "1.0"

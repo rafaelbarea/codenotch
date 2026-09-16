@@ -75,7 +75,7 @@ enum ThresholdAlerts {
                 ? L10n.t("\(alert.providerName) limit reached")
                 : L10n.t("\(alert.providerName) is at \(alert.usedPercent)%")
             let body = L10n.t("\(alert.usedPercent)% of its \(alert.windowLabel.lowercased()) limit used.")
-            DispatchQueue.main.async { _ = BrinkNotifications.notchAlert?(title, body) }
+            DispatchQueue.main.async { _ = BrinkNotifications.notchAlert?(title, body, nil) }
             return
         }
         let center = UNUserNotificationCenter.current()

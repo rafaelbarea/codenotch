@@ -343,9 +343,10 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
             Brink.openSettingsSection = { [weak settings] in settings?.show(section: $0) }
             // "In the notch" for an event with no card of its own: the peek
             // and the session chime.
-            BrinkNotifications.notchAlert = { [weak fleet, weak preferences] title, body in
+            BrinkNotifications.notchAlert = { [weak fleet, weak preferences] title, body, sound in
                 guard let fleet, let preferences else { return false }
-                if preferences.sessionEndSound { SessionChime.play(preferences.sessionEndSoundName) }
+                let name = sound ?? (preferences.sessionEndSound ? preferences.sessionEndSoundName : "")
+                if !name.isEmpty { SessionChime.play(name) }
                 var notice = UsageResetEvent(providerID: "codenotch", providerName: "Codenotch",
                                              windowLabel: "", glyph: .tasks,
                                              previousFraction: 0, currentFraction: 0, resetsAt: nil)

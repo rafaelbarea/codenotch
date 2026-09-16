@@ -38,7 +38,12 @@ enum BrinkNotifications {
     /// no card of its own (a focus block ending, a test): a card beside the
     /// notch with these words, and the chime. Returns false when the notch
     /// could not show it (hidden), so the caller can fall back to a banner.
-    static var notchAlert: ((_ title: String, _ body: String) -> Bool)?
+    static var notchAlert: ((_ title: String, _ body: String, _ sound: String?) -> Bool)?
+
+    /// The focus block's sound; empty plays nothing. Unset, it borrows the
+    /// session's "finished" sound.
+    static let focusSoundKey = "brinkFocusSoundName"
+    static var focusSound: String? { UserDefaults.standard.string(forKey: focusSoundKey) }
 
     /// Without a delegate, macOS delivers an app's own notifications quietly
     /// to the list while that app is frontmost: the test sent from Settings,
@@ -73,7 +78,7 @@ enum BrinkNotifications {
     static func test() {
         guard usesMac else {
             DispatchQueue.main.async {
-                _ = notchAlert?(L10n.t("Codenotch test"), L10n.t("This is what one looks like."))
+                _ = notchAlert?(L10n.t("Codenotch test"), L10n.t("This is what one looks like."), nil)
             }
             return
         }
@@ -106,12 +111,12 @@ enum BrinkNotifications {
 
     /// An event with no notch card of its own: a banner on the Mac channel,
     /// the notch's peek and chime otherwise.
-    static func alert(title: String, body: String) {
+    static func alert(title: String, body: String, sound: String? = nil) {
         if usesMac {
             post(title: title, body: body)
         } else {
             DispatchQueue.main.async {
-                if notchAlert?(title, body) != true { post(title: title, body: body) }
+                if notchAlert?(title, body, sound) != true { post(title: title, body: body) }
             }
         }
     }
@@ -164,18 +169,5 @@ struct BrinkNotificationsSection: View {
             }
         }
         .onChange(of: channel) { _, _ in BrinkNotifications.requestAuthorizationIfNeeded() }
-    }
-}
-
-/// The focus block's own switch, beside the other events.
-struct BrinkFocusNotificationGroup: View {
-    @AppStorage(BrinkNotifications.focusKey) private var focus = true
-
-    var body: some View {
-        SettingsGroup(title: L10n.t("When a focus block ends")) {
-            SettingsToggleRow(title: L10n.t("Notify"),
-                              description: L10n.t("When the block reaches its target, and again every hour a block runs past two."),
-                              isOn: $focus)
-        }
     }
 }

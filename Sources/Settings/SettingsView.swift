@@ -867,70 +867,66 @@ struct SettingsView: View {
         SettingsPage {
             BrinkNotificationsSection()
 
-            SettingsGroup(title: L10n.t("When a session ends"),
-                          footer: L10n.t("Codenotch already knows the moment an agent stops working or stops to ask you something. Clicking the notch while it is open brings that session's app to the front — the app, not the tab: only some terminals let anything outside them choose a tab, so the tooltip names the session instead.")) {
-                SettingsToggleRow(title: L10n.t("Notify"),
-                                  description: notifiesInNotch ? preferences.peekDuration.explanation
-                                      : L10n.t("A banner names the session and whether it finished or is waiting on you."),
-                                  isOn: $preferences.announceSessionEnd)
-                if notifiesInNotch {
-                    SettingsRow(title: L10n.t("For")) {
+            if notifiesInNotch {
+                SettingsGroup(title: L10n.t("Peek")) {
+                    SettingsRow(title: L10n.t("How long the notch stays open"),
+                                description: preferences.peekDuration.explanation) {
                         Picker("", selection: $preferences.peekDuration) {
                             ForEach(PeekDuration.allCases) { Text($0.title).tag($0) }
                         }
                         .labelsHidden().pickerStyle(.segmented).fixedSize()
-                        .disabled(!preferences.announceSessionEnd)
-                    }
-                }
-                SettingsToggleRow(title: L10n.t("Play a sound"),
-                                  description: L10n.t("The sound plays on the ordinary output, not the interface sound-effects channel — so it is still heard with \u{201C}Play user interface sound effects\u{201D} switched off in System Settings → Sound."),
-                                  isOn: $preferences.sessionEndSound)
-                SoundRow(label: L10n.t("Finished"), name: $preferences.sessionEndSoundName,
-                         pickerEnabled: preferences.sessionEndSound)
-                SoundRow(label: L10n.t("Waiting on you"), name: $preferences.sessionBlockedSoundName,
-                         pickerEnabled: preferences.sessionEndSound)
-            }
-
-            SettingsGroup(title: L10n.t("When a limit is reached"),
-                          footer: notifiesInNotch ? L10n.t("Displays a notification card from the side of the notch when a provider's session or weekly usage limit is reached.") : L10n.t("A banner names the provider and the limit that was reached.")) {
-                SettingsToggleRow(title: L10n.t("Session limit"), isOn: $preferences.announceSessionLimitReached)
-                SettingsToggleRow(title: L10n.t("Weekly limit"), isOn: $preferences.announceWeeklyLimitReached)
-                SettingsToggleRow(title: L10n.t("Play a sound"), isOn: $preferences.limitReachedSound)
-                SoundRow(label: L10n.t("Alert sound"), name: $preferences.limitReachedSoundName,
-                         pickerEnabled: preferences.limitReachedSound)
-                if previewSessionLimitAlert != nil || previewWeeklyLimitAlert != nil {
-                    SettingsRow(title: L10n.t("Preview")) {
-                        HStack(spacing: 8) {
-                            if let previewSessionLimitAlert {
-                                Button(L10n.t("Session limit")) { previewSessionLimitAlert() }
-                            }
-                            if let previewWeeklyLimitAlert {
-                                Button(L10n.t("Weekly limit")) { previewWeeklyLimitAlert() }
-                            }
-                        }
                     }
                 }
             }
 
-            SettingsGroup(title: L10n.t("When a limit resets"),
-                          footer: notifiesInNotch ? L10n.t("Displays a notification card from the side of the notch when a provider's usage limit resets.") : L10n.t("A banner names the provider and the limit that is available again.")) {
-                SettingsToggleRow(title: L10n.t("Notify"), isOn: $preferences.announceUsageReset)
-                SettingsToggleRow(title: L10n.t("Play a sound"), isOn: $preferences.usageResetSound)
-                SoundRow(label: L10n.t("Reset sound"), name: $preferences.usageResetSoundName,
-                         pickerEnabled: preferences.usageResetSound)
-                if let previewResetAlert {
-                    SettingsRow(title: L10n.t("Preview")) {
-                        Button(L10n.t("Preview notification")) { previewResetAlert() }
-                    }
-                }
-            }
-
-            BrinkFocusNotificationGroup()
-
-            SettingsGroup(title: L10n.t("Threshold alerts")) {
-                SettingsNote(text: L10n.t("A system notification the moment a provider's headline limit crosses 80%, and again at 100% — once per crossing, and again only after the window rolls over. Mute one from the bell beside its row in Accounts."))
+            SettingsGroup(title: L10n.t("Events"),
+                          footer: L10n.t("A system notification the moment a provider's headline limit crosses 80%, and again at 100% — once per crossing, and again only after the window rolls over. Mute one from the bell beside its row in Accounts.")) {
+                NotificationEventHeader()
+                NotificationEventRow(title: L10n.t("Session finished"),
+                                     description: L10n.t("The agent's turn is done."),
+                                     isOn: $preferences.announceSessionEnd,
+                                     sound: soundChoice(enabled: $preferences.sessionEndSound, name: $preferences.sessionEndSoundName))
+                NotificationEventRow(title: L10n.t("Session waiting on you"),
+                                     description: L10n.t("The agent stopped to ask you something."),
+                                     isOn: $preferences.announceSessionEnd,
+                                     sound: soundChoice(enabled: $preferences.sessionEndSound, name: $preferences.sessionBlockedSoundName))
+                NotificationEventRow(title: L10n.t("Session limit reached"),
+                                     description: L10n.t("The 5-hour allowance of a provider is spent."),
+                                     isOn: $preferences.announceSessionLimitReached,
+                                     sound: soundChoice(enabled: $preferences.limitReachedSound, name: $preferences.limitReachedSoundName))
+                NotificationEventRow(title: L10n.t("Weekly limit reached"),
+                                     description: L10n.t("The weekly allowance of a provider is spent."),
+                                     isOn: $preferences.announceWeeklyLimitReached,
+                                     sound: soundChoice(enabled: $preferences.limitReachedSound, name: $preferences.limitReachedSoundName))
+                NotificationEventRow(title: L10n.t("Limit reset"),
+                                     description: L10n.t("A limit is available again."),
+                                     isOn: $preferences.announceUsageReset,
+                                     sound: soundChoice(enabled: $preferences.usageResetSound, name: $preferences.usageResetSoundName))
+                NotificationEventRow(title: L10n.t("Focus block ended"),
+                                     description: L10n.t("The block reached its target, or ran past two hours."),
+                                     isOn: $focusNotifies,
+                                     sound: Binding(get: { focusSoundName ?? preferences.sessionEndSoundName },
+                                                    set: { focusSoundName = $0 }))
             }
         }
+    }
+
+    @AppStorage(BrinkNotifications.focusKey) private var focusNotifies = true
+    @AppStorage(BrinkNotifications.focusSoundKey) private var focusSoundName: String?
+
+    /// "Don't play" is the empty name; choosing a sound switches the sound on.
+    private func soundChoice(enabled: Binding<Bool>, name: Binding<String>) -> Binding<String> {
+        Binding(
+            get: { enabled.wrappedValue ? name.wrappedValue : "" },
+            set: { chosen in
+                if chosen.isEmpty {
+                    enabled.wrappedValue = false
+                } else {
+                    name.wrappedValue = chosen
+                    enabled.wrappedValue = true
+                }
+            }
+        )
     }
 
     private var generalPane: some View {
@@ -1280,34 +1276,70 @@ private struct AccentColorSwatch: View {
 /// One provider: whether Codenotch reads it, whose account that is, and where
 /// to go if there is nothing to read.
 /// One sound choice, with a preview button.
-private struct SoundRow: View {
-    let label: String
-    @Binding var name: String
-    /// The preview stays live even with the sound switched off — it is how you
-    /// find out what you are switching on, and a dead button teaches nothing.
-    let pickerEnabled: Bool
+/// The column titles over the event rows.
+private struct NotificationEventHeader: View {
+    var body: some View {
+        HStack(spacing: 16) {
+            Text(L10n.t("Event"))
+            Spacer(minLength: 0)
+            Text(L10n.t("Notify")).frame(width: NotificationEventRow.toggleWidth)
+            Text(L10n.t("Sound")).frame(width: NotificationEventRow.soundWidth, alignment: .leading)
+        }
+        .font(.system(size: 11, weight: .medium))
+        .foregroundStyle(.secondary)
+        .padding(.horizontal, SettingsChrome.rowPaddingH)
+        .padding(.top, 10)
+        .padding(.bottom, 4)
+    }
+}
+
+/// One event: whether it notifies, and with which sound ("Don't play" is
+/// one of the sounds).
+private struct NotificationEventRow: View {
+    let title: String
+    var description: String? = nil
+    @Binding var isOn: Bool
+    @Binding var sound: String
+
+    static let toggleWidth: CGFloat = 52
+    static let soundWidth: CGFloat = 186
 
     var body: some View {
-        SettingsRow(title: label) {
-            HStack(spacing: 8) {
-                Picker("", selection: $name) {
-                    // A sound that has been removed since it was chosen still has
-                    // to appear, or the picker would silently show a different one
-                    // and the setting would look like it had changed itself.
-                    if !SessionChime.available.contains(name) {
-                        Text(L10n.t("\(name) (missing)")).tag(name)
+        HStack(spacing: 16) {
+            VStack(alignment: .leading, spacing: 3) {
+                Text(title).font(SettingsChrome.titleFont)
+                if let description {
+                    Text(description).font(SettingsChrome.bodyFont).foregroundStyle(.secondary)
+                        .fixedSize(horizontal: false, vertical: true)
+                }
+            }
+            Spacer(minLength: 0)
+            Toggle("", isOn: $isOn).labelsHidden().toggleStyle(.switch)
+                .frame(width: Self.toggleWidth)
+            HStack(spacing: 6) {
+                Picker("", selection: $sound) {
+                    Text(L10n.t("Don't play")).tag("")
+                    Divider()
+                    // A sound removed since it was chosen still has to appear,
+                    // or the picker would silently show a different one.
+                    if !sound.isEmpty, !SessionChime.available.contains(sound) {
+                        Text(L10n.t("\(sound) (missing)")).tag(sound)
                     }
                     ForEach(SessionChime.available, id: \.self) { Text($0).tag($0) }
                 }
                 .labelsHidden()
-                .fixedSize()
-                .disabled(!pickerEnabled)
-                SettingsIconButton(systemName: "play.fill", help: L10n.t("Play \(name)")) {
-                    Log.usage.info("preview \(name, privacy: .public)")
-                    SessionChime.play(name)
+                .frame(width: 140)
+                .disabled(!isOn)
+                SettingsIconButton(systemName: "play.fill", help: L10n.t("Play \(sound)")) {
+                    _ = SessionChime.play(sound)
                 }
+                .disabled(sound.isEmpty)
+                .opacity(sound.isEmpty ? 0.35 : 1)
             }
+            .frame(width: Self.soundWidth, alignment: .leading)
         }
+        .padding(.horizontal, SettingsChrome.rowPaddingH)
+        .padding(.vertical, SettingsChrome.rowPaddingV)
     }
 }
 

@@ -65,6 +65,8 @@ enum SessionChime {
     /// below. See the comment there.
     @discardableResult
     static func play(_ name: String) -> Bool {
+        // "Don't play" is stored as an empty name.
+        guard !name.isEmpty else { return false }
         guard let url = url(for: name) else {
             Log.usage.error("no sound file named \(name, privacy: .public)")
             return false
