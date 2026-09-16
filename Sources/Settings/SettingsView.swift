@@ -662,6 +662,24 @@ struct SettingsView: View {
         }
         .animation(.snappy(duration: 0.25), value: preferences.connectedProviders)
         .animation(.snappy(duration: 0.25), value: preferences.disabledModels)
+        // Everything on when the pane opens is kept, so the first switch-off
+        // leaves a row rather than removing one; and a row switched off is
+        // marked kept at that moment, whatever the list said before.
+        .onAppear {
+            if listedSourcesRaw.isEmpty { seedListed() }
+            previouslyConnected = Set(connected.map(\.id))
+        }
+        .onChange(of: preferences.connectedProviders) { _, _ in
+            let now = Set(connected.map(\.id))
+            for id in previouslyConnected.subtracting(now) { setListed(id, true) }
+            previouslyConnected = now
+        }
+    }
+
+    @State private var previouslyConnected: Set<String> = []
+
+    private func seedListed() {
+        listedSourcesRaw = connected.map(\.id).sorted().joined(separator: ",")
     }
 
     private var appearancePane: some View {
@@ -1034,7 +1052,7 @@ struct SettingsView: View {
     @AppStorage("brinkListedSources") private var listedSourcesRaw = ""
 
     private var listedSources: Set<String> {
-        Set(listedSourcesRaw.split(separator: ",").map(String.init))
+        Set(listedSourcesRaw.split(separator: ",").map(String.init)).subtracting(["-"])
     }
 
     private func setListed(_ id: String, _ listed: Bool) {
@@ -1042,7 +1060,8 @@ struct SettingsView: View {
         // The first change seeds the set with what is on, so nothing vanishes.
         if listedSourcesRaw.isEmpty { set.formUnion(connected.map(\.id)) }
         if listed { set.insert(id) } else { set.remove(id) }
-        listedSourcesRaw = set.sorted().joined(separator: ",")
+        // Never back to empty: empty means "never set" and would re-seed.
+        listedSourcesRaw = set.isEmpty ? "-" : set.sorted().joined(separator: ",")
     }
 
     /// What the Accounts list shows: everything on, plus what was added and
