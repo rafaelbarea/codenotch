@@ -458,10 +458,13 @@ enum NotchLayout {
     /// big, and at the small end would reserve less than the card needs.
     static func slack(for edge: NotchEdge,
                       maxCardHeight: CGFloat = defaultMaxCardHeight,
-                      notchScale: CGFloat = 1) -> CGFloat {
+                      notchScale: CGFloat = 1,
+                      cardScale: CGFloat = 1) -> CGFloat {
+        // The card is drawn at the notch's size too, so its half-extent here
+        // is the scaled one.
         edge.isVertical
-            ? max(endSlack * notchScale, maxCardHeight / 2 + cardCorner)
-            : max(endSlack * notchScale, cardWidth / 2 + cardCorner)
+            ? max(endSlack * notchScale, maxCardHeight * cardScale / 2 + cardCorner)
+            : max(endSlack * notchScale, cardWidth * cardScale / 2 + cardCorner)
     }
 
     private static let endSlack = Design.px(190)
@@ -537,7 +540,8 @@ enum NotchLayout {
     /// so the tooltip has somewhere to live. Beside the stack on a side edge,
     /// below or above it on a horizontal one.
     static func tooltipDepth(for edge: NotchEdge,
-                             maxCardHeight: CGFloat = defaultMaxCardHeight) -> CGFloat {
-        (edge.isVertical ? cardWidth : maxCardHeight) + tailLength + tailGap
+                             maxCardHeight: CGFloat = defaultMaxCardHeight,
+                             cardScale: CGFloat = 1) -> CGFloat {
+        ((edge.isVertical ? cardWidth : maxCardHeight) + tailLength + tailGap) * cardScale
     }
 }

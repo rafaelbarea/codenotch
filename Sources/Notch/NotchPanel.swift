@@ -82,6 +82,9 @@ final class NotchPanel: NSPanel {
         isReleasedWhenClosed = false
     }
 
-    override var canBecomeKey: Bool { false }
+    /// Set while the tasks card is up: its text fields need the keyboard,
+    /// which a panel that can never be key would never hand them.
+    var allowsKeyboard = false
+    override var canBecomeKey: Bool { allowsKeyboard }
     override var canBecomeMain: Bool { false }
 }

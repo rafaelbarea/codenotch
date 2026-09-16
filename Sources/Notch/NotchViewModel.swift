@@ -466,7 +466,7 @@ final class NotchViewModel: ObservableObject {
     /// Where the tooltip's tail tip sits, measured in from the bezel: just off
     /// the inner face of a shape that the extension has made deeper.
     var tooltipInset: CGFloat {
-        notchDrawnDepth + NotchLayout.tailGap
+        notchDrawnDepth + NotchLayout.tailGap * cardScale
     }
 
     /// How deep the notch body reaches on screen — the design-frame depth at
@@ -548,7 +548,27 @@ final class NotchViewModel: ObservableObject {
     func slack(cellCount: Int) -> CGFloat {
         NotchLayout.slack(for: edge,
                           maxCardHeight: maxCardHeight(cellCount: cellCount),
-                          notchScale: sizeScale)
+                          notchScale: sizeScale, cardScale: cardScale(cellCount: cellCount))
+    }
+
+    /// The hover card follows the notch's size setting, as far as the screen
+    /// lets it: a card that would run off a small display at `large` is drawn
+    /// as big as still fits, so the setting scales the reading without ever
+    /// cropping it.
+    var cardScale: CGFloat { cardScale(cellCount: snapshots.count) }
+
+    func cardScale(cellCount: Int) -> CGFloat {
+        let card = maxCardHeight(cellCount: cellCount)
+        guard card > 0, screenSize.height > 0 else { return sizeScale }
+        let fit: CGFloat
+        if edge.isVertical {
+            let room = screenSize.height - shapeLength(cellCount: cellCount) * sizeScale - 2 * NotchLayout.cardCorner
+            fit = room / card
+        } else {
+            let room = screenSize.height - (contentInset + NotchLayout.bodyDepth(for: edge)) * sizeScale
+            fit = room / (card + NotchLayout.tailLength + NotchLayout.tailGap)
+        }
+        return max(min(sizeScale, fit), 0.5)
     }
 
     /// How many sessions a tooltip may list here before it has to summarise
@@ -742,12 +762,13 @@ final class NotchViewModel: ObservableObject {
     /// panel had shrunk around a card that had not.
     func panelSize(cellCount: Int) -> CGSize {
         let card = maxCardHeight(cellCount: cellCount)
+        let cardScale = cardScale(cellCount: cellCount)
         return NotchPlacement.panelSize(
             edge: edge,
             length: shapeLength(cellCount: cellCount) * sizeScale
-                + 2 * NotchLayout.slack(for: edge, maxCardHeight: card, notchScale: sizeScale),
+                + 2 * NotchLayout.slack(for: edge, maxCardHeight: card, notchScale: sizeScale, cardScale: cardScale),
             depth: (contentInset + NotchLayout.bodyDepth(for: edge)) * sizeScale
-                + NotchLayout.tooltipDepth(for: edge, maxCardHeight: card)
+                + NotchLayout.tooltipDepth(for: edge, maxCardHeight: card, cardScale: cardScale)
         )
     }
 }

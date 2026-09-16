@@ -1433,20 +1433,26 @@ final class NotchSizeTests: XCTestCase {
         }
     }
 
-    /// The point of this whole split: the tooltip is drawn at one size whatever
-    /// the notch is set to. Its text has a legible size of its own, and
-    /// shrinking the reading you opened the notch to read is the opposite of
-    /// the point.
-    ///
-    /// Read off the panel, because that is where a scaled card would show: the
-    /// panel's depth is the drawn notch plus the card's own room, so the whole
-    /// difference between two sizes has to be the notch's share alone.
-    func testTheTooltipKeepsItsOwnSizeWhateverTheNotchIs() {
-        let large = model(scale: 1.25)
-        let medium = model(scale: 1)
+    /// The tooltip follows the notch's size setting: the panel's depth is the
+    /// drawn notch plus the card's room, and both grow by the same quarter.
+    func testTheTooltipFollowsTheNotchSize() {
+        let large = model(scale: 1.25, height: 2000)
+        let medium = model(scale: 1, height: 2000)
         let notchShare = medium.contentInset + NotchLayout.bodyDepth(for: .right)
+        let cardShare = NotchLayout.tooltipDepth(for: .right, maxCardHeight: medium.maxCardHeight(cellCount: 3))
 
         XCTAssertEqual(large.panelSize(cellCount: 3).width - medium.panelSize(cellCount: 3).width,
-                       notchShare * 0.25, accuracy: 0.001)
+                       (notchShare + cardShare) * 0.25, accuracy: 0.001)
+    }
+
+    /// Unless the screen has no room for that: then the card is drawn as big
+    /// as still fits, and the panel never runs off the display.
+    func testTheTooltipGivesUpScaleBeforeItRunsOffTheScreen() {
+        for edge in NotchEdge.allCases {
+            let short = model(scale: 1.25, edge: edge, height: 700)
+            short.hoveredIndex = 0
+            XCTAssertLessThanOrEqual(short.panelSize(cellCount: 3).height, 700.1, "\(edge)")
+            XCTAssertLessThanOrEqual(short.cardScale, 1.25)
+        }
     }
 }

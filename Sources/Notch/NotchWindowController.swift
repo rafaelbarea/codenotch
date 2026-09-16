@@ -49,7 +49,7 @@ final class NotchWindowController {
 
     /// Hover in is quick; hover out waits, because the pointer has to cross the
     /// gap between the notch and the card without the card vanishing under it.
-    private let hoverGrace: TimeInterval = 0.25
+    private let hoverGrace: TimeInterval = 0.4
     /// Longer than the hover grace: folding shut is a bigger movement than
     /// dismissing a tooltip, and doing it the instant the pointer strays feels
     /// twitchy rather than responsive.
@@ -184,6 +184,20 @@ final class NotchWindowController {
             MainActor.assumeIsolated { self?.relocate() }
         }
         .store(in: &cancellables)
+
+        // While a tasks field is being typed in the card holds still; once it
+        // is done the pointer decides again, and the keyboard goes back.
+        TodoStore.shared.$editing
+            .removeDuplicates()
+            .receive(on: RunLoop.main)
+            .sink { [weak self] editing in
+                MainActor.assumeIsolated {
+                    guard let self, !editing else { return }
+                    self.panel?.makeFirstResponder(nil)
+                    self.cursorMoved()
+                }
+            }
+            .store(in: &cancellables)
 
         NSWorkspace.shared.notificationCenter.publisher(
             for: NSWorkspace.activeSpaceDidChangeNotification
@@ -497,16 +511,20 @@ final class NotchWindowController {
         )
         // Across the stack the region is the card, its tail, and the gap the
         // pointer has to cross. Along it, the card's own extent.
-        let cardAcross = model.edge.isVertical ? NotchLayout.cardWidth : cardHeight
-        let cardAlong = model.edge.isVertical ? cardHeight : NotchLayout.cardWidth
+        let scale = model.cardScale
+        let cardAcross = (model.edge.isVertical ? NotchLayout.cardWidth : cardHeight) * scale
+        let cardAlong = (model.edge.isVertical ? cardHeight : NotchLayout.cardWidth) * scale
         let centre = model.tooltipAlong(index: index, length: cardAlong)
+        // A little more than the card on every side: the pointer that brushes
+        // the edge while reading a row must not fold the card.
+        let margin = NotchLayout.cardCorner
         return placement.rect(
-            along: centre - cardAlong / 2,
-            // The card's own extent does not scale, and it begins where the
-            // drawn notch ends.
+            along: centre - cardAlong / 2 - margin,
+            // The card begins where the drawn notch ends and is drawn at the
+            // notch's size.
             across: model.notchDrawnDepth,
-            length: cardAlong,
-            depth: NotchLayout.tailGap + NotchLayout.tailLength + cardAcross
+            length: cardAlong + 2 * margin,
+            depth: (NotchLayout.tailGap + NotchLayout.tailLength) * scale + cardAcross + margin
         )
     }
 
@@ -586,6 +604,8 @@ final class NotchWindowController {
     // drive the event fold through handleActiveSpaceOrAppChange.
     func cursorMoved() {
         guard let panel, !isOptionDragging else { return }
+        // Typing in the tasks card: the pointer's wanderings do not fold it.
+        if TodoStore.shared.editing { return }
         let local = localCursor(in: panel.frame)
         let overTooltip = model.hoveredIndex
             .flatMap(tooltipRect(index:))
@@ -619,6 +639,8 @@ final class NotchWindowController {
                 || overHandle || overMove
         )
 
+        panel.allowsKeyboard = model.isExpanded
+            && target.map { model.snapshots.indices.contains($0) && model.snapshots[$0].id == TasksProvider.providerID } == true
         if let target {
             clearHoverWork?.cancel()
             clearHoverWork = nil

@@ -456,6 +456,9 @@ final class NotchFleet {
         controller.model.now = Date()
         controller.apply(visibility)
         controller.show()
+        // Again once the panel exists: "Always show" must open this panel as
+        // well, not only the one that was there when the setting was chosen.
+        controller.apply(visibility)
         return controller
     }
 }
