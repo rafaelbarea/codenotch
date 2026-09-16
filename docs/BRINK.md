@@ -19,9 +19,14 @@ Everything under `Sources/Brink/`, plus small hooks in `AppDelegate`, `StatusIte
 - **Tasks ring** (switch on in Settings → Accounts): today's done ÷ total from Things 3 or Reminders;
   hover card with Today / Tomorrow / one list, complete, add ("@" picks the project), open in the
   app, focus timer per task or free. While a task is in focus the ring is the timer.
-- **Focus window** (menu → Focus…, ⌘F): day / week / month, per project, editable blocks.
+- **Focus window** (menu → Focus…, ⌘F, or Settings → Focus): day / week / month, per project, editable blocks.
 - **New session…** (⌘N): runs a command (default `claude`) in a new window of your terminal.
-- **Settings → Brink**: billing per account, market data, task source, focus block, launcher.
+- **Settings → Costs & Tasks**: billing per account, market data, task source, focus block, launcher.
+  Activity and Focus are sidebar sections of the same window.
+- **Hover card size**: the card follows Appearance → Notch size (small / medium / large), capped so it
+  never runs off the screen. The tasks card takes the keyboard: type a task or a free focus in place.
+- **Displays**: Appearance → Displays: All displays puts one notch on every screen, each honouring the
+  visibility setting (always show / on hover / hidden); switching needs no restart.
 - **Shell export**: `…/brink/accounts.json` and `~/.config/brink/aliases.zsh` so a shell launcher can
   list the accounts.
 
