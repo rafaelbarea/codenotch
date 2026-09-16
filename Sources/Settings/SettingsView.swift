@@ -542,13 +542,13 @@ struct SettingsView: View {
                 Text(section.title)
                     .font(.system(size: 22, weight: .bold))
                 Spacer(minLength: 0)
-                if section == .accounts, !notConnected.isEmpty {
+                if section == .accounts, !addableAccounts.isEmpty {
                     addSourceMenu
                         .padding(.trailing, SettingsView.paneGutter)
                 }
             }
             .frame(height: SettingsView.headerHeight)
-            .padding(.top, 18)
+            .padding(.top, 36)
             .padding(.leading, isSidebarVisible ? SettingsView.paneGutter : 12)
             .frame(maxWidth: SettingsChrome.measure + 2 * SettingsChrome.gutter, alignment: .leading)
             .frame(maxWidth: .infinity)
@@ -600,7 +600,7 @@ struct SettingsView: View {
     /// to make, not a list to read past.
     private var addSourceMenu: some View {
         Menu {
-            ForEach(notConnected) { account in
+            ForEach(addableAccounts) { account in
                 Button {
                     addSource(account.id)
                 } label: {
@@ -627,23 +627,26 @@ struct SettingsView: View {
                 SettingsGroup { SettingsCell { setupNote } }
             }
             VStack(alignment: .leading, spacing: 0) {
-                ForEach(Array(connected.enumerated()), id: \.element.id) { index, account in
+                let rows = listedAccounts
+                ForEach(Array(rows.enumerated()), id: \.element.id) { index, account in
+                    let isOn = preferences.isConnected(account.id)
                     AccountRow(provider: account, preferences: preferences,
                                signOut: signOut, signIn: signIn,
                                switchAccount: switchAccount, retry: retry,
                                refresh: { usageStore?.reevaluate(providerID: $0) },
-                               isOrderable: true,
+                               isOrderable: isOn,
                                drag: drag,
                                cursorRefresh: cursorRefresh,
                                onDrop: { cursorRefresh += 1 },
                                takePlaceOf: { move($0, onto: account.id) },
-                               didConnect: { connect(account.id) })
+                               didConnect: { setListed(account.id, true); connect(account.id) },
+                               onRemove: isOn ? nil : { setListed(account.id, false) })
                         .padding(.vertical, 12)
-                    if index < connected.count - 1 {
+                    if index < rows.count - 1 {
                         Divider().padding(.leading, 60)
                     }
                 }
-                if connected.isEmpty {
+                if rows.isEmpty {
                     Text(L10n.t("Nothing is connected, so the notch has no rings to draw."))
                         .font(SettingsChrome.bodyFont)
                         .foregroundStyle(.secondary)
@@ -1024,6 +1027,35 @@ struct SettingsView: View {
         ringAccounts.filter { !preferences.isConnected($0.id) }
     }
 
+    /// Sources kept on the list while switched off. A ring switched off is
+    /// still yours; only Remove sends it back to the Add menu. Stored as a
+    /// joined string so `AppStorage` can hold it; empty means "never set",
+    /// which lists whatever is connected.
+    @AppStorage("brinkListedSources") private var listedSourcesRaw = ""
+
+    private var listedSources: Set<String> {
+        Set(listedSourcesRaw.split(separator: ",").map(String.init))
+    }
+
+    private func setListed(_ id: String, _ listed: Bool) {
+        var set = listedSources
+        // The first change seeds the set with what is on, so nothing vanishes.
+        if listedSourcesRaw.isEmpty { set.formUnion(connected.map(\.id)) }
+        if listed { set.insert(id) } else { set.remove(id) }
+        listedSourcesRaw = set.sorted().joined(separator: ",")
+    }
+
+    /// What the Accounts list shows: everything on, plus what was added and
+    /// later switched off.
+    private var listedAccounts: [ProviderSummary] {
+        connected + notConnected.filter { listedSources.contains($0.id) }
+    }
+
+    /// What the Add menu offers: whatever is neither on nor kept.
+    private var addableAccounts: [ProviderSummary] {
+        notConnected.filter { !listedSources.contains($0.id) }
+    }
+
     /// Nothing to read from anywhere. On a first launch that is the normal
     /// state, and it is the only moment the sheet has something to explain.
     private var needsSetup: Bool {
@@ -1059,6 +1091,7 @@ struct SettingsView: View {
     /// The menu's version of switching a row on: connect, place it, and open
     /// wherever it signs in.
     private func addSource(_ providerID: String) {
+        setListed(providerID, true)
         preferences.setConnected(true, for: providerID)
         connect(providerID)
         if let summary = accounts.first(where: { $0.id == providerID }), summary.localModel == nil {
@@ -1278,6 +1311,9 @@ private struct AccountRow: View {
     /// Called after this row is switched on, so the list can decide where it
     /// now belongs. The row itself cannot: it can see only itself.
     let didConnect: () -> Void
+    /// Takes a switched-off source off the list, back to the Add menu. Nil
+    /// while it is on: a ring in the notch is not something to delete.
+    var onRemove: (() -> Void)? = nil
 
     @Environment(\.codenotchReduceTransparency) private var reduceTransparency
 
@@ -1387,6 +1423,12 @@ private struct AccountRow: View {
                 // Mac, in a popover: the account is the subject of this row,
                 // so what it costs belongs here and not in another pane.
                 BrinkAccountEditButton(providerID: provider.id)
+
+                if let onRemove {
+                    SettingsIconButton(systemName: "trash",
+                                       help: L10n.t("Remove \(provider.name) from the list. It goes back to the Add menu."),
+                                       action: onRemove)
+                }
 
                 // Prefers the app that owns the account, and falls back to the
                 // web page only when there is no app to open.

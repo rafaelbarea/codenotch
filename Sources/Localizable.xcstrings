@@ -24709,6 +24709,17 @@
           }
         }
       }
+    },
+    "Remove %@ from the list. It goes back to the Add menu.": {
+      "extractionState": "manual",
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Tirar %@ da lista. Volta para o menu Adicionar."
+          }
+        }
+      }
     }
   },
   "version": "1.0"
