@@ -1169,7 +1169,21 @@ final class NotchWindowController {
     }
 
     /// Clicking the open notch pins it, so it stays put while you read it.
+    /// A click on the open notch that lands on no ring: pin it for now, or
+    /// let it go again. The pin is for this sitting only; the stored choice
+    /// ("Always show", "Show on hover") is changed by the context menu's
+    /// Keep open and by Settings, never by a click that could as easily have
+    /// been aimed at a ring. Before this, one stray click on the body quietly
+    /// switched an always-shown notch to hover-only, and it stayed that way
+    /// across restarts.
     func togglePinned() {
+        togglePinned(persist: false)
+    }
+
+    func togglePinned(persist: Bool) {
+        // Nothing to pin on a notch the setting already holds open, and a
+        // click must not be the thing that lets it go.
+        if !persist, visibility == .alwaysShow { return }
         model.isPinned.toggle()
         if model.isPinned {
             foldWork?.cancel()
@@ -1177,7 +1191,7 @@ final class NotchWindowController {
             withAnimation(NotchMotion.unfold) { model.isExpanded = true }
         }
         updateInteractiveRects()
-        onToggleKeepOpen?()
+        if persist { onToggleKeepOpen?() }
     }
 
     func cellIndex(along: CGFloat) -> Int? {
@@ -1266,7 +1280,7 @@ final class NotchWindowController {
     private lazy var menuActions = MenuActions(
         refresh: { [weak self] in self?.onRefresh?() },
         signIn: { [weak self] index in self?.signInItems[safe: index]?.action() },
-        togglePinned: { [weak self] in self?.togglePinned() },
+        togglePinned: { [weak self] in self?.togglePinned(persist: true) },
         openSettings: { [weak self] in self?.onOpenSettings?() }
     )
 }

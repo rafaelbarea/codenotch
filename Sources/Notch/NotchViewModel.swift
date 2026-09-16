@@ -87,7 +87,15 @@ final class NotchViewModel: ObservableObject {
     }
 
     /// Whether the notch is open or folded away to its pill.
-    @Published var isExpanded = false
+    @Published var isExpanded = false {
+        didSet {
+            guard oldValue != isExpanded else { return }
+            let stack = Thread.callStackSymbols.dropFirst(1).prefix(4)
+                .map { $0.split(separator: " ", omittingEmptySubsequences: true).dropFirst(3).joined(separator: " ") }
+                .joined(separator: " <- ")
+            Log.usage.info("notch expanded=\(self.isExpanded, privacy: .public) alwaysOn=\(self.isAlwaysOn, privacy: .public) via \(stack, privacy: .public)")
+        }
+    }
     /// Clicked open, so it stays open until clicked shut again. A gesture,
     /// not a setting: it lasts as long as this session of looking at it.
     @Published var isPinned = false
@@ -226,7 +234,32 @@ final class NotchViewModel: ObservableObject {
 
     private var cancellables = Set<AnyCancellable>()
 
+    /// Geometry answered once per state. `cursorMoved` runs on every mouse
+    /// event and asks for the panel size, the slack and the card scale, each
+    /// of which asks the others; unmemoised that chain took most of the main
+    /// thread and left the notch reacting seconds late. Cleared whenever this
+    /// model, the tasks or the focus change.
+    private var geometryCache: [String: Any] = [:]
+
+    private func memo<T>(_ key: String, _ compute: () -> T) -> T {
+        if let hit = geometryCache[key] as? T { return hit }
+        let value = compute()
+        geometryCache[key] = value
+        return value
+    }
+
+    func invalidateGeometry() { geometryCache.removeAll() }
+
     init() {
+        objectWillChange
+            .sink { [weak self] _ in MainActor.assumeIsolated { self?.geometryCache.removeAll() } }
+            .store(in: &cancellables)
+        TodoStore.shared.objectWillChange
+            .sink { [weak self] _ in MainActor.assumeIsolated { self?.geometryCache.removeAll() } }
+            .store(in: &cancellables)
+        FocusStore.shared.objectWillChange
+            .sink { [weak self] _ in MainActor.assumeIsolated { self?.geometryCache.removeAll() } }
+            .store(in: &cancellables)
         // Language change leaves snapshots untouched; tick `now` so copy
         // already on screen is redrawn against the new catalog.
         NotificationCenter.default.publisher(for: L10n.didChange)
@@ -496,7 +529,8 @@ final class NotchViewModel: ObservableObject {
     var cellSpacing: CGFloat { cellSpacing(cellCount: snapshots.count) }
     var cellPitch: CGFloat { NotchLayout.cellAlong(for: edge) + cellSpacing }
 
-    private func cellSpacing(cellCount: Int) -> CGFloat {
+    private func cellSpacing(cellCount: Int) -> CGFloat { memo("spacing\(cellCount)") { computeCellSpacing(cellCount: cellCount) } }
+    private func computeCellSpacing(cellCount: Int) -> CGFloat {
         guard edge.isVertical, screenSize.height > 0, cellCount > 1 else {
             return NotchLayout.cellSpacing
         }
@@ -545,7 +579,8 @@ final class NotchViewModel: ObservableObject {
     /// Room at each end of the stack, for this edge.
     var slack: CGFloat { slack(cellCount: snapshots.count) }
 
-    func slack(cellCount: Int) -> CGFloat {
+    func slack(cellCount: Int) -> CGFloat { memo("slack\(cellCount)") { computeSlack(cellCount: cellCount) } }
+    private func computeSlack(cellCount: Int) -> CGFloat {
         let full = NotchLayout.slack(for: edge,
                                      maxCardHeight: maxCardHeight(cellCount: cellCount),
                                      notchScale: sizeScale, cardScale: cardScale(cellCount: cellCount))
@@ -566,7 +601,8 @@ final class NotchViewModel: ObservableObject {
     /// cropping it.
     var cardScale: CGFloat { cardScale(cellCount: snapshots.count) }
 
-    func cardScale(cellCount: Int) -> CGFloat {
+    func cardScale(cellCount: Int) -> CGFloat { memo("cardScale\(cellCount)") { computeCardScale(cellCount: cellCount) } }
+    private func computeCardScale(cellCount: Int) -> CGFloat {
         let card = maxCardHeight(cellCount: cellCount)
         guard card > 0, screenSize.height > 0 else { return sizeScale }
         let fit: CGFloat
@@ -579,12 +615,15 @@ final class NotchViewModel: ObservableObject {
             let room = screenSize.height - (contentInset + NotchLayout.bodyDepth(for: edge)) * sizeScale
             fit = room / (card + NotchLayout.tailLength + NotchLayout.tailGap)
         }
-        return max(min(sizeScale * Self.cardScaleBoost, fit), 0.5)
+        return max(min(Self.cardBase(for: sizeScale), fit), 0.5)
     }
 
     /// The card as upstream drew it is the small setting; medium and large
-    /// grow it by the same steps as the notch.
-    static let cardScaleBoost: CGFloat = 1.35
+    /// grow it in bigger steps than the notch, since the card is read and the
+    /// notch is glanced at: small 1.0, medium 1.45, large 2.0.
+    static func cardBase(for sizeScale: CGFloat) -> CGFloat {
+        1.0 + max(0, sizeScale - NotchSize.small.scale) * 2.25
+    }
     /// Room kept for the menu bar when a side-edge card is sized to the screen.
     static let cardScreenMargin: CGFloat = 44
 
@@ -604,7 +643,8 @@ final class NotchViewModel: ObservableObject {
         snapshots.contains { $0.resetCredits != nil }
     }
 
-    func sessionCap(cellCount: Int) -> Int {
+    func sessionCap(cellCount: Int) -> Int { memo("sessionCap\(cellCount)") { computeSessionCap(cellCount: cellCount) } }
+    private func computeSessionCap(cellCount: Int) -> Int {
         guard screenSize != .zero else { return NotchLayout.defaultSessionCap }
         return NotchLayout.sessionsFitting(cardBudget: cardBudget(cellCount: cellCount),
                                            windowCount: NotchLayout.maxWindowCount,
@@ -628,9 +668,11 @@ final class NotchViewModel: ObservableObject {
         guard wanted > 0, !solvingBrinkRows else { return 0 }
         guard screenSize != .zero else { return wanted }
         solvingBrinkRows = true
-        defer { solvingBrinkRows = false; brinkRowPins[id] = nil }
+        defer { solvingBrinkRows = false; brinkRowPins[id] = nil; geometryCache.removeAll() }
         for n in stride(from: wanted, through: 0, by: -1) {
             brinkRowPins[id] = n
+            // Every pinned candidate is a different geometry.
+            geometryCache.removeAll()
             let size = panelSize(cellCount: snapshots.count)
             if size.height <= screenSize.height && size.width <= screenSize.width { return n }
         }
@@ -638,17 +680,18 @@ final class NotchViewModel: ObservableObject {
     }
 
     func brinkCostRows(for snapshot: ProviderSnapshot) -> Int {
-        brinkRowsFitting(id: snapshot.id, wanted: BrinkCostSection.rowCount(for: snapshot))
+        memo("costRows\(snapshot.id)") { brinkRowsFitting(id: snapshot.id, wanted: BrinkCostSection.rowCount(for: snapshot)) }
     }
 
     /// Task rows the tasks card may list on this screen.
     func brinkTaskRows() -> Int {
         if let pinned = brinkRowPins[TasksProvider.providerID] { return pinned }
         guard !solvingBrinkRows, screenSize != .zero else { return solvingBrinkRows ? 1 : TasksCard.maxRows }
-        return max(1, brinkRowsFitting(id: TasksProvider.providerID, wanted: TasksCard.maxRows))
+        return memo("taskRows") { max(1, brinkRowsFitting(id: TasksProvider.providerID, wanted: TasksCard.maxRows)) }
     }
 
-    private func contentCardHeight(sessionCap: Int) -> CGFloat {
+    private func contentCardHeight(sessionCap: Int) -> CGFloat { memo("content\(sessionCap)") { computeContentCardHeight(sessionCap: sessionCap) } }
+    private func computeContentCardHeight(sessionCap: Int) -> CGFloat {
         snapshots.map { snapshot in
             if snapshot.id == TasksProvider.providerID { return TasksCard.height(rows: brinkTaskRows()) }
             return NotchLayout.cardHeight(windowCount: snapshot.windows.count,
@@ -671,7 +714,8 @@ final class NotchViewModel: ObservableObject {
         }.max() ?? 0
     }
 
-    func maxCardHeight(cellCount: Int) -> CGFloat {
+    func maxCardHeight(cellCount: Int) -> CGFloat { memo("maxCard\(cellCount)") { computeMaxCardHeight(cellCount: cellCount) } }
+    private func computeMaxCardHeight(cellCount: Int) -> CGFloat {
         let cap = sessionCap(cellCount: cellCount)
         return snapshots.isEmpty
             ? NotchLayout.maxCardHeight(sessionCap: cap, hasTokenUsage: hasTokenUsage, hasPlan: hasPlan,
@@ -760,7 +804,8 @@ final class NotchViewModel: ObservableObject {
     /// a change in the provider list still sees the *old* array if it reads the
     /// model back. Taking the count as an argument is the only way to be sure
     /// the panel is sized for the list that caused the change.
-    func shapeLength(cellCount: Int) -> CGFloat {
+    func shapeLength(cellCount: Int) -> CGFloat { memo("shape\(cellCount)") { computeShapeLength(cellCount: cellCount) } }
+    private func computeShapeLength(cellCount: Int) -> CGFloat {
         NotchLayout.shapeLength(cellCount: cellCount,
                                 edge: edge, flare: flare,
                                 spacing: cellSpacing(cellCount: cellCount))
@@ -777,7 +822,8 @@ final class NotchViewModel: ObservableObject {
     /// So the notch's share scales and the card's share does not. Scaling the
     /// whole panel instead left the card cropped at the small end, where the
     /// panel had shrunk around a card that had not.
-    func panelSize(cellCount: Int) -> CGSize {
+    func panelSize(cellCount: Int) -> CGSize { memo("panel\(cellCount)") { computePanelSize(cellCount: cellCount) } }
+    private func computePanelSize(cellCount: Int) -> CGSize {
         let card = maxCardHeight(cellCount: cellCount)
         let cardScale = cardScale(cellCount: cellCount)
         return NotchPlacement.panelSize(

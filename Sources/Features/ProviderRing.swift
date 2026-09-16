@@ -264,9 +264,14 @@ struct ProviderCell: View {
     /// For the reset countdown under the percent.
     var now: Date = Date()
 
+    /// A running focus ticks every second, straight from its store, rather
+    /// than waiting for the next provider poll.
+    @ObservedObject private var focus = FocusStore.shared
+
     /// A dash, not "0%": nothing read is not the same as nothing used.
     private var readingText: String {
-        snapshot.hasReading ? snapshot.headlineText : "—"
+        if snapshot.headlineID == "focus", focus.isActive { return FocusStore.clock(focus.elapsed) }
+        return snapshot.hasReading ? snapshot.headlineText : "—"
     }
 
     var body: some View {

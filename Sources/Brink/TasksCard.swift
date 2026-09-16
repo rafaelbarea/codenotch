@@ -59,7 +59,8 @@ struct TasksCard: View {
                 .padding(.top, NotchLayout.sessionRowGap)
             }
         }
-        .padding(NotchLayout.cardPadding)
+        // The shared card chrome already pads the frame's margin; the height
+        // formula counts that margin once.
         .frame(maxWidth: .infinity, alignment: .topLeading)
         .onAppear { store.refresh() }
     }
