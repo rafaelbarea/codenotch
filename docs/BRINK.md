@@ -23,8 +23,13 @@ Everything under `Sources/Brink/`, plus small hooks in `AppDelegate`, `StatusIte
 - **New session…** (⌘N): runs a command (default `claude`) in a new window of your terminal.
 - **Settings → Costs & Tasks**: billing per account, market data, task source, focus block, launcher.
   Activity and Focus are sidebar sections of the same window.
-- **Hover card size**: the card follows Appearance → Notch size (small / medium / large), capped so it
-  never runs off the screen. The tasks card takes the keyboard: type a task or a free focus in place.
+- **Hover card size**: the card follows Appearance → Notch size (small keeps upstream's card, medium and
+  large grow it), capped so it never runs off the screen. The tasks card takes the keyboard: type a task
+  or a free focus in place.
+- **Under each ring**: the percent, then how long until that limit resets ("4h 25m", "2d 3h"). A
+  running focus shows its clock instead of a percent, in violet, with a play (or pause) glyph.
+- **Right-click on the notch**: New session…, Activity…, Focus… (both open as Settings sections) and
+  Settings…. Settings is resizable.
 - **Displays**: Appearance → Displays: All displays puts one notch on every screen, each honouring the
   visibility setting (always show / on hover / hidden); switching needs no restart.
 - **Shell export**: `…/brink/accounts.json` and `~/.config/brink/aliases.zsh` so a shell launcher can

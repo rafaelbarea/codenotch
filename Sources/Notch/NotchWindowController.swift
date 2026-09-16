@@ -1242,6 +1242,14 @@ final class NotchWindowController {
             menu.addItem(item)
         }
         menu.addItem(.separator())
+        let settings = NSMenuItem(
+            title: L10n.t("Settings…"),
+            action: #selector(MenuActions.openSettings(_:)),
+            keyEquivalent: ","
+        )
+        settings.target = menuActions
+        settings.isEnabled = true
+        menu.addItem(settings)
         menu.addItem(
             withTitle: L10n.t("Quit Codenotch"),
             action: #selector(NSApplication.terminate(_:)),
@@ -1253,7 +1261,8 @@ final class NotchWindowController {
     private lazy var menuActions = MenuActions(
         refresh: { [weak self] in self?.onRefresh?() },
         signIn: { [weak self] index in self?.signInItems[safe: index]?.action() },
-        togglePinned: { [weak self] in self?.togglePinned() }
+        togglePinned: { [weak self] in self?.togglePinned() },
+        openSettings: { [weak self] in self?.onOpenSettings?() }
     )
 }
 
@@ -1264,18 +1273,22 @@ final class MenuActions: NSObject {
     private let refresh: () -> Void
     private let signIn: (Int) -> Void
     private let pin: () -> Void
+    private let settings: () -> Void
 
     init(
         refresh: @escaping () -> Void,
         signIn: @escaping (Int) -> Void,
-        togglePinned: @escaping () -> Void
+        togglePinned: @escaping () -> Void,
+        openSettings: @escaping () -> Void = {}
     ) {
         self.refresh = refresh
         self.signIn = signIn
         self.pin = togglePinned
+        self.settings = openSettings
     }
 
     @objc func refreshNow(_ sender: Any?) { refresh() }
+    @objc func openSettings(_ sender: Any?) { settings() }
     @objc func togglePinned(_ sender: Any?) { pin() }
 
     @objc func signIn(_ sender: Any?) {

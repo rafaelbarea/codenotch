@@ -25,7 +25,8 @@ final class BrinkTests: XCTestCase {
     @MainActor func testTasksProviderSnapshotHasATodayWindow() async throws {
         let snapshot = try await TasksProvider().fetchSnapshot()
         XCTAssertEqual(snapshot.id, "tasks")
-        XCTAssertEqual(snapshot.glyph, .tasks)
+        let focus = FocusStore.shared
+        XCTAssertEqual(snapshot.glyph, focus.isActive ? (focus.isRunning ? .focus : .focusPaused) : .tasks)
         XCTAssertNotNil(snapshot.windows.first { $0.id == "today" })
         XCTAssertEqual(snapshot.headlineID, FocusStore.shared.isActive ? "focus" : "today")
     }

@@ -9,7 +9,8 @@ enum FullScreenDetector {
         screenBounds: CGRect,
         frontmostPID: pid_t,
         windows: [(pid: pid_t, layer: Int, bounds: CGRect)],
-        safeAreaTopInset: CGFloat = 0
+        safeAreaTopInset: CGFloat = 0,
+        menuBarVisible: Bool = false
     ) -> Bool {
         for window in windows {
             guard window.pid == frontmostPID, window.layer == 0 else { continue }
@@ -36,11 +37,28 @@ enum FullScreenDetector {
                                 b.origin.y <= screenBounds.origin.y + maxTopInset
             let occupiesMainArea = b.height >= screenBounds.height - (maxTopInset + 10)
 
-            if reachesBottom && startsNearTop && occupiesMainArea {
+            // With the menu bar still showing on this display that shape is a
+            // maximised window, not a full-screen Space: clicking between two
+            // displays must not fold the notch on the one with the big window.
+            if !menuBarVisible && reachesBottom && startsNearTop && occupiesMainArea {
                 return true
             }
         }
         return false
+    }
+
+    /// The menu bar is a window of its own at level 24, as wide as the display
+    /// and a few dozen points tall, sitting at its top. A full-screen Space
+    /// takes it off screen; a maximised window leaves it there.
+    static func isMenuBarVisible(on screenBounds: CGRect,
+                                 windows: [(pid: pid_t, layer: Int, bounds: CGRect)]) -> Bool {
+        windows.contains { window in
+            window.layer == 24
+                && abs(window.bounds.minX - screenBounds.minX) <= 4
+                && abs(window.bounds.width - screenBounds.width) <= 4
+                && abs(window.bounds.minY - screenBounds.minY) <= 4
+                && window.bounds.height <= 60
+        }
     }
 
     /// Queries WindowServer and NSWorkspace to determine if the frontmost app
@@ -84,7 +102,8 @@ enum FullScreenDetector {
                 screenBounds: cgScreenBounds,
                 frontmostPID: frontApp.processIdentifier,
                 windows: extractedWindows,
-                safeAreaTopInset: safeTop
+                safeAreaTopInset: safeTop,
+                menuBarVisible: isMenuBarVisible(on: cgScreenBounds, windows: extractedWindows)
             ) {
                 return true
             }

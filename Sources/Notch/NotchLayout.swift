@@ -39,7 +39,9 @@ enum NotchLayout {
     static let cornerRadius = Design.px(78.8)
     static let padTop       = Design.px(69.5)   // body top -> first ring
     static let padBottom    = Design.px(50.1)   // last label -> body bottom
-    static let cellSpacing  = Design.px(83.5)   // label bottom -> next ring top
+    /// Label bottom to the next ring top. The frame's 83.5px, less the reset
+    /// line that now sits in that gap, so the ring pitch stays the frame's.
+    static let cellSpacing  = Design.px(83.5) - resetLineGap - resetLineHeight
 
     // The resting pill. Not in the design frame — it is the notch folded away,
     // sized to read as a deliberate handle rather than a sliver of chrome.
@@ -229,8 +231,16 @@ enum NotchLayout {
         ceil(font.ascender - font.descender + font.leading)
     }
 
-    /// Ring plus its percent label.
-    static var cellExtent: CGFloat { ringDiameter + ringLabelGap + percentLineHeight }
+    /// The reset line under the percent: its line box and the gap above it.
+    static let resetLineHeight: CGFloat = lineHeight(
+        NSFont.systemFont(ofSize: Design.fontSize(capPixels: 16), weight: .medium)
+    )
+    static let resetLineGap = Design.px(6)
+
+    /// Ring, its percent label and the reset line under it.
+    static var cellExtent: CGFloat {
+        ringDiameter + ringLabelGap + percentLineHeight + resetLineGap + resetLineHeight
+    }
 
     /// What one cell claims along the stack.
     ///

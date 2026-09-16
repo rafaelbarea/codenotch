@@ -1442,7 +1442,8 @@ final class NotchSizeTests: XCTestCase {
         let cardShare = NotchLayout.tooltipDepth(for: .right, maxCardHeight: medium.maxCardHeight(cellCount: 3))
 
         XCTAssertEqual(large.panelSize(cellCount: 3).width - medium.panelSize(cellCount: 3).width,
-                       (notchShare + cardShare) * 0.25, accuracy: 0.001)
+                       notchShare * 0.25 + cardShare * (large.cardScale - medium.cardScale), accuracy: 0.001)
+        XCTAssertEqual(medium.cardScale, NotchViewModel.cardScaleBoost, accuracy: 0.001)
     }
 
     /// Unless the screen has no room for that: then the card is drawn as big
@@ -1452,7 +1453,7 @@ final class NotchSizeTests: XCTestCase {
             let short = model(scale: 1.25, edge: edge, height: 700)
             short.hoveredIndex = 0
             XCTAssertLessThanOrEqual(short.panelSize(cellCount: 3).height, 700.1, "\(edge)")
-            XCTAssertLessThanOrEqual(short.cardScale, 1.25)
+            XCTAssertLessThanOrEqual(short.cardScale, 1.25 * NotchViewModel.cardScaleBoost)
         }
     }
 }

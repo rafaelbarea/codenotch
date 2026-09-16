@@ -281,6 +281,12 @@ struct SettingsView: View {
         .onReceive(NotificationCenter.default.publisher(
             for: NSApplication.didChangeScreenParametersNotification
         )) { _ in displays = DisplayOption.connected }
+        .onReceive(NotificationCenter.default.publisher(for: SettingsView.openSection)) { note in
+            if let raw = note.userInfo?["section"] as? String,
+               let section = SettingsSection(rawValue: raw) {
+                selection = section
+            }
+        }
         .onReceive((usageStore?.$notchSnapshots.eraseToAnyPublisher()
                     ?? Empty<[ProviderSnapshot], Never>().eraseToAnyPublisher())
             .receive(on: RunLoop.main)) { _ in
@@ -1088,10 +1094,14 @@ struct SettingsView: View {
 
     /// The sidebar plus a detail pane wide enough for an account row's name,
     /// buttons and switch without crowding.
-    static let width: CGFloat = 840
+    static let width: CGFloat = 960
+    static let minWidth: CGFloat = 820
+    static let minHeight: CGFloat = 600
+    /// Posted with a "section" raw value to open the window on that section.
+    static let openSection = Notification.Name("CodenotchSettingsOpenSection")
     /// Each pane scrolls on its own now, so this no longer has to fit every
     /// section in the app at once — just a comfortable account list.
-    static let height: CGFloat = 660
+    static let height: CGFloat = 720
 
     /// The rows the notch actually draws, in the order it draws them.
     ///

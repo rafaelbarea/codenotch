@@ -344,7 +344,7 @@ final class MergedShapeTests: XCTestCase {
     func testTheTooltipClearsTheDeeperShape() {
         let m = model()
         XCTAssertEqual(
-            m.tooltipInset, m.contentInset + NotchLayout.bodyDepth(for: .top) + NotchLayout.tailGap,
+            m.tooltipInset, m.contentInset + NotchLayout.bodyDepth(for: .top) + NotchLayout.tailGap * m.cardScale,
             accuracy: 0.001
         )
     }

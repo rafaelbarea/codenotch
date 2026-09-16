@@ -146,6 +146,14 @@ final class SettingsWindowController: NSObject, NSWindowDelegate {
         show()
     }
 
+    /// Open the window on one section, named by its raw value ("activity",
+    /// "focus"…), the way a menu command that names a destination should.
+    func show(section: String) {
+        show()
+        NotificationCenter.default.post(name: SettingsView.openSection, object: nil,
+                                        userInfo: ["section": section])
+    }
+
     func show() {
         if let window {
             // Re-centered every time, not only at creation: a window is
@@ -168,7 +176,7 @@ final class SettingsWindowController: NSObject, NSWindowDelegate {
             // tall blank band once before, but that band was
             // `NavigationSplitView`'s own toolbar — the sidebar is a plain
             // `HStack` now, so there is no toolbar left to reserve for.
-            styleMask: [.titled, .closable, .fullSizeContentView],
+            styleMask: [.titled, .closable, .resizable, .fullSizeContentView],
             backing: .buffered,
             defer: false
         )
@@ -202,6 +210,7 @@ final class SettingsWindowController: NSObject, NSWindowDelegate {
                                    previewSessionLimitAlert: previewSessionLimitAlert,
                                    previewWeeklyLimitAlert: previewWeeklyLimitAlert)
         )
+        window.minSize = NSSize(width: SettingsView.minWidth, height: SettingsView.minHeight)
         window.center()
         window.isReleasedWhenClosed = false
         self.window = window

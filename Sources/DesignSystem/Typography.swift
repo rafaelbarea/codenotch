@@ -11,4 +11,7 @@ enum Typography {
 
     /// "Current session", "73% Used", "Resets in 51 min". Cap height 18px.
     static let cardBody = Font.system(size: Design.fontSize(capPixels: 18), weight: .regular)
+
+    /// "2h 10m" under the percent: how long until that limit resets. Cap height 16px.
+    static let resetLine = Font.system(size: Design.fontSize(capPixels: 16), weight: .medium)
 }

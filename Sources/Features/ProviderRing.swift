@@ -30,6 +30,9 @@ struct ProviderRing: View {
     var weeklyFraction: Double?
     /// Where the user asked for it, if at all.
     var weeklyRing: WeeklyRing = .off
+    /// A colour of the provider's own for the arc, when the reading is not a
+    /// share of a limit: a focus block runs violet whatever its progress.
+    var tint: Color? = nil
 
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
     @Environment(\.codenotchReduceTransparency) private var reduceTransparency
@@ -46,7 +49,9 @@ struct ProviderRing: View {
     private var sweep: CGFloat { CGFloat(min(max(usedFraction ?? 0, 0), 1)) }
     private var localSweep: CGFloat { CGFloat(min(max(localContextFraction ?? 1, 0), 1)) }
     private var primaryColor: Color {
-        isStale ? Palette.textSecondary : band.color(accent: accentColor)
+        if isStale { return Palette.textSecondary }
+        if let tint { return tint }
+        return band.color(accent: accentColor)
     }
 
     private var weeklyBand: UsageBand {
@@ -256,6 +261,8 @@ struct ProviderCell: View {
     var activity: ActivitySummary?
     var isRefreshing: Bool = false
     var weeklyRing: WeeklyRing = .off
+    /// For the reset countdown under the percent.
+    var now: Date = Date()
 
     /// A dash, not "0%": nothing read is not the same as nothing used.
     private var readingText: String {
@@ -274,8 +281,10 @@ struct ProviderCell: View {
                 localPerformance: snapshot.localPerformance,
                 localContextFraction: snapshot.localContextFraction,
                 weeklyFraction: snapshot.hasReading ? snapshot.weeklyFraction : nil,
-                weeklyRing: weeklyRing
+                weeklyRing: weeklyRing,
+                tint: snapshot.headlineID == "focus" ? BrinkColors.violet : nil
             )
+            VStack(spacing: NotchLayout.resetLineGap) {
             Text(readingText)
                 .font(Typography.percent)
                 .foregroundStyle(snapshot.showsLocalPerformance && snapshot.localPerformance == nil
@@ -289,10 +298,25 @@ struct ProviderCell: View {
                        height: NotchLayout.percentLineHeight)
                 .contentTransition(.numericText())
                 .animation(NotchMotion.reading, value: readingText)
+            Text(resetLineText)
+                .font(Typography.resetLine)
+                .foregroundStyle(Palette.textSecondary)
+                .lineLimit(1)
+                .fixedSize()
+                .frame(height: NotchLayout.resetLineHeight)
+                .contentTransition(.numericText())
+            }
         }
         .frame(height: NotchLayout.cellExtent)
         .accessibilityElement(children: .ignore)
         .accessibilityLabel(accessibilityText)
+    }
+
+    /// How long until the headline limit resets, or nothing when the reading
+    /// has no reset (a local model, the tasks ring).
+    private var resetLineText: String {
+        guard snapshot.localModel == nil, let resetsAt = snapshot.headline?.resetsAt else { return "" }
+        return BrinkResetLine.text(until: resetsAt, now: now)
     }
 
     /// Everything the cell says, as one sentence for VoiceOver and the tests.

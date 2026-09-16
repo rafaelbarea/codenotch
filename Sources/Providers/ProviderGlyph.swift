@@ -36,6 +36,8 @@ enum ProviderGlyph: String, Codable, Equatable {
     case lmstudio
     /// Brink's task ring: drawn from an SF Symbol, not a traced outline.
     case tasks
+    case focus
+    case focusPaused = "focus-paused"
 
     /// If an asset with this name is in the bundle it wins over the traced
     /// outline — drop a PDF/SVG export from Figma in and it is picked up.
@@ -71,7 +73,17 @@ enum ProviderGlyph: String, Codable, Equatable {
         case .third:  return 1.0
         case .ollamaLocal: return 0.98
         case .lmstudio: return 0.96
-        case .devin, .qwen, .gemma, .meta, .deepseek, .mistral, .tasks: return 1.0
+        case .devin, .qwen, .gemma, .meta, .deepseek, .mistral, .tasks, .focus, .focusPaused: return 1.0
+        }
+    }
+
+    /// Glyphs drawn from SF Symbols rather than an outline of their own.
+    var symbolName: String? {
+        switch self {
+        case .tasks: return "checklist"
+        case .focus: return "play.fill"
+        case .focusPaused: return "pause.fill"
+        default: return nil
         }
     }
 
@@ -84,7 +96,7 @@ enum ProviderGlyph: String, Codable, Equatable {
         case .antigravity: return GlyphOutline.antigravity
         case .geminiSpark: return GlyphOutline.gemini
         case .glm:    return GlyphOutline.glm
-        case .devin, .qwen, .gemma, .meta, .deepseek, .mistral, .lmstudio, .tasks: return []
+        case .devin, .qwen, .gemma, .meta, .deepseek, .mistral, .lmstudio, .tasks, .focus, .focusPaused: return []
         case .grok:   return GlyphOutline.grok
         case .opencode: return GlyphOutline.opencode
         case .commandcode: return GlyphOutline.commandcode
@@ -124,8 +136,8 @@ struct ProviderGlyphView: View {
 
     var body: some View {
         Group {
-            if glyph == .tasks {
-                Image(systemName: "checklist")
+            if let symbol = glyph.symbolName {
+                Image(systemName: symbol)
                     .resizable()
                     .scaledToFit()
                     .padding(size * 0.12)

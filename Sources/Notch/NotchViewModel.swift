@@ -568,8 +568,12 @@ final class NotchViewModel: ObservableObject {
             let room = screenSize.height - (contentInset + NotchLayout.bodyDepth(for: edge)) * sizeScale
             fit = room / (card + NotchLayout.tailLength + NotchLayout.tailGap)
         }
-        return max(min(sizeScale, fit), 0.5)
+        return max(min(sizeScale * Self.cardScaleBoost, fit), 0.5)
     }
+
+    /// The card as upstream drew it is the small setting; medium and large
+    /// grow it by the same steps as the notch.
+    static let cardScaleBoost: CGFloat = 1.25
 
     /// How many sessions a tooltip may list here before it has to summarise
     /// the rest — as many as this screen has room for.

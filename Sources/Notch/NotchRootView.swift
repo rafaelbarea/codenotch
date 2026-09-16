@@ -311,7 +311,8 @@ struct NotchRootView: View {
                 snapshot: snapshot,
                 activity: model.activity(for: snapshot),
                 isRefreshing: model.isRefreshing(snapshot),
-                weeklyRing: model.weeklyRing
+                weeklyRing: model.weeklyRing,
+                now: model.now
             )
                 // Pinned to what the cell claims along the stack, or the drawn
                 // rings stop lining up with the centres `ringCenter` hands to

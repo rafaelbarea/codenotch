@@ -28,7 +28,8 @@ struct TasksProvider: UsageProvider {
                                    usedFraction: total == 0 ? 0 : Double(done) / Double(total),
                                    remaining: open, used: done,
                                    usedText: "\(done)/\(total)"))
-        var snapshot = ProviderSnapshot(id: id, displayName: displayName, glyph: glyph,
+        let ringGlyph: ProviderGlyph = focus.isActive ? (focus.isRunning ? .focus : .focusPaused) : .tasks
+        var snapshot = ProviderSnapshot(id: id, displayName: displayName, glyph: ringGlyph,
                                         fidelity: .official, status: .ok, windows: windows)
         snapshot.headlineID = focus.isActive ? "focus" : "today"
         return snapshot

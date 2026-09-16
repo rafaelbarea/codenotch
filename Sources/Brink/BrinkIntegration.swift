@@ -12,6 +12,9 @@ enum Brink {
     private static var activityWindow: NSWindow?
     private static var focusWindow: NSWindow?
     private static weak var store: UsageStore?
+    /// Set by the app once Settings exists: Activity and Focus open there,
+    /// as sidebar sections, rather than in windows of their own.
+    static var openSettingsSection: ((String) -> Void)?
 
     static func attach(to store: UsageStore) {
         self.store = store
@@ -42,6 +45,7 @@ enum Brink {
     }
 
     static func showFocus() {
+        if let openSettingsSection { openSettingsSection("focus"); return }
         if focusWindow == nil {
             let w = NSWindow(contentRect: NSRect(x: 0, y: 0, width: 1100, height: 720),
                              styleMask: [.titled, .closable, .miniaturizable, .resizable],
@@ -58,6 +62,7 @@ enum Brink {
     }
 
     static func showActivity() {
+        if let openSettingsSection { openSettingsSection("activity"); return }
         if activityWindow == nil {
             let w = NSWindow(contentRect: NSRect(x: 0, y: 0, width: 1100, height: 720),
                              styleMask: [.titled, .closable, .miniaturizable, .resizable],
