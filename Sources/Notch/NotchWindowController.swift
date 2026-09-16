@@ -297,9 +297,16 @@ final class NotchWindowController {
     /// been assigned, which is the single-controller case `.mainDisplay`
     /// scope leaves it in.
     func currentScreen() -> NSScreen? {
-        if let assigned = assignedScreen,
-           NSScreen.screens.contains(where: { $0 === assigned }) {
-            return assigned
+        // Matched by display number rather than by identity: AppKit hands out
+        // fresh `NSScreen` objects after any display change, and a controller
+        // holding the old one would otherwise fall back to the main display
+        // and pile up on the notch already there.
+        if let assigned = assignedScreen {
+            let key = NotchFleet.key(for: assigned)
+            if let fresh = NSScreen.screens.first(where: { NotchFleet.key(for: $0) == key }) {
+                assignedScreen = fresh
+                return fresh
+            }
         }
         return NotchGeometry.preferredScreen(from: NSScreen.screens, preference: displayPreference)
     }
