@@ -352,6 +352,8 @@ struct SettingsView: View {
             Button(role: .destructive, action: quit) {
                 Label {
                     Text(L10n.t("Quit Codenotch"))
+                        .lineLimit(1)
+                        .minimumScaleFactor(0.8)
                 } icon: {
                     SidebarIcon(systemName: "power", tint: .red)
                 }
@@ -1374,6 +1376,9 @@ private struct AccountRow: View {
 
     private var isConnected: Bool { preferences.isConnected(provider.id) }
     private var isMuted: Bool { preferences.isMutedAlerts(for: provider.id) }
+    /// The nickname given in the row's editor, when this is a Brink account.
+    @ObservedObject private var brinkAccounts = CostAccountStore.shared
+    private var shownName: String { brinkAccounts.account(provider.id)?.name ?? provider.name }
 
     var body: some View {
         VStack(alignment: .leading, spacing: 6) {
@@ -1392,7 +1397,7 @@ private struct AccountRow: View {
                     ProviderGlyphView(glyph: provider.glyph, size: 16)
                         .foregroundStyle(isConnected ? .primary : .tertiary)
 
-                    Text(provider.name)
+                    Text(shownName)
                         .foregroundStyle(isConnected ? .primary : .secondary)
                 }
                 // Without this only the drawn pixels are grabbable, and the
@@ -1459,6 +1464,10 @@ private struct AccountRow: View {
                           ? L10n.t("Alerts for \(provider.name) are muted. Click to unmute.")
                           : L10n.t("Alert when \(provider.name) crosses 80% and 100% of a limit."))
                 }
+                // Name, plan and price for a Claude or Codex login on this
+                // Mac, in a popover: the account is the subject of this row,
+                // so what it costs belongs here and not in another pane.
+                BrinkAccountEditButton(providerID: provider.id)
 
                 // Prefers the app that owns the account, and falls back to the
                 // web page only when there is no app to open.

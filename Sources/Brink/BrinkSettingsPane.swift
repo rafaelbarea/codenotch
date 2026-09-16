@@ -12,37 +12,9 @@ struct BrinkSettingsPane: View {
     @State private var terminal = NewSession.terminal
     @State private var accountCommand = NewSession.accountCommand
 
-    private var currencyName: String { Locale.current.localizedString(forCurrencyCode: prices.currency) ?? prices.currency }
 
     var body: some View {
         Form {
-            Section(L10n.t("Plans")) {
-                ForEach(accounts.accounts) { a in
-                    let auto = a.monthlyLocal(rate: prices.rate)
-                    LabeledContent {
-                        HStack(spacing: 8) {
-                            if a.billing == .subscription {
-                                TextField("", value: Binding(get: { a.monthlyPrice == 0 ? nil : a.monthlyPrice },
-                                                             set: { accounts.setMonthlyPrice(a.id, $0 ?? 0) }),
-                                          format: .number, prompt: Text(auto > 0 ? MoneyFormat.string(auto, currency: prices.currency) : "—"))
-                                    .frame(width: 100).multilineTextAlignment(.trailing)
-                            }
-                            Picker("", selection: Binding(get: { a.billing }, set: { accounts.setBilling(a.id, $0) })) {
-                                ForEach(CostAccount.Billing.allCases) { Text($0.title).tag($0) }
-                            }.labelsHidden().frame(width: 170)
-                        }
-                    } label: {
-                        // The name is yours to change: it is what the notch,
-                        // the cards and the shell launcher call this login.
-                        TextField("", text: Binding(get: { a.name }, set: { accounts.setName(a.id, $0) }),
-                                  prompt: Text(accounts.defaultName(a.id)))
-                            .textFieldStyle(.plain)
-                    }
-                    Text(planDetail(a)).font(.caption).foregroundStyle(.secondary)
-                }
-                Text(L10n.t("Detected from each login once a day. A week of the plan costs the price ÷ 4.35; a project that used 4% of the weekly allowance spent 4% of that. Amounts in \(currencyName), your Mac's currency. Type the amount you actually pay to override the list price."))
-                    .font(.caption).foregroundStyle(.secondary).fixedSize(horizontal: false, vertical: true)
-            }
             Section(L10n.t("Market data")) {
                 LabeledContent(L10n.t("Exchange rate"), value: prices.rateKnown ? L10n.t("1 USD = \(MoneyFormat.string(prices.rate, currency: prices.currency))") : L10n.t("Not fetched yet"))
                 LabeledContent(L10n.t("Per-token prices"), value: L10n.t("\(prices.prices.count) models"))
@@ -85,12 +57,4 @@ struct BrinkSettingsPane: View {
         .formStyle(.grouped)
     }
 
-    private func planDetail(_ a: CostAccount) -> String {
-        guard let tier = a.planTier else { return L10n.t("Plan not detected yet") }
-        let name = catalog.name(for: tier)
-        if let local = catalog.monthly(for: tier, currency: prices.currency, rate: prices.rate) {
-            return L10n.t("\(name) · \(MoneyFormat.string(local, currency: prices.currency))/month (catalog)")
-        }
-        return L10n.t("\(name) · price unknown, set it here")
-    }
 }

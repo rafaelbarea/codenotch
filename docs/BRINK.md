@@ -21,15 +21,16 @@ Everything under `Sources/Brink/`, plus small hooks in `AppDelegate`, `StatusIte
   app, focus timer per task or free. While a task is in focus the ring is the timer.
 - **Focus window** (menu → Focus…, ⌘F, or Settings → Focus): day / week / month, per project, editable blocks.
 - **New session…** (⌘N): runs a command (default `claude`) in a new window of your terminal.
-- **Settings → Costs & Tasks**: billing per account, market data, task source, focus block, launcher.
+- **Settings → Costs & Tasks**: market data, task source, focus block, launcher.
   Activity and Focus are sidebar sections of the same window.
 - **Hover card size**: the card follows Appearance → Notch size (small keeps upstream's card, medium and
   large grow it), capped so it never runs off the screen. The tasks card takes the keyboard: type a task
   or a free focus in place.
 - **Under each ring**: the percent, then how long until that limit resets ("4h 25m", "2d 3h"). A
   running focus shows its clock instead of a percent, in violet, with a play (or pause) glyph.
-- **Account nicknames**: rename any login in Settings → Costs & Tasks; the name follows into the notch,
-  the cards and the exported accounts.json.
+- **Account editor**: the pencil on a Claude or Codex row in Settings → Accounts opens name, billing,
+  monthly price and the detected plan; the nickname follows into the notch, the cards and the exported
+  accounts.json.
 - **Token chart on Claude cards**: the daily token chart and summary the Codex card has, built from
   the transcripts (lifetime, peak day, streaks, today, 30 days). Tall cards scale to fit on their own.
 - **System notifications** (Settings → Notifications): banners when a session finishes or waits on

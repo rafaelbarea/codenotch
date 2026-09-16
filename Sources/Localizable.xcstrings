@@ -23967,6 +23967,50 @@
           }
         }
       }
+    },
+    "Name, plan and price for this login": {
+      "extractionState": "manual",
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Nome, plano e valor desta conta"
+          }
+        }
+      }
+    },
+    "Billing": {
+      "extractionState": "manual",
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Cobrança"
+          }
+        }
+      }
+    },
+    "Plan": {
+      "extractionState": "manual",
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Plano"
+          }
+        }
+      }
+    },
+    "The name is what the notch, the cards and a shell launcher call this login. Empty goes back to the default.": {
+      "extractionState": "manual",
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "O nome é como o notch, os cards e o lançador do shell chamam esta conta. Vazio volta ao padrão."
+          }
+        }
+      }
     }
   },
   "version": "1.0"
