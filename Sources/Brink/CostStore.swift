@@ -99,7 +99,7 @@ final class CostStore {
     static let unexplainedKey = "__unexplained__"
 
     private var db: OpaquePointer?
-    private let queue = DispatchQueue(label: "com.semihtali.brink.cost")
+    let queue = DispatchQueue(label: "com.semihtali.brink.cost")
     private static let transient = unsafeBitCast(-1, to: sqlite3_destructor_type.self)
 
     // Weights that split a limit delta across turns within one interval. They are
@@ -197,7 +197,7 @@ final class CostStore {
         sqlite3_exec(db, sql, nil, nil, nil) == SQLITE_OK
     }
 
-    private func prepare(_ sql: String) -> OpaquePointer? {
+    func prepare(_ sql: String) -> OpaquePointer? {
         var st: OpaquePointer?
         guard sqlite3_prepare_v2(db, sql, -1, &st, nil) == SQLITE_OK else { return nil }
         return st
@@ -207,7 +207,7 @@ final class CostStore {
         if let v { sqlite3_bind_text(st, i, v, -1, Self.transient) } else { sqlite3_bind_null(st, i) }
     }
 
-    private func text(_ st: OpaquePointer?, _ i: Int32) -> String? {
+    func text(_ st: OpaquePointer?, _ i: Int32) -> String? {
         guard let c = sqlite3_column_text(st, i) else { return nil }
         return String(cString: c)
     }

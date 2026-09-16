@@ -21,7 +21,7 @@ final class NotchViewModel: ObservableObject {
 
     func updateSnapshots(_ providerSnapshots: [ProviderSnapshot]) {
         let hoveredID = hoveredSnapshot?.id
-        let next = ProviderOrder.cells(from: providerSnapshots, keeping: snapshots).map(decorated)
+        let next = ProviderOrder.cells(from: providerSnapshots, keeping: snapshots).map(decorated).map(Brink.decorate)
         let nextHoveredIndex = hoveredID.flatMap { id in next.firstIndex { $0.id == id } }
         if hoveredIndex != nextHoveredIndex { hoveredIndex = nextHoveredIndex }
         snapshots = next
@@ -585,9 +585,14 @@ final class NotchViewModel: ObservableObject {
 
     func slack(cellCount: Int) -> CGFloat { memo("slack\(cellCount)") { computeSlack(cellCount: cellCount) } }
     private func computeSlack(cellCount: Int) -> CGFloat {
-        let full = NotchLayout.slack(for: edge,
-                                     maxCardHeight: maxCardHeight(cellCount: cellCount),
-                                     notchScale: sizeScale, cardScale: cardScale(cellCount: cellCount))
+        let cap = sessionCap(cellCount: cellCount)
+        let full = snapshots.isEmpty
+            ? NotchLayout.slack(for: edge, maxCardHeight: maxCardHeight(cellCount: cellCount),
+                                notchScale: sizeScale, cardScale: cardScale(cellCount: cellCount))
+            : snapshots.map {
+                NotchLayout.slack(for: edge, maxCardHeight: cardHeight(of: $0, sessionCap: cap),
+                                  notchScale: sizeScale, cardScale: cardScale(of: $0, cellCount: cellCount))
+            }.max()!
         // The card is clamped into the visible range (`tooltipAlong`), so the
         // panel need not reserve half a card past each end of the stack: on a
         // screen with no room for that it reserves what is left instead, and
@@ -603,11 +608,24 @@ final class NotchViewModel: ObservableObject {
     /// lets it: a card that would run off a small display at `large` is drawn
     /// as big as still fits, so the setting scales the reading without ever
     /// cropping it.
-    var cardScale: CGFloat { cardScale(cellCount: snapshots.count) }
+    ///
+    /// Per card: a tall card (a Claude login with its token chart) shrinks to
+    /// fit while the tasks card beside it keeps the full size. Without a
+    /// hovered card this is the scale of the tallest one, the conservative
+    /// figure the panel is sized against.
+    var cardScale: CGFloat {
+        if let hovered = hoveredSnapshot { return cardScale(of: hovered, cellCount: snapshots.count) }
+        return cardScale(cellCount: snapshots.count)
+    }
 
-    func cardScale(cellCount: Int) -> CGFloat { memo("cardScale\(cellCount)") { computeCardScale(cellCount: cellCount) } }
-    private func computeCardScale(cellCount: Int) -> CGFloat {
-        let card = maxCardHeight(cellCount: cellCount)
+    func cardScale(of snapshot: ProviderSnapshot, cellCount: Int) -> CGFloat {
+        memo("cardScaleOf\(snapshot.id)\(cellCount)") {
+            fitScale(card: cardHeight(of: snapshot, sessionCap: sessionCap(cellCount: cellCount)))
+        }
+    }
+
+    func cardScale(cellCount: Int) -> CGFloat { memo("cardScale\(cellCount)") { fitScale(card: maxCardHeight(cellCount: cellCount)) } }
+    private func fitScale(card: CGFloat) -> CGFloat {
         guard card > 0, screenSize.height > 0 else { return sizeScale }
         let fit: CGFloat
         if edge.isVertical {
@@ -698,7 +716,12 @@ final class NotchViewModel: ObservableObject {
 
     private func contentCardHeight(sessionCap: Int) -> CGFloat { memo("content\(sessionCap)") { computeContentCardHeight(sessionCap: sessionCap) } }
     private func computeContentCardHeight(sessionCap: Int) -> CGFloat {
-        snapshots.map { snapshot in
+        snapshots.map { cardHeight(of: $0, sessionCap: sessionCap) }.max() ?? 0
+    }
+
+    /// One card's unscaled height.
+    func cardHeight(of snapshot: ProviderSnapshot, sessionCap: Int) -> CGFloat {
+        memo("cardHeight\(snapshot.id)\(sessionCap)") {
             if snapshot.id == TasksProvider.providerID { return TasksCard.height(rows: brinkTaskRows()) }
             return NotchLayout.cardHeight(windowCount: snapshot.windows.count,
                 groupCount: Set(snapshot.windows.compactMap(\.group)).count,
@@ -717,7 +740,7 @@ final class NotchViewModel: ObservableObject {
                 compactRowCount: snapshot.compactRowCount,
                 showsDeepSeekPricing: deepSeekPricingEnabled,
                 brinkCostRows: brinkCostRows(for: snapshot))
-        }.max() ?? 0
+        }
     }
 
     func maxCardHeight(cellCount: Int) -> CGFloat { memo("maxCard\(cellCount)") { computeMaxCardHeight(cellCount: cellCount) } }
@@ -830,13 +853,18 @@ final class NotchViewModel: ObservableObject {
     /// panel had shrunk around a card that had not.
     func panelSize(cellCount: Int) -> CGSize { memo("panel\(cellCount)") { computePanelSize(cellCount: cellCount) } }
     private func computePanelSize(cellCount: Int) -> CGSize {
-        let card = maxCardHeight(cellCount: cellCount)
-        let cardScale = cardScale(cellCount: cellCount)
+        let cap = sessionCap(cellCount: cellCount)
+        let tooltipDepth = snapshots.isEmpty
+            ? NotchLayout.tooltipDepth(for: edge, maxCardHeight: maxCardHeight(cellCount: cellCount),
+                                       cardScale: cardScale(cellCount: cellCount))
+            : snapshots.map {
+                NotchLayout.tooltipDepth(for: edge, maxCardHeight: cardHeight(of: $0, sessionCap: cap),
+                                         cardScale: cardScale(of: $0, cellCount: cellCount))
+            }.max()!
         return NotchPlacement.panelSize(
             edge: edge,
             length: shapeLength(cellCount: cellCount) * sizeScale + 2 * slack(cellCount: cellCount),
-            depth: (contentInset + NotchLayout.bodyDepth(for: edge)) * sizeScale
-                + NotchLayout.tooltipDepth(for: edge, maxCardHeight: card, cardScale: cardScale)
+            depth: (contentInset + NotchLayout.bodyDepth(for: edge)) * sizeScale + tooltipDepth
         )
     }
 }

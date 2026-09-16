@@ -13,7 +13,7 @@ struct CostAccount: Identifiable, Equatable {
 
     let id: String                 // the provider id Codenotch uses ("claude", "claude-braspine", "codex", …)
     let provider: String           // "claude" | "codex"
-    let name: String               // "Claude (braspine)"
+    var name: String               // "Claude (braspine)", or the nickname given in Settings
     let configDirectory: URL
     var billing: Billing = .subscription
     var monthlyPrice: Double = 0   // manual override in the Mac's currency (0 = detected plan)
@@ -54,6 +54,7 @@ final class CostAccountStore: ObservableObject {
         var planTier: String?
         var planDetectedAt: Date?
         var creditLimit: Double?
+        var nickname: String?
     }
     private var stored: [String: Stored] = [:]
 
@@ -115,8 +116,27 @@ final class CostAccountStore: ObservableObject {
             a.planTier = s.planTier
             a.planDetectedAt = s.planDetectedAt
             a.creditLimit = s.creditLimit
+            if let nick = s.nickname?.trimmingCharacters(in: .whitespaces), !nick.isEmpty { a.name = nick }
         }
         return a
+    }
+
+    /// The name the config directory gives, before any nickname.
+    func defaultName(_ id: String) -> String {
+        guard let a = account(id) else { return id }
+        let slug = a.isDefault ? nil : String(a.id.drop(while: { $0 != "-" }).dropFirst())
+        let base = a.provider == "codex" ? "Codex" : "Claude"
+        return slug.map { "\(base) (\($0))" } ?? base
+    }
+
+    /// The nickname shown everywhere: the notch, the cards, Settings and the
+    /// accounts.json a shell launcher reads. Empty goes back to the default.
+    func setName(_ id: String, _ name: String) {
+        let nick = name.trimmingCharacters(in: .whitespaces)
+        mutate(id) { $0.name = nick.isEmpty ? defaultName(id) : nick }
+        stored[id]?.nickname = nick.isEmpty ? nil : nick
+        save()
+        exportForShell()
     }
 
     func account(_ id: String) -> CostAccount? { accounts.first { $0.id == id } }
@@ -127,7 +147,8 @@ final class CostAccountStore: ObservableObject {
         change(&accounts[i])
         let a = accounts[i]
         stored[id] = Stored(billing: a.billing, monthlyPrice: a.monthlyPrice, planTier: a.planTier,
-                            planDetectedAt: a.planDetectedAt, creditLimit: a.creditLimit)
+                            planDetectedAt: a.planDetectedAt, creditLimit: a.creditLimit,
+                            nickname: stored[id]?.nickname)
         save()
     }
 

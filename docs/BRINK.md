@@ -28,6 +28,12 @@ Everything under `Sources/Brink/`, plus small hooks in `AppDelegate`, `StatusIte
   or a free focus in place.
 - **Under each ring**: the percent, then how long until that limit resets ("4h 25m", "2d 3h"). A
   running focus shows its clock instead of a percent, in violet, with a play (or pause) glyph.
+- **Account nicknames**: rename any login in Settings → Costs & Tasks; the name follows into the notch,
+  the cards and the exported accounts.json.
+- **Token chart on Claude cards**: the daily token chart and summary the Codex card has, built from
+  the transcripts (lifetime, peak day, streaks, today, 30 days). Tall cards scale to fit on their own.
+- **System notifications** (Settings → Notifications): banners when a session finishes or waits on
+  you, when a limit is reached or resets, and for focus blocks; permission asked at launch; test button.
 - **Cost tabs**: Today / Week (Cycle for credit plans) / Month in each account's card. Double-click a
   ring to open a terminal on that account (its config directory exported); the tasks ring opens the
   task app.

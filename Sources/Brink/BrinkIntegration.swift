@@ -16,11 +16,27 @@ enum Brink {
     /// as sidebar sections, rather than in windows of their own.
     static var openSettingsSection: ((String) -> Void)?
 
+    /// What Brink adds to a cell before the notch draws it: the account's
+    /// nickname, and for Claude logins the token chart the Codex card has,
+    /// built from the transcripts Claude Code writes.
+    static func decorate(_ snapshot: ProviderSnapshot) -> ProviderSnapshot {
+        // The suite compares cells to what it fed in; the machine's own
+        // accounts and transcripts must not leak into that.
+        guard !Runtime.isUnderTest, let account = CostAccountStore.shared.account(snapshot.id) else { return snapshot }
+        var s = snapshot
+        s.displayName = account.name
+        if s.tokenUsage == nil, let usage = CostModels.model(for: snapshot.id)?.tokenUsage {
+            s.tokenUsage = usage
+        }
+        return s
+    }
+
     static func attach(to store: UsageStore) {
         self.store = store
         _ = PlanCatalog.shared
         _ = PriceTable.shared
         _ = CostAccountStore.shared
+        BrinkNotifications.requestAuthorizationIfNeeded()
         subscription = store.$snapshots
             .receive(on: RunLoop.main)
             .sink { snapshots in

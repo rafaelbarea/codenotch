@@ -800,6 +800,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
                               ? preferences.sessionBlockedSoundName
                               : preferences.sessionEndSoundName)
         }
+        BrinkNotifications.sessionEnded(name: event.session.name, blocked: event.reason == .blocked)
         guard preferences.announceSessionEnd else { return }
         fleet.peek(for: preferences.peekDuration.seconds,
                    focusing: event.session.processID)
@@ -813,6 +814,12 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
 
         if preferences.usageResetSound {
             SessionChime.play(preferences.usageResetSoundName)
+        }
+        // A banner as well as the card when asked for; the card's own
+        // fallback already sends one when the notch cannot show it.
+        if BrinkNotifications.limits, preferences.announceUsageReset, fleet.showResetAlert(event, duration: 5.0) {
+            UsageAlertNotifications.deliver(event)
+            return
         }
         guard preferences.announceUsageReset else { return }
         if !fleet.showResetAlert(event, duration: 5.0) {
@@ -860,7 +867,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
         if preferences.limitReachedSound {
             SessionChime.play(preferences.limitReachedSoundName)
         }
-        if !fleet.showResetAlert(event, duration: 6.0) {
+        if !fleet.showResetAlert(event, duration: 6.0) || BrinkNotifications.limits {
             UsageAlertNotifications.deliver(event)
         }
     }

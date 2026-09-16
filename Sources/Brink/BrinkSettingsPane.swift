@@ -19,7 +19,7 @@ struct BrinkSettingsPane: View {
             Section(L10n.t("Plans")) {
                 ForEach(accounts.accounts) { a in
                     let auto = a.monthlyLocal(rate: prices.rate)
-                    LabeledContent(a.name) {
+                    LabeledContent {
                         HStack(spacing: 8) {
                             if a.billing == .subscription {
                                 TextField("", value: Binding(get: { a.monthlyPrice == 0 ? nil : a.monthlyPrice },
@@ -31,6 +31,12 @@ struct BrinkSettingsPane: View {
                                 ForEach(CostAccount.Billing.allCases) { Text($0.title).tag($0) }
                             }.labelsHidden().frame(width: 170)
                         }
+                    } label: {
+                        // The name is yours to change: it is what the notch,
+                        // the cards and the shell launcher call this login.
+                        TextField("", text: Binding(get: { a.name }, set: { accounts.setName(a.id, $0) }),
+                                  prompt: Text(accounts.defaultName(a.id)))
+                            .textFieldStyle(.plain)
                     }
                     Text(planDetail(a)).font(.caption).foregroundStyle(.secondary)
                 }

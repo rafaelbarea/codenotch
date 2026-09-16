@@ -212,7 +212,7 @@ struct UsageBlock: Equatable {
 
 struct ProviderSnapshot: Identifiable, Equatable {
     let id: String
-    let displayName: String
+    var displayName: String
     let glyph: ProviderGlyph
     let fidelity: Fidelity
     var status: ProviderStatus

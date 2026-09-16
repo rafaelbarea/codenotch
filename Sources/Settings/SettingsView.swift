@@ -963,6 +963,7 @@ struct SettingsView: View {
                     .foregroundStyle(.secondary)
                     .fixedSize(horizontal: false, vertical: true)
             }
+            BrinkNotificationsSection()
         }
         .formStyle(.grouped)
     }

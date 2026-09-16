@@ -19339,6 +19339,12 @@
             "state": "translated",
             "value": "Токенів усього"
           }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Tokens no total"
+          }
         }
       }
     },
@@ -19367,6 +19373,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "Пік токенів за день"
+          }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Pico diário"
           }
         }
       }
@@ -19397,6 +19409,12 @@
             "state": "translated",
             "value": "Найдовший чат"
           }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Turno mais longo"
+          }
         }
       }
     },
@@ -19426,6 +19444,12 @@
             "state": "translated",
             "value": "Поточна серія"
           }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Sequência atual"
+          }
         }
       }
     },
@@ -19454,6 +19478,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "Найдовша серія"
+          }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Maior sequência"
           }
         }
       }
@@ -19519,6 +19549,12 @@
             "state": "translated",
             "value": "Токени за 30 днів"
           }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Tokens em 30 dias"
+          }
         }
       }
     },
@@ -19547,6 +19583,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "Очікується"
+          }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Pendente"
           }
         }
       }
@@ -23790,6 +23832,138 @@
           "stringUnit": {
             "state": "translated",
             "value": "Roda com a conta do anel já escolhida. {cmd} é o CLI dessa conta (claude, ou env CLAUDE_CONFIG_DIR=… claude), {id} o id, {dir} a pasta de config, {provider} claude ou codex. Vazio roda {cmd}."
+          }
+        }
+      }
+    },
+    "System notifications": {
+      "extractionState": "manual",
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Notificações do sistema"
+          }
+        }
+      }
+    },
+    "Session finished or waiting on you": {
+      "extractionState": "manual",
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Sessão terminou ou está esperando você"
+          }
+        }
+      }
+    },
+    "Limit reached and limit reset": {
+      "extractionState": "manual",
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Limite atingido e limite renovado"
+          }
+        }
+      }
+    },
+    "Focus block done, long focus": {
+      "extractionState": "manual",
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Bloco de foco concluído, foco longo"
+          }
+        }
+      }
+    },
+    "Banners in Notification Center, on top of the notch's own peek, cards and sounds: they reach you on another display or with the notch hidden.": {
+      "extractionState": "manual",
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Avisos na Central de Notificações, além da espiada, dos cards e dos sons do próprio notch: chegam até você em outra tela ou com o notch oculto."
+          }
+        }
+      }
+    },
+    "Send a test": {
+      "extractionState": "manual",
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Enviar teste"
+          }
+        }
+      }
+    },
+    "Codenotch notifications are on": {
+      "extractionState": "manual",
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Notificações do Codenotch ativas"
+          }
+        }
+      }
+    },
+    "This is what one looks like.": {
+      "extractionState": "manual",
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "É assim que uma aparece."
+          }
+        }
+      }
+    },
+    "%@ is waiting on you": {
+      "extractionState": "manual",
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@ está esperando você"
+          }
+        }
+      }
+    },
+    "%@ finished": {
+      "extractionState": "manual",
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@ terminou"
+          }
+        }
+      }
+    },
+    "The agent stopped to ask you something.": {
+      "extractionState": "manual",
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "O agente parou para perguntar algo."
+          }
+        }
+      }
+    },
+    "The agent's turn is done.": {
+      "extractionState": "manual",
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "O turno do agente terminou."
           }
         }
       }

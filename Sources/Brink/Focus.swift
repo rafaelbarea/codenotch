@@ -231,6 +231,7 @@ final class FocusStore: ObservableObject {
 /// Local notifications for the Brink features (focus blocks).
 enum BrinkNotify {
     static func post(title: String, body: String) {
+        guard BrinkNotifications.focus else { return }
         let center = UNUserNotificationCenter.current()
         center.getNotificationSettings { settings in
             let deliver = {

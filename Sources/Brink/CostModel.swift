@@ -20,6 +20,9 @@ final class CostModel: ObservableObject {
     }
 
     @Published private(set) var rows: [ProjectCost] = []
+    /// Tokens per day and the summary the card's chart reads, from the
+    /// transcripts; Codex brings its own from the server.
+    @Published private(set) var tokenUsage: CodexTokenUsage?
     @Published private(set) var state: State = .unavailable
     /// False for plans with no rolling limits (credit-based seats): the session
     /// and week views need limit samples, so only month and all-time apply.
@@ -170,9 +173,11 @@ final class CostModel: ObservableObject {
                 fresh[i].cost = perPoint.map { $0 * fresh[i].pct } ?? costs[fresh[i].project]
             }
             let done = fresh.presentable()
+            let usage = store.tokenUsage()
             await MainActor.run {
                 self.rows = done
                 self.state = done.isEmpty ? .waiting : .ready
+                if self.tokenUsage != usage { self.tokenUsage = usage }
             }
         }
     }
