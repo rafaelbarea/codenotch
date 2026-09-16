@@ -257,7 +257,11 @@ final class NotchViewModel: ObservableObject {
         TodoStore.shared.objectWillChange
             .sink { [weak self] _ in MainActor.assumeIsolated { self?.geometryCache.removeAll() } }
             .store(in: &cancellables)
-        FocusStore.shared.objectWillChange
+        // The focus store ticks every second; only a block starting, pausing
+        // or stopping changes the card's shape.
+        Publishers.Merge(
+            FocusStore.shared.$taskID.map { _ in () }.eraseToAnyPublisher(),
+            FocusStore.shared.$isRunning.map { _ in () }.eraseToAnyPublisher())
             .sink { [weak self] _ in MainActor.assumeIsolated { self?.geometryCache.removeAll() } }
             .store(in: &cancellables)
         // Language change leaves snapshots untouched; tick `now` so copy

@@ -268,6 +268,8 @@ struct ProviderCell: View {
     /// than waiting for the next provider poll.
     @ObservedObject private var focus = FocusStore.shared
 
+    private var isFocusClock: Bool { snapshot.headlineID == "focus" && focus.isActive }
+
     /// A dash, not "0%": nothing read is not the same as nothing used.
     private var readingText: String {
         if snapshot.headlineID == "focus", focus.isActive { return FocusStore.clock(focus.elapsed) }
@@ -301,8 +303,11 @@ struct ProviderCell: View {
                 .fixedSize(horizontal: snapshot.localModel == nil, vertical: false)
                 .frame(width: snapshot.localModel == nil ? nil : NotchLayout.ringDiameter,
                        height: NotchLayout.percentLineHeight)
-                .contentTransition(.numericText())
-                .animation(NotchMotion.reading, value: readingText)
+                // A clock ticking every second is swapped, not animated: the
+                // rolling digits cost a burst of frames each tick, and the
+                // whole panel composites again for every one of them.
+                .contentTransition(isFocusClock ? .identity : .numericText())
+                .animation(isFocusClock ? nil : NotchMotion.reading, value: readingText)
             Text(resetLineText)
                 .font(Typography.resetLine)
                 .foregroundStyle(Palette.textSecondary)
