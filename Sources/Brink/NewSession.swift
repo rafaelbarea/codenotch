@@ -23,8 +23,18 @@ enum NewSession {
         terminals.filter { NSWorkspace.shared.urlForApplication(withBundleIdentifier: $0.bundleID) != nil }
     }
 
-    @MainActor static func launch() {
-        let cmd = command.isEmpty ? "claude" : command
+    @MainActor static func launch() { launch(account: nil) }
+
+    /// With an account: the terminal opens on that login (its config
+    /// directory exported the way the CLI reads it) before the launcher runs.
+    @MainActor static func launch(account: CostAccount?) {
+        var cmd = command
+        if cmd.isEmpty { cmd = account?.provider == "codex" ? "codex" : "claude" }
+        if let account {
+            let env = account.provider == "codex" ? "CODEX_HOME" : "CLAUDE_CONFIG_DIR"
+            let dir = account.configDirectory.path.replacingOccurrences(of: "'", with: "'\\''")
+            cmd = "export \(env)='\(dir)'; \(cmd)"
+        }
         let choice = terminal.isEmpty ? (installed().first?.bundleID ?? "com.apple.Terminal") : terminal
         let escaped = cmd.replacingOccurrences(of: "\\", with: "\\\\").replacingOccurrences(of: "\"", with: "\\\"")
         let script: String

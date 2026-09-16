@@ -331,6 +331,7 @@ final class NotchWindowController {
             let hosting = NotchHostingView(rootView: NotchRootView(model: model))
             panel.contextMenuProvider = { [weak self] in self?.contextMenu() }
             panel.onClick = { [weak self] point in self?.handleClick(at: point) }
+            panel.onDoubleClick = { [weak self] point in self?.handleDoubleClick(at: point) }
             panel.onDragStart = { [weak self] in self?.beginOptionDrag() }
             panel.onDrag = { [weak self] dx, dy in self?.dragged(dx: dx, dy: dy) }
             panel.onDragEnd = { [weak self] in
@@ -612,7 +613,7 @@ final class NotchWindowController {
     func cursorMoved() {
         guard let panel, !isOptionDragging else { return }
         // Typing in the tasks card: the pointer's wanderings do not fold it.
-        if TodoStore.shared.editing { return }
+        if TodoStore.shared.editing, panel.isKeyWindow { return }
         let local = localCursor(in: panel.frame)
         let overTooltip = model.hoveredIndex
             .flatMap(tooltipRect(index:))
@@ -737,6 +738,17 @@ final class NotchWindowController {
 
     /// A click on a ring refetches that provider; a click anywhere else on the
     /// open notch pins it. The ring is the more specific target, so it wins.
+    /// Two clicks on a ring open the thing behind it: a terminal session on
+    /// that account, or the task app for the tasks ring.
+    func handleDoubleClick(at locationInWindow: CGPoint) {
+        guard let panel, model.isExpanded else { return }
+        let local = CGPoint(x: locationInWindow.x, y: panel.frame.height - locationInWindow.y)
+        guard notchRect.contains(local),
+              let index = cellIndex(along: placement.along(of: local)),
+              model.snapshots.indices.contains(index) else { return }
+        Brink.open(snapshot: model.snapshots[index])
+    }
+
     func handleClick(at locationInWindow: CGPoint) {
         guard let panel else {
             setExpanded(true)

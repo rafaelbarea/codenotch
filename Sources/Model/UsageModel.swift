@@ -326,8 +326,9 @@ struct ProviderSnapshot: Identifiable, Equatable {
             return showsLocalPerformance ? (localPerformance?.headlineText ?? "— tok/s")
                 : (localModel?.memoryText ?? "—")
         }
-        // A running focus reads as its clock, not as a share of the block.
-        if headline?.id == "focus", let usedText = headline?.usedText { return usedText }
+        // The tasks ring reads as a count ("2/7") or, in focus, as its clock,
+        // never as a percentage.
+        if id == TasksProvider.providerID, let usedText = headline?.usedText { return usedText }
         if let usedFraction { return Percent.text(for: usedFraction) + "%" }
         if let remaining = headline?.remaining { return LimitWindow.compact(remaining) }
         if let usedText = headline?.usedText { return usedText }

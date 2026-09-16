@@ -44,6 +44,16 @@ enum Brink {
             .sink { [weak store] _ in _ = store?.refresh(providerID: TasksProvider.providerID) }
     }
 
+    /// What a double click on a ring opens.
+    static func open(snapshot: ProviderSnapshot) {
+        if snapshot.id == TasksProvider.providerID {
+            let store = TodoStore.shared
+            store.source.showList(store.listName(for: store.tab))
+            return
+        }
+        NewSession.launch(account: CostAccountStore.shared.accounts.first { $0.id == snapshot.id })
+    }
+
     static func showFocus() {
         if let openSettingsSection { openSettingsSection("focus"); return }
         if focusWindow == nil {

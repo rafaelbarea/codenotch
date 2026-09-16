@@ -1,6 +1,24 @@
 import SwiftUI
 import AppKit
 
+/// Type for the tasks card, sized so that at the medium notch size the card
+/// is drawn exactly as Brink drew it (330pt wide, 11.5pt task names). The
+/// card is scaled by `NotchViewModel.cardScale`, so every size here is the
+/// Brink point size divided by the medium card scale.
+enum BrinkType {
+    static let unit: CGFloat = 1 / NotchViewModel.cardBase(for: 1)
+
+    static func pt(_ size: CGFloat) -> CGFloat { size * unit }
+    static func font(_ size: CGFloat, _ weight: Font.Weight = .regular) -> Font {
+        .system(size: pt(size), weight: weight)
+    }
+    /// The line box of a font, for the height the card reserves.
+    static func line(_ size: CGFloat, _ weight: NSFont.Weight = .regular) -> CGFloat {
+        let font = NSFont.systemFont(ofSize: pt(size), weight: weight)
+        return ceil(font.ascender - font.descender + font.leading)
+    }
+}
+
 /// The hover card for the Tasks ring: today / tomorrow / one list of yours,
 /// complete with a click, add with a line of text ("@" picks the project),
 /// and a focus timer per task or free-standing.
@@ -11,7 +29,21 @@ struct TasksCard: View {
     /// Rows the screen has room for (solved by the view model).
     var rows: Int = TasksCard.maxRows
 
-    static let maxRows = 10
+    static let maxRows = 12
+
+    // Brink's measurements, in its points (scaled by `BrinkType.unit`).
+    static let headerBottom = BrinkType.pt(10)
+    static let bannerPadH = BrinkType.pt(9)
+    static let bannerPadV = BrinkType.pt(7)
+    static let bannerBottom = BrinkType.pt(10)
+    static let tabPadV = BrinkType.pt(3)
+    static let tabsBottom = BrinkType.pt(8)
+    static let rowPadV = BrinkType.pt(4)
+    static let rowLineGap = BrinkType.pt(1)
+    static let emptyPadV = BrinkType.pt(6)
+    static let quickAddTop = BrinkType.pt(12)
+    static let freeFocusTop = BrinkType.pt(6)
+    static let fieldHeight = BrinkType.line(11) + BrinkType.pt(6)
 
     private var listed: [Todo] { Array((store.todos[store.tab] ?? []).prefix(min(rows, Self.maxRows))) }
 
@@ -20,33 +52,37 @@ struct TasksCard: View {
     @MainActor static func height(rows cap: Int = TasksCard.maxRows) -> CGFloat {
         let store = TodoStore.shared, focus = FocusStore.shared
         let rows = min((store.todos[store.tab] ?? []).count, min(cap, maxRows))
-        let line = NotchLayout.cardBodyLineHeight
         var h = 2 * NotchLayout.cardPadding
-            + max(NotchLayout.glyphSize, NotchLayout.cardTitleLineHeight)   // header
-            + NotchLayout.headerToBlock + line                              // tabs
-        if focus.isActive { h += NotchLayout.blockSpacing + 2 * line + 2 * bannerPadV }   // focus banner
-        h += NotchLayout.blockSpacing
-        h += rows == 0 ? line : CGFloat(rows) * (2 * line + NotchLayout.sessionRowGap)
-        h += NotchLayout.blockSpacing + line                                // quick add
-        if !focus.isActive { h += NotchLayout.sessionRowGap + line }        // free focus
+        h += max(BrinkType.line(14, .semibold), BrinkType.line(9, .bold) + BrinkType.pt(4)) + headerBottom
+        if focus.isActive {
+            h += BrinkType.line(11.5, .semibold) + BrinkType.pt(1) + BrinkType.line(10) + 2 * bannerPadV + bannerBottom
+        }
+        h += BrinkType.line(10.5, .semibold) + 2 * tabPadV + tabsBottom
+        if rows == 0 {
+            h += BrinkType.line(11) + 2 * emptyPadV
+        } else {
+            h += CGFloat(rows) * (BrinkType.line(11.5) + rowLineGap + BrinkType.line(10) + 2 * rowPadV)
+        }
+        h += quickAddTop + fieldHeight
+        if !focus.isActive { h += freeFocusTop + fieldHeight }
         let suggestions = store.suggestionCount
-        if suggestions > 0 { h += CGFloat(suggestions) * line + NotchLayout.sessionRowGap }
+        if suggestions > 0 { h += CGFloat(suggestions) * BrinkType.line(11) + BrinkType.pt(4) }
         return h
     }
 
     var body: some View {
         VStack(alignment: .leading, spacing: 0) {
-            header
-            tabs.padding(.top, NotchLayout.headerToBlock)
-            if focus.isActive { focusBanner.padding(.top, NotchLayout.blockSpacing) }
-            list.padding(.top, NotchLayout.blockSpacing)
+            header.padding(.bottom, Self.headerBottom)
+            if focus.isActive { focusBanner.padding(.bottom, Self.bannerBottom) }
+            tabs.padding(.bottom, Self.tabsBottom)
+            list
             BrinkTaggedField(text: $store.draft, project: $store.draftProject, lists: store.lists,
                              prompt: L10n.t("New task in \(store.title(for: store.tab))"), icon: "plus",
                              accent: Palette.textSecondary, id: "draft", editing: $store.editing) {
                 store.create(store.draft, project: store.draftProject.isEmpty ? nil : store.draftProject)
                 store.draft = ""; store.draftProject = ""
             }
-            .padding(.top, NotchLayout.blockSpacing)
+            .padding(.top, Self.quickAddTop)
             if !focus.isActive {
                 BrinkTaggedField(text: $store.freeFocus, project: $store.freeProject, lists: store.lists,
                                  prompt: L10n.t("Focus without a task…"), icon: "timer",
@@ -56,44 +92,73 @@ struct TasksCard: View {
                                 project: store.freeProject.isEmpty ? nil : store.freeProject)
                     store.freeFocus = ""; store.freeProject = ""
                 }
-                .padding(.top, NotchLayout.sessionRowGap)
+                .padding(.top, Self.freeFocusTop)
             }
         }
         // The shared card chrome already pads the frame's margin; the height
         // formula counts that margin once.
         .frame(maxWidth: .infinity, alignment: .topLeading)
         .onAppear { store.refresh() }
+        // A card that goes away takes its typing with it: nothing is being
+        // edited in a card that is not on screen.
+        .onDisappear { store.editing = false }
     }
 
     private var header: some View {
-        HStack(alignment: .center, spacing: NotchLayout.headerGap) {
-            Image(systemName: "checklist")
-                .font(.system(size: Design.px(30), weight: .semibold))
-                .foregroundStyle(Palette.textPrimary)
-                .frame(width: NotchLayout.glyphSize, height: NotchLayout.glyphSize)
-            Text(L10n.t("Tasks")).font(Typography.cardTitle).foregroundStyle(Palette.textPrimary)
-            Spacer(minLength: Design.px(12))
-            if store.completedToday > 0 {
-                Text(L10n.t("\(store.completedToday) done")).font(Typography.cardBody).foregroundStyle(BrinkColors.green)
+        HStack(spacing: BrinkType.pt(8)) {
+            Image(systemName: "checklist").font(BrinkType.font(13, .semibold))
+            Text(L10n.t("Tasks")).font(BrinkType.font(14, .semibold))
+            Spacer()
+            if store.tab == .today, store.completedToday > 0 {
+                Text(L10n.t("\(store.completedToday) done"))
+                    .font(BrinkType.font(9, .bold))
+                    .padding(.horizontal, BrinkType.pt(5)).padding(.vertical, BrinkType.pt(2))
+                    .background(Capsule().fill(BrinkColors.green.opacity(0.85)))
+                    .foregroundStyle(.black.opacity(0.85))
             }
             Button { store.source.showList(store.listName(for: store.tab)) } label: {
-                Image(systemName: "arrow.up.forward.square").font(Typography.cardBody).foregroundStyle(Palette.textSecondary)
+                Image(systemName: "arrow.up.forward.square").font(BrinkType.font(11)).foregroundStyle(Palette.textSecondary)
             }
             .buttonStyle(.plain)
         }
+        .foregroundStyle(Palette.textPrimary)
+    }
+
+    private var focusBanner: some View {
+        HStack(spacing: BrinkType.pt(8)) {
+            Image(systemName: focus.isRunning ? "timer" : "pause.fill")
+                .font(BrinkType.font(11, .semibold)).foregroundStyle(BrinkColors.violet)
+            VStack(alignment: .leading, spacing: BrinkType.pt(1)) {
+                Text(focus.taskName ?? "").font(BrinkType.font(11.5, .semibold)).foregroundStyle(Palette.textPrimary).lineLimit(1)
+                Text("\(FocusStore.clock(focus.elapsed)) · \(L10n.t("target \(focus.targetMinutes) min"))" + (focus.project.map { " · \($0)" } ?? ""))
+                    .font(BrinkType.font(10)).monospacedDigit().foregroundStyle(Palette.textSecondary).lineLimit(1)
+            }
+            Spacer()
+            Button { focus.isRunning ? focus.pause() : focus.resume() } label: {
+                Image(systemName: focus.isRunning ? "pause.circle.fill" : "play.circle.fill").font(BrinkType.font(16))
+            }.buttonStyle(.plain).foregroundStyle(Palette.textPrimary)
+            Button { focus.stop() } label: { Image(systemName: "stop.circle").font(BrinkType.font(16)) }
+                .buttonStyle(.plain).foregroundStyle(Palette.textSecondary)
+        }
+        .padding(.horizontal, Self.bannerPadH).padding(.vertical, Self.bannerPadV)
+        .background(RoundedRectangle(cornerRadius: BrinkType.pt(7), style: .continuous).fill(BrinkColors.violet.opacity(0.14)))
     }
 
     private var tabs: some View {
-        HStack(spacing: Design.px(18)) {
+        HStack(spacing: BrinkType.pt(10)) {
             ForEach(TodoStore.Tab.allCases) { tab in
                 let selected = tab == store.tab
                 let count = store.todos[tab]?.count ?? 0
                 Button { store.tab = tab } label: {
-                    HStack(spacing: Design.px(6)) {
-                        Text(store.title(for: tab)).font(Typography.cardBody).lineLimit(1)
-                        if count > 0 { Text("\(count)").font(Typography.cardBody).monospacedDigit() }
+                    HStack(spacing: BrinkType.pt(4)) {
+                        Text(store.title(for: tab)).font(BrinkType.font(10.5, selected ? .semibold : .regular)).lineLimit(1)
+                        if count > 0 {
+                            Text("\(count)").font(BrinkType.font(9, .semibold)).monospacedDigit()
+                        }
                     }
                     .foregroundStyle(selected ? Palette.textPrimary : Palette.textSecondary)
+                    .padding(.vertical, Self.tabPadV).padding(.horizontal, BrinkType.pt(7))
+                    .background(Capsule().fill(selected ? Palette.ringTrack : .clear))
                     .contentShape(Rectangle())
                 }
                 .buttonStyle(.plain)
@@ -102,35 +167,13 @@ struct TasksCard: View {
         }
     }
 
-    private var focusBanner: some View {
-        HStack(spacing: Design.px(10)) {
-            Image(systemName: focus.isRunning ? "timer" : "pause.fill").font(Typography.cardBody.weight(.semibold)).foregroundStyle(BrinkColors.violet)
-            VStack(alignment: .leading, spacing: 0) {
-                Text(focus.taskName ?? "").font(Typography.cardBody.weight(.semibold)).foregroundStyle(Palette.textPrimary).lineLimit(1)
-                Text("\(FocusStore.clock(focus.elapsed)) · \(L10n.t("target \(focus.targetMinutes) min"))" + (focus.project.map { " · \($0)" } ?? ""))
-                    .font(Typography.cardBody).monospacedDigit().foregroundStyle(Palette.textSecondary).lineLimit(1)
-            }
-            Spacer()
-            Button { focus.isRunning ? focus.pause() : focus.resume() } label: {
-                Image(systemName: focus.isRunning ? "pause.circle.fill" : "play.circle.fill").font(Typography.cardTitle)
-            }.buttonStyle(.plain).foregroundStyle(Palette.textPrimary)
-            Button { focus.stop() } label: { Image(systemName: "stop.circle").font(Typography.cardTitle) }
-                .buttonStyle(.plain).foregroundStyle(Palette.textSecondary)
-        }
-        .padding(.horizontal, Self.bannerPadH)
-        .padding(.vertical, Self.bannerPadV)
-        .background(RoundedRectangle(cornerRadius: Design.px(18), style: .continuous).fill(BrinkColors.violet.opacity(0.16)))
-    }
-
-    static let bannerPadH = Design.px(22)
-    static let bannerPadV = Design.px(14)
-
     @ViewBuilder private var list: some View {
         if listed.isEmpty {
             Text(store.refreshedAt == nil ? L10n.t("Reading \(store.source.title)…") : L10n.t("Nothing here. Enjoy it."))
-                .font(Typography.cardBody).foregroundStyle(Palette.textSecondary)
+                .font(BrinkType.font(11)).foregroundStyle(Palette.textSecondary)
+                .padding(.vertical, Self.emptyPadV)
         } else {
-            VStack(alignment: .leading, spacing: NotchLayout.sessionRowGap) {
+            VStack(alignment: .leading, spacing: 0) {
                 ForEach(listed) { todo in
                     TaskRow(todo: todo, busy: store.busy.contains(todo.id), focused: focus.taskID == todo.id,
                             onComplete: { store.complete(todo); if focus.taskID == todo.id { focus.stop() } },
@@ -152,28 +195,34 @@ private struct TaskRow: View {
     @State private var hover = false
 
     var body: some View {
-        HStack(alignment: .top, spacing: Design.px(12)) {
+        HStack(alignment: .top, spacing: BrinkType.pt(8)) {
             Button(action: onComplete) {
                 ZStack {
-                    Circle().stroke(busy ? BrinkColors.green : Palette.textSecondary, lineWidth: 1.2)
-                        .frame(width: Design.px(20), height: Design.px(20))
-                    if busy { Circle().fill(BrinkColors.green).frame(width: Design.px(20), height: Design.px(20)) }
-                    if busy || hover { Image(systemName: "checkmark").font(.system(size: Design.px(12), weight: .bold)).foregroundStyle(busy ? .black : Palette.textSecondary) }
+                    Circle().stroke(busy ? BrinkColors.green : Palette.textSecondary, lineWidth: BrinkType.pt(1.2))
+                        .frame(width: BrinkType.pt(13), height: BrinkType.pt(13))
+                    if busy { Circle().fill(BrinkColors.green).frame(width: BrinkType.pt(13), height: BrinkType.pt(13)) }
+                    if busy || hover {
+                        Image(systemName: "checkmark").font(BrinkType.font(8, .bold))
+                            .foregroundStyle(busy ? .black.opacity(0.8) : Palette.textSecondary)
+                    }
                 }
-                .padding(.top, Design.px(3))
+                .padding(.top, BrinkType.pt(2))
                 .contentShape(Rectangle())
             }
             .buttonStyle(.plain)
+            // The whole row (minus the checkbox and the play button) opens
+            // the exact item in the app.
             Button(action: onOpen) {
-                VStack(alignment: .leading, spacing: 0) {
-                    Text(todo.name).font(Typography.cardBody).foregroundStyle(busy ? Palette.textSecondary : Palette.textPrimary)
+                VStack(alignment: .leading, spacing: TasksCard.rowLineGap) {
+                    Text(todo.name).font(BrinkType.font(11.5)).foregroundStyle(busy ? Palette.textSecondary : Palette.textPrimary)
                         .strikethrough(busy).lineLimit(1)
-                    HStack(spacing: Design.px(8)) {
-                        if let p = todo.project { Text(p).font(Typography.cardBody).foregroundStyle(Palette.textSecondary).lineLimit(1) }
+                    HStack(spacing: BrinkType.pt(5)) {
+                        if let p = todo.project { Text(p).font(BrinkType.font(10)).foregroundStyle(Palette.textSecondary).lineLimit(1) }
                         if let due = todo.due {
-                            Text(todo.overdue ? L10n.t("due \(due)") : due).font(Typography.cardBody)
+                            Text(todo.overdue ? L10n.t("due \(due)") : due).font(BrinkType.font(10))
                                 .foregroundStyle(todo.overdue ? BrinkColors.orange : Palette.textSecondary)
                         }
+                        if todo.project == nil && todo.due == nil { Text(" ").font(BrinkType.font(10)) }
                     }
                 }
                 .frame(maxWidth: .infinity, alignment: .leading)
@@ -182,15 +231,19 @@ private struct TaskRow: View {
             .buttonStyle(.plain)
             if focused || hover {
                 Button(action: onFocus) {
-                    Image(systemName: focused ? "stop.circle.fill" : "play.circle").font(Typography.cardBody)
+                    Image(systemName: focused ? "stop.circle.fill" : "play.circle").font(BrinkType.font(13))
                         .foregroundStyle(focused ? BrinkColors.violet : Palette.textSecondary)
                 }
-                .buttonStyle(.plain).padding(.top, Design.px(2))
+                .buttonStyle(.plain).padding(.top, BrinkType.pt(1))
             }
         }
-        .background(RoundedRectangle(cornerRadius: Design.px(8), style: .continuous)
-            .fill(focused ? BrinkColors.violet.opacity(0.12) : .clear).padding(.horizontal, -Design.px(8)))
+        .padding(.vertical, TasksCard.rowPadV)
+        // The focus highlight bleeds outside the row so the text stays
+        // aligned with the others.
+        .background(RoundedRectangle(cornerRadius: BrinkType.pt(6), style: .continuous)
+            .fill(focused ? BrinkColors.violet.opacity(0.10) : .clear).padding(.horizontal, -BrinkType.pt(6)))
         .opacity(busy ? 0.6 : 1)
+        .animation(.easeOut(duration: 0.25), value: busy)
         .onHover { hover = $0 }
     }
 }
@@ -219,11 +272,11 @@ struct BrinkTaggedField: View {
     }
 
     var body: some View {
-        VStack(alignment: .leading, spacing: NotchLayout.sessionRowGap) {
-            HStack(spacing: Design.px(10)) {
-                Image(systemName: icon).font(Typography.cardBody).foregroundStyle(accent).frame(width: Design.px(20))
+        VStack(alignment: .leading, spacing: BrinkType.pt(4)) {
+            HStack(spacing: BrinkType.pt(7)) {
+                Image(systemName: icon).font(BrinkType.font(11)).foregroundStyle(accent).frame(width: BrinkType.pt(14))
                 TextField("", text: $text, prompt: Text(prompt).foregroundStyle(Palette.textSecondary))
-                    .textFieldStyle(.plain).font(Typography.cardBody).foregroundStyle(Palette.textPrimary)
+                    .textFieldStyle(.plain).font(BrinkType.font(11)).foregroundStyle(Palette.textPrimary)
                     .focused($focused)
                     .onChange(of: focused) { _, on in
                         editing = on
@@ -236,35 +289,40 @@ struct BrinkTaggedField: View {
                             DispatchQueue.main.async { focused = true }
                         }
                     }
+                    // A field that leaves the screen (the free-focus line goes
+                    // when a block starts) can no longer be edited, whatever
+                    // its focus state last said.
+                    .onDisappear { if editing { editing = false } }
                     .onSubmit { if let first = suggestions.first, query != nil { pick(first) } else { action() } }
                 Menu {
                     Button(L10n.t("No project")) { project = "" }
                     Divider()
                     ForEach(lists, id: \.self) { l in Button(l) { project = l } }
                 } label: {
-                    HStack(spacing: Design.px(4)) {
-                        Image(systemName: project.isEmpty ? "folder" : "folder.fill").font(Typography.cardBody)
-                        if !project.isEmpty { Text(project).font(Typography.cardBody).lineLimit(1).frame(maxWidth: Design.px(160)) }
+                    HStack(spacing: BrinkType.pt(3)) {
+                        Image(systemName: project.isEmpty ? "folder" : "folder.fill").font(BrinkType.font(11))
+                        if !project.isEmpty { Text(project).font(BrinkType.font(10.5)).lineLimit(1).frame(maxWidth: BrinkType.pt(110)) }
                     }
                     .foregroundStyle(project.isEmpty ? Palette.textSecondary : accent)
                 }
                 .menuStyle(.borderlessButton).menuIndicator(.hidden).fixedSize()
                 Button(action: action) {
-                    Image(systemName: icon == "timer" ? "play.circle.fill" : "return").font(Typography.cardBody).foregroundStyle(accent)
-                        .frame(width: Design.px(24))
+                    Image(systemName: icon == "timer" ? "play.circle.fill" : "return").font(BrinkType.font(12)).foregroundStyle(accent)
+                        .frame(width: BrinkType.pt(16))
                 }
                 .buttonStyle(.plain)
             }
+            .frame(height: TasksCard.fieldHeight)
             if !suggestions.isEmpty {
                 VStack(alignment: .leading, spacing: 0) {
                     ForEach(suggestions, id: \.self) { l in
                         Button { pick(l) } label: {
-                            HStack(spacing: Design.px(8)) {
-                                Image(systemName: "folder").font(Typography.cardBody).foregroundStyle(Palette.textSecondary)
-                                Text(l).font(Typography.cardBody).foregroundStyle(Palette.textPrimary).lineLimit(1)
+                            HStack(spacing: BrinkType.pt(6)) {
+                                Image(systemName: "folder").font(BrinkType.font(10.5)).foregroundStyle(Palette.textSecondary)
+                                Text(l).font(BrinkType.font(11)).foregroundStyle(Palette.textPrimary).lineLimit(1)
                                 Spacer()
                             }
-                            .frame(height: NotchLayout.cardBodyLineHeight)
+                            .frame(height: BrinkType.line(11))
                             .contentShape(Rectangle())
                         }
                         .buttonStyle(.plain)

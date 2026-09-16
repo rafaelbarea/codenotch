@@ -580,6 +580,7 @@ extension Array where Element == ProjectCost {
 /// shows. All-time has no limit to measure against, so it reports each project's
 /// *share of total work* instead; both are percentages, and the UI says which.
 enum CostRange: String, CaseIterable, Identifiable {
+    case today
     case session
     case weekly
     case month
@@ -590,6 +591,7 @@ enum CostRange: String, CaseIterable, Identifiable {
     /// Used as the section heading, where there is room for a full phrase.
     var title: String {
         switch self {
+        case .today:   return L10n.t("Today")
         case .session: return L10n.t("This session")
         case .weekly:  return L10n.t("This week")
         case .month:   return L10n.t("This month")
@@ -600,6 +602,7 @@ enum CostRange: String, CaseIterable, Identifiable {
     /// Used in the picker, where four labels have to fit on one line.
     var shortTitle: String {
         switch self {
+        case .today:   return L10n.t("Today")
         case .session: return L10n.t("Session")
         case .weekly:  return L10n.t("Week")
         case .month:   return L10n.t("Month")
@@ -614,13 +617,15 @@ enum CostRange: String, CaseIterable, Identifiable {
         switch self {
         case .session: return .session
         case .weekly:  return .weekly
-        case .month, .allTime: return nil
+        case .today, .month, .allTime: return nil
         }
     }
 
     /// Start of the range for the share-based views.
     var start: Date? {
         switch self {
+        case .today:
+            return Calendar.current.startOfDay(for: Date())
         case .month:
             let cal = Calendar.current
             return cal.date(from: cal.dateComponents([.year, .month], from: Date()))

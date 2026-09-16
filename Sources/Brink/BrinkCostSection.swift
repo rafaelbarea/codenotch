@@ -20,16 +20,33 @@ struct BrinkCostSection: View {
     }
 
     private var shown: [ProjectCost] { Array(model.rows.prefix(min(rows, Self.maxRows))) }
-    private var title: String {
-        model.creditBacked ? L10n.t("This cycle") : (model.quotaBacked ? L10n.t("This week") : L10n.t("This month"))
+
+    /// The ranges the card offers: the day, the allowance window (a week, or
+    /// a credit cycle) and the month.
+    static let tabs: [CostRange] = [.today, .weekly, .month]
+
+    private func title(_ range: CostRange) -> String {
+        if range == .weekly, model.creditBacked { return L10n.t("Cycle") }
+        return range.shortTitle
     }
 
     var body: some View {
         VStack(alignment: .leading, spacing: NotchLayout.sessionRowGap) {
-            Text(title)
-                .font(Typography.cardBody)
-                .foregroundStyle(Palette.textPrimary)
-                .padding(.top, NotchLayout.blockSpacing)
+            HStack(spacing: Design.px(18)) {
+                ForEach(Self.tabs) { range in
+                    let selected = model.range == range
+                    Button { model.range = range } label: {
+                        Text(title(range))
+                            .font(selected ? Typography.cardBody.weight(.semibold) : Typography.cardBody)
+                            .foregroundStyle(selected ? Palette.textPrimary : Palette.textSecondary)
+                            .contentShape(Rectangle())
+                    }
+                    .buttonStyle(.plain)
+                }
+                Spacer()
+            }
+            .frame(height: NotchLayout.cardBodyLineHeight)
+            .padding(.top, NotchLayout.blockSpacing)
             ForEach(shown) { row in
                 HStack(spacing: Design.px(12)) {
                     Text(row.displayName)
@@ -53,10 +70,10 @@ struct BrinkCostSection: View {
             }
         }
         .onAppear {
-            // The card has one range: the allowance window when the account has
-            // one, else the month.
-            if model.quotaBacked { if model.range != .weekly { model.range = .weekly } }
-            else if model.range != .month { model.range = .month }
+            // Opens on the allowance window when the account has one, else the
+            // month; the tabs take it from there.
+            guard !Self.tabs.contains(model.range) else { return }
+            model.range = model.quotaBacked ? .weekly : .month
         }
     }
 }

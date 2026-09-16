@@ -28,6 +28,9 @@ Everything under `Sources/Brink/`, plus small hooks in `AppDelegate`, `StatusIte
   or a free focus in place.
 - **Under each ring**: the percent, then how long until that limit resets ("4h 25m", "2d 3h"). A
   running focus shows its clock instead of a percent, in violet, with a play (or pause) glyph.
+- **Cost tabs**: Today / Week (Cycle for credit plans) / Month in each account's card. Double-click a
+  ring to open a terminal on that account (its config directory exported); the tasks ring opens the
+  task app.
 - **Right-click on the notch**: New session…, Activity…, Focus… (both open as Settings sections) and
   Settings…. Settings is resizable.
 - **Displays**: Appearance → Displays: All displays puts one notch on every screen, each honouring the

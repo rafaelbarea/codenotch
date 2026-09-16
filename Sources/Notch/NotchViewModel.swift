@@ -625,7 +625,7 @@ final class NotchViewModel: ObservableObject {
     /// The card as upstream drew it is the small setting; medium and large
     /// grow it in bigger steps than the notch, since the card is read and the
     /// notch is glanced at: small 1.0, medium 1.45, large 2.0.
-    static func cardBase(for sizeScale: CGFloat) -> CGFloat {
+    nonisolated static func cardBase(for sizeScale: CGFloat) -> CGFloat {
         1.0 + max(0, sizeScale - NotchSize.small.scale) * 2.25
     }
     /// Room kept for the menu bar when a side-edge card is sized to the screen.
