@@ -37,7 +37,9 @@ enum Brink {
         _ = PlanCatalog.shared
         _ = PriceTable.shared
         _ = CostAccountStore.shared
+        BrinkNotifications.installPresenter()
         BrinkNotifications.requestAuthorizationIfNeeded()
+        BrinkNotifications.testOnLaunchIfAsked()
         // A nickname typed in Settings shows on the ring's card at once, not
         // at the next poll.
         accountTick = CostAccountStore.shared.$accounts

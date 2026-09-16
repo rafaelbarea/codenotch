@@ -38,6 +38,23 @@ enum BrinkNotifications {
     /// no card of its own (a focus block ending): the peek, and the chime.
     static var notchAlert: (() -> Void)?
 
+    /// Without a delegate, macOS delivers an app's own notifications quietly
+    /// to the list while that app is frontmost: the test sent from Settings,
+    /// with the Settings window in front, never showed. The delegate asks for
+    /// the banner and the sound whatever is in front.
+    private final class Presenter: NSObject, UNUserNotificationCenterDelegate {
+        func userNotificationCenter(_ center: UNUserNotificationCenter,
+                                    willPresent notification: UNNotification,
+                                    withCompletionHandler completionHandler: @escaping (UNNotificationPresentationOptions) -> Void) {
+            completionHandler([.banner, .list, .sound])
+        }
+    }
+    private static let presenter = Presenter()
+
+    static func installPresenter() {
+        UNUserNotificationCenter.current().delegate = presenter
+    }
+
     /// Asked once, at launch, so the first banner is not also the first
     /// permission dialog.
     static func requestAuthorizationIfNeeded() {
@@ -50,10 +67,15 @@ enum BrinkNotifications {
     }
 
     /// A banner, or the System Settings pane when banners are switched off
-    /// for Codenotch there.
+    /// for Codenotch there. On the notch channel, the peek and the chime.
     static func test() {
+        guard usesMac else {
+            DispatchQueue.main.async { notchAlert?() }
+            return
+        }
         let center = UNUserNotificationCenter.current()
         center.getNotificationSettings { settings in
+            Log.usage.info("notifications: authorization \(settings.authorizationStatus.rawValue, privacy: .public) alerts \(settings.alertSetting.rawValue, privacy: .public) style \(settings.alertStyle.rawValue, privacy: .public) centre \(settings.notificationCenterSetting.rawValue, privacy: .public) sound \(settings.soundSetting.rawValue, privacy: .public)")
             switch settings.authorizationStatus {
             case .notDetermined:
                 center.requestAuthorization(options: [.alert, .sound]) { ok, _ in
@@ -94,7 +116,22 @@ enum BrinkNotifications {
         content.body = body
         content.sound = .default
         let identifier = "brink|\(id ?? "")|\(Int(Date().timeIntervalSince1970))"
-        UNUserNotificationCenter.current().add(UNNotificationRequest(identifier: identifier, content: content, trigger: nil))
+        UNUserNotificationCenter.current().add(UNNotificationRequest(identifier: identifier, content: content, trigger: nil)) { error in
+            if let error {
+                Log.usage.error("notification not accepted: \(error.localizedDescription, privacy: .public)")
+            } else {
+                Log.usage.info("notification queued: \(title, privacy: .public)")
+            }
+        }
+    }
+
+    /// `defaults write com.vinz.codenotch brinkNotifyTestOnLaunch -bool true`
+    /// sends one test a few seconds after launch and clears the flag: a way
+    /// to exercise the path without a hand on the button.
+    static func testOnLaunchIfAsked() {
+        guard UserDefaults.standard.bool(forKey: "brinkNotifyTestOnLaunch") else { return }
+        UserDefaults.standard.removeObject(forKey: "brinkNotifyTestOnLaunch")
+        DispatchQueue.main.asyncAfter(deadline: .now() + 4) { test() }
     }
 }
 
@@ -113,10 +150,11 @@ struct BrinkNotificationsSection: View {
                 }
                 .labelsHidden().pickerStyle(.segmented).fixedSize()
             }
-            if current == .mac {
-                SettingsRow(title: L10n.t("Send a test"), description: L10n.t("Opens System Settings when banners are off for Codenotch.")) {
-                    Button(L10n.t("Send")) { BrinkNotifications.test() }
-                }
+            SettingsRow(title: L10n.t("Send a test"),
+                        description: current == .mac
+                            ? L10n.t("Opens System Settings when banners are off for Codenotch.")
+                            : L10n.t("The notch opens for a moment, with the session sound.")) {
+                Button(L10n.t("Send")) { BrinkNotifications.test() }
             }
         }
         .onChange(of: channel) { _, _ in BrinkNotifications.requestAuthorizationIfNeeded() }

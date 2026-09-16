@@ -24863,6 +24863,17 @@
           }
         }
       }
+    },
+    "The notch opens for a moment, with the session sound.": {
+      "extractionState": "manual",
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "O notch abre por um instante, com o som de sessão."
+          }
+        }
+      }
     }
   },
   "version": "1.0"
