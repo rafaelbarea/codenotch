@@ -56,6 +56,11 @@ enum NewSession {
                 .replacingOccurrences(of: "{dir}", with: dir)
                 .replacingOccurrences(of: "{provider}", with: account.provider)
         }
+        run(cmd)
+    }
+
+    /// Run a command in a new window of the chosen terminal.
+    @MainActor static func run(_ cmd: String) {
         let choice = terminal.isEmpty ? (installed().first?.bundleID ?? "com.apple.Terminal") : terminal
         let escaped = cmd.replacingOccurrences(of: "\\", with: "\\\\").replacingOccurrences(of: "\"", with: "\\\"")
         let script: String

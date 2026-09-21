@@ -32927,6 +32927,28 @@
           }
         }
       }
+    },
+    "Runs %@ in your terminal; it opens the browser to sign in and saves the session this reads.": {
+      "extractionState": "manual",
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Roda %@ no seu terminal; ele abre o navegador para entrar e guarda a sessão que o app lê."
+          }
+        }
+      }
+    },
+    "Install the Grok CLI first (docs.x.ai); Sign in then runs grok login in your terminal, which opens the browser.": {
+      "extractionState": "manual",
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Instale a CLI do Grok primeiro (docs.x.ai); Entrar então roda grok login no seu terminal, que abre o navegador."
+          }
+        }
+      }
     }
   },
   "version": "1.0"

@@ -610,6 +610,9 @@ final class UsageStore: ObservableObject {
             // Claude Code: nothing to open. The row's guidance is the whole
             // answer, so the sheet has to show it rather than pretend.
             return false
+        case .command(let command, _):
+            NewSession.run(command)
+            return true
         }
     }
 
