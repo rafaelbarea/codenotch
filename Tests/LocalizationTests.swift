@@ -324,8 +324,8 @@ final class LocalizationTests: XCTestCase {
     /// reordering without positional specifiers.
     func testThresholdAlertKeepsArgumentOrderInGerman() {
         XCTAssertEqual(
-            L10n.t("\(80)% of its \("weekly") limit used.", locale: german),
-            "80% des weekly-Limits verwendet."
+            L10n.t("\("Weekly limit"): \(80)% used.", locale: german),
+            "Weekly limit: 80% verbraucht."
         )
     }
 
@@ -480,8 +480,8 @@ final class LocalizationTests: XCTestCase {
     /// them without positional specifiers.
     func testThresholdAlertKeepsArgumentOrderInJapanese() {
         XCTAssertEqual(
-            L10n.t("\(80)% of its \("weekly") limit used.", locale: japanese),
-            "80% を使用（weekly の上限）。"
+            L10n.t("\("Weekly limit"): \(80)% used.", locale: japanese),
+            "Weekly limit：80% 使用"
         )
     }
 
@@ -513,8 +513,8 @@ final class LocalizationTests: XCTestCase {
 
     func testRussianThresholdAlertKeepsArgumentOrder() {
         XCTAssertEqual(
-            L10n.t("\(80)% of its \("weekly") limit used.", locale: russian),
-            "Использовано 80% от лимита «weekly»."
+            L10n.t("\("Weekly limit"): \(80)% used.", locale: russian),
+            "Weekly limit: использовано 80%."
         )
     }
 
@@ -543,8 +543,8 @@ final class LocalizationTests: XCTestCase {
 
     func testUkrainianThresholdAlertKeepsArgumentOrder() {
         XCTAssertEqual(
-            L10n.t("\(80)% of its \("weekly") limit used.", locale: ukrainian),
-            "Використано 80% ліміту «weekly»."
+            L10n.t("\("Weekly limit"): \(80)% used.", locale: ukrainian),
+            "Weekly limit: використано 80%."
         )
     }
 

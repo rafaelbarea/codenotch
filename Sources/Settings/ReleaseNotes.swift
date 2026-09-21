@@ -32,6 +32,20 @@ enum ReleaseNotes {
     static var all: [ReleaseNote] {
         [
             ReleaseNote(
+                version: "1.12.1",
+                headline: L10n.t("Quieter after a restart."),
+                changes: [
+                    ReleaseNote.Change(
+                        title: L10n.t("No banners for Codenotch's own work"),
+                        detail: L10n.t("The Claude Code process that reads /usage no longer shows as a session or announces that it finished. A limit already spent when the app starts is not announced again, and the Tasks ring is not treated as a limit.")
+                    ),
+                    ReleaseNote.Change(
+                        title: L10n.t("Clearer limit banners"),
+                        detail: L10n.t("The reset and limit notifications name the window once, and are translated.")
+                    ),
+                ]
+            ),
+            ReleaseNote(
                 version: "1.12.0",
                 headline: L10n.t("An installer for Windows, Ukrainian, Dark glass, and limits you set yourself."),
                 changes: [

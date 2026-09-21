@@ -28,7 +28,7 @@ final class CatalogCoverageTests: XCTestCase {
             "Always show": "Всегда показывать",
             "Settings…": "Настройки…",
             "Sign in to %@": "Войти в %@",
-            "%lld%% of its %@ limit used.": "Использовано %lld%% от лимита «%@»."
+            "%@: %lld%% used.": "%@: использовано %lld%%."
         ]
 
         for (key, value) in expected {
@@ -49,7 +49,7 @@ final class CatalogCoverageTests: XCTestCase {
             "Always show": "Показувати завжди",
             "Settings…": "Налаштування…",
             "Sign in to %@": "Увійти в %@",
-            "%lld%% of its %@ limit used.": "Використано %lld%% ліміту «%@»."
+            "%@: %lld%% used.": "%@: використано %lld%%."
         ]
 
         for (key, value) in expected {

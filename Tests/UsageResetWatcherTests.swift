@@ -32,6 +32,23 @@ final class UsageResetWatcherTests: XCTestCase {
         XCTAssertTrue(alerts.isEmpty, "initial reading records baseline and does not alert")
     }
 
+    /// At launch the store publishes the archived reading, marked stale, and
+    /// the live one follows. A newer reset date between the two is not a reset
+    /// that happened; it is the archive being old.
+    func testAnArchivedReadingIsNotTheBaseline() {
+        let old = Date(timeIntervalSince1970: 1_000_000)
+        var archived = snapshot("claude", "Claude", 0.85, resetsAt: old)
+        archived.status = .stale(since: old)
+        watcher.observe([archived])
+        watcher.observe([snapshot("claude", "Claude", 0.10, resetsAt: old.addingTimeInterval(5 * 3600))])
+        XCTAssertTrue(alerts.isEmpty, "the first live reading only records")
+
+        // The next roll-over, seen live against live, is announced.
+        watcher.observe([snapshot("claude", "Claude", 0.60, resetsAt: old.addingTimeInterval(5 * 3600))])
+        watcher.observe([snapshot("claude", "Claude", 0.05, resetsAt: old.addingTimeInterval(10 * 3600))])
+        XCTAssertEqual(alerts.count, 1)
+    }
+
     func testAlertsWhenUsageDropsSignificantly() {
         watcher.observe([snapshot("claude", "Claude", 0.90)])
         watcher.observe([snapshot("claude", "Claude", 0.05)])

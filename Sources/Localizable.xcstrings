@@ -13166,147 +13166,6 @@
         }
       }
     },
-    "Its %@ limit is spent.": {
-      "extractionState": "manual",
-      "localizations": {
-        "fr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Sa limite %@ est épuisée."
-          }
-        },
-        "ja": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "%@ の上限を使い切りました。"
-          }
-        },
-        "pt-BR": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "O limite de %@ dele está esgotado."
-          }
-        },
-        "zh-Hans": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "它的 %@ 额度已用完。"
-          }
-        },
-        "ru": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Лимит %@ исчерпан."
-          }
-        },
-        "de": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Sein %@-Limit ist aufgebraucht."
-          }
-        },
-        "uk": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Ліміт %@ вичерпано."
-          }
-        }
-      }
-    },
-    "Its %@ limit is spent — resets %@": {
-      "extractionState": "manual",
-      "localizations": {
-        "fr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Sa limite %@ est épuisée — réinit. %@"
-          }
-        },
-        "ja": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "%@ の上限を使い切りました — %@ にリセット"
-          }
-        },
-        "pt-BR": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "O limite de %@ dele está esgotado — renova %@"
-          }
-        },
-        "zh-Hans": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "它的 %@ 额度已用完 — %@ 重置"
-          }
-        },
-        "ru": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Лимит %@ исчерпан — сброс %@"
-          }
-        },
-        "de": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Sein %@-Limit ist aufgebraucht — Zurücksetzung %@"
-          }
-        },
-        "uk": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Ліміт %@ вичерпано — скидання %@"
-          }
-        }
-      }
-    },
-    "%lld%% of its %@ limit used.": {
-      "extractionState": "manual",
-      "localizations": {
-        "ru": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Использовано %lld%% от лимита «%@»."
-          }
-        },
-        "fr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "%lld%% de sa limite %@ utilisés."
-          }
-        },
-        "ja": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "%lld%% を使用（%@ の上限）。"
-          }
-        },
-        "pt-BR": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "%lld%% do limite de %@ dele usado."
-          }
-        },
-        "zh-Hans": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "已用其 %@ 额度的 %lld%%。"
-          }
-        },
-        "de": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "%lld%% des %@-Limits verwendet."
-          }
-        },
-        "uk": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Використано %lld%% ліміту «%@»."
-          }
-        }
-      }
-    },
     "Moves to the display containing the window receiving keyboard input.": {
       "extractionState": "manual",
       "localizations": {
@@ -25058,6 +24917,296 @@
           "stringUnit": {
             "state": "translated",
             "value": "O bloco chegou à meta, ou passou de duas horas."
+          }
+        }
+      }
+    },
+    "%@: %lld%% used.": {
+      "extractionState": "manual",
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@: %lld%% usado."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@ : %lld%% utilisés."
+          }
+        },
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@: %lld%% verbraucht."
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@：%lld%% 使用"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@：已用 %lld%%。"
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@: использовано %lld%%."
+          }
+        },
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@: використано %lld%%."
+          }
+        }
+      }
+    },
+    "%@: spent. Resets %@": {
+      "extractionState": "manual",
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@: esgotado. Renova %@"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@ : épuisée. Réinit. %@"
+          }
+        },
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@: aufgebraucht. Zurücksetzung %@"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@：使い切りました。%@ にリセット"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@：已用完。%@ 重置"
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@: исчерпан. Сброс %@"
+          }
+        },
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@: вичерпано. Скидання %@"
+          }
+        }
+      }
+    },
+    "%@: spent.": {
+      "extractionState": "manual",
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@: esgotado."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@ : épuisée."
+          }
+        },
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@: aufgebraucht."
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@：使い切りました。"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@：已用完。"
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@: исчерпан."
+          }
+        },
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@: вичерпано."
+          }
+        }
+      }
+    },
+    "%@: available again.": {
+      "extractionState": "manual",
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@: disponível de novo."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@ : de nouveau disponible."
+          }
+        },
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@: wieder verfügbar."
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@：再び利用できます。"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@：已恢复可用。"
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@: снова доступен."
+          }
+        },
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@: знову доступний."
+          }
+        }
+      }
+    },
+    "%@ has reset": {
+      "extractionState": "manual",
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@: limite renovado"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@ : limite réinitialisée"
+          }
+        },
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@: Limit zurückgesetzt"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@ の上限がリセットされました"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@ 额度已重置"
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@: лимит сброшен"
+          }
+        },
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@: ліміт скинуто"
+          }
+        }
+      }
+    },
+    "Quieter after a restart.": {
+      "extractionState": "manual",
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Mais silencioso depois de reiniciar."
+          }
+        }
+      }
+    },
+    "No banners for Codenotch's own work": {
+      "extractionState": "manual",
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Sem avisos para o trabalho do próprio Codenotch"
+          }
+        }
+      }
+    },
+    "The Claude Code process that reads /usage no longer shows as a session or announces that it finished. A limit already spent when the app starts is not announced again, and the Tasks ring is not treated as a limit.": {
+      "extractionState": "manual",
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "O processo do Claude Code que lê /usage não aparece mais como sessão nem anuncia que terminou. Um limite já esgotado quando o app abre não é anunciado de novo, e o anel de Tarefas não é tratado como limite."
+          }
+        }
+      }
+    },
+    "Clearer limit banners": {
+      "extractionState": "manual",
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Avisos de limite mais claros"
+          }
+        }
+      }
+    },
+    "The reset and limit notifications name the window once, and are translated.": {
+      "extractionState": "manual",
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "As notificações de renovação e de limite citam a janela uma vez só, e estão traduzidas."
           }
         }
       }

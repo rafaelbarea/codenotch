@@ -633,9 +633,14 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
                 .sink { [weak statusItem] snapshots, paced in
                     let snapshots = DailyPace.apply(to: snapshots, enabled: paced)
                     statusItem?.snapshots = snapshots
-                    notifier.observe(snapshots)
-                    resetWatcher.observe(snapshots)
-                    limitWatcher.observe(snapshots)
+                    // The Tasks ring is done ÷ open, not a vendor's quota. A
+                    // list emptying or loading is not a limit resetting, and
+                    // fed to the watchers it announced "Tasks has reset" as
+                    // the day's to-dos came in.
+                    let watched = snapshots.filter { $0.id != TasksProvider.providerID }
+                    notifier.observe(watched)
+                    resetWatcher.observe(watched)
+                    limitWatcher.observe(watched)
                 }
                 .store(in: &cancellables)
             store.start()
@@ -685,6 +690,16 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
             monitors[profile.id] = CodexActivityMonitor(profile: profile)
         }
 
+        // The `/usage` probe is a Claude Code process too, and files a session
+        // for the seconds it runs. Every Claude monitor steps over it by pid
+        // and by its scratch directory, whether or not a token refresher runs
+        // below. Without this the probe showed as a `busy` session, vanished,
+        // and was announced as a turn that finished.
+        for monitor in claudeMonitors {
+            monitor.ignoredPIDs = { ClaudeUsageCLI.runningPIDs }
+            monitor.ignoredWorkingDirectories = [ClaudeUsageCLI.scratchLocation().path]
+        }
+
         // Renewing the token runs the Claude command, which registers a session
         // of its own for the second it lives. Every Claude monitor is told to
         // step over that pid, so it never reaches the notch and never counts as
@@ -702,8 +717,9 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
             )
             for monitor in claudeMonitors {
                 monitor.ignoredPIDs = { [weak refresher] in
-                    guard let pid = refresher?.launchedPID else { return [] }
-                    return [pid]
+                    var pids = ClaudeUsageCLI.runningPIDs
+                    if let pid = refresher?.launchedPID { pids.insert(pid) }
+                    return pids
                 }
             }
             // The one place the failure becomes visible. The store carries the

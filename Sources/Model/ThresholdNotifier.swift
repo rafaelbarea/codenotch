@@ -41,12 +41,28 @@ final class ThresholdNotifier {
     }
 
     private func observe(_ snapshot: ProviderSnapshot) {
+        // An archived reading is not a baseline. At launch the store publishes
+        // what it remembered from the last run, marked stale, and the first
+        // live fetch follows seconds later; measured against the archive it
+        // read as a crossing, and rang on every start. Forgetting the provider
+        // here makes that first live reading the one that only records.
+        guard !snapshot.status.isStale else {
+            crossed.removeValue(forKey: snapshot.id)
+            return
+        }
         guard let fraction = snapshot.usedFraction else { return }
         let percent = fraction * 100
         let level = percent >= 100 ? 100 : percent >= 80 ? 80 : 0
 
+        // The first reading only records. Every provider arrives with no
+        // history when Codenotch launches, and after a restart that reading is
+        // the archived one, often already past a threshold; treating it as a
+        // crossing rang "limit reached" on every start.
+        guard let previous = crossed[snapshot.id] else {
+            crossed[snapshot.id] = level
+            return
+        }
         defer { crossed[snapshot.id] = level }
-        let previous = crossed[snapshot.id] ?? 0
         guard level > previous, !isMuted(snapshot.id) else { return }
 
         guard let headline = snapshot.headline else { return }
@@ -74,7 +90,7 @@ enum ThresholdAlerts {
             let title = alert.threshold >= 100
                 ? L10n.t("\(alert.providerName) limit reached")
                 : L10n.t("\(alert.providerName) is at \(alert.usedPercent)%")
-            let body = L10n.t("\(alert.usedPercent)% of its \(alert.windowLabel.lowercased()) limit used.")
+            let body = L10n.t("\(alert.windowLabel): \(alert.usedPercent)% used.")
             DispatchQueue.main.async { _ = BrinkNotifications.notchAlert?(title, body, nil) }
             return
         }
@@ -86,12 +102,15 @@ enum ThresholdAlerts {
             content.title = alert.threshold >= 100
                 ? L10n.t("\(alert.providerName) limit reached")
                 : L10n.t("\(alert.providerName) is at \(alert.usedPercent)%")
+            // The window's label leads and is used as printed: labels such as
+            // "5h limit" already say "limit", and "Its 5h limit limit is
+            // spent" is what a template that added the word produced.
             if alert.threshold >= 100 {
                 content.body = alert.resetsAt.map {
-                    L10n.t("Its \(alert.windowLabel.lowercased()) limit is spent — resets \($0.formatted(date: .omitted, time: .shortened))")
-                } ?? L10n.t("Its \(alert.windowLabel.lowercased()) limit is spent.")
+                    L10n.t("\(alert.windowLabel): spent. Resets \($0.formatted(date: .omitted, time: .shortened))")
+                } ?? L10n.t("\(alert.windowLabel): spent.")
             } else {
-                content.body = L10n.t("\(alert.usedPercent)% of its \(alert.windowLabel.lowercased()) limit used.")
+                content.body = L10n.t("\(alert.windowLabel): \(alert.usedPercent)% used.")
             }
             // One thread per provider, so two limits ending together read as
             // two notes, not one merged pile.
@@ -117,16 +136,16 @@ enum UsageAlertNotifications {
             guard granted else { return }
 
             let content = UNMutableNotificationContent()
-            let window = event.windowLabel.lowercased()
+            let window = event.windowLabel
             switch event.kind {
             case .reset:
                 content.title = L10n.t("\(event.providerName) has reset")
-                content.body = L10n.t("Its \(window) limit is available again.")
+                content.body = L10n.t("\(window): available again.")
             case .sessionLimitReached, .weeklyLimitReached:
                 content.title = L10n.t("\(event.providerName) limit reached")
                 content.body = event.resetsAt.map {
-                    L10n.t("Its \(window) limit is spent — resets \($0.formatted(date: .omitted, time: .shortened))")
-                } ?? L10n.t("Its \(window) limit is spent.")
+                    L10n.t("\(window): spent. Resets \($0.formatted(date: .omitted, time: .shortened))")
+                } ?? L10n.t("\(window): spent.")
             }
             // Same threading as the crossing alerts: one pile per provider.
             content.threadIdentifier = event.providerID
