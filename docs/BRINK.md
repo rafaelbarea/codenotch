@@ -16,7 +16,8 @@ Everything under `Sources/Brink/`, plus small hooks in `AppDelegate`, `StatusIte
   cycle's) allowance and the money that is worth.
 - **Activity window** (menu → Activity…, ⌘A): day / week / month, per account, lanes or bars per
   day, sessions per project with cost.
-- **Tasks ring** (switch on in Settings → Accounts): today's done ÷ total from Things 3 or Reminders;
+- **Tasks ring** (switch on in Settings → Accounts): today's done ÷ total from Things 3, Reminders or
+  Todoist (REST API, token from Todoist → Settings → Integrations → Developer, kept in the keychain);
   hover card with Today / Tomorrow / one list, complete, add ("@" picks the project), open in the
   app, focus timer per task or free. While a task is in focus the ring is the timer.
 - **Focus window** (menu → Focus…, ⌘F, or Settings → Focus): day / week / month, per project, editable blocks.

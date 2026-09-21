@@ -239,23 +239,80 @@ enum ThingsBridge {
 
 /// Where tasks come from.
 enum TaskSource: String, CaseIterable, Identifiable {
-    case things, reminders
+    case things, reminders, todoist
     var id: String { rawValue }
-    var title: String { self == .things ? "Things 3" : L10n.t("Reminders") }
-    var isAvailable: Bool { self == .things ? ThingsBridge.isInstalled : true }
+    var title: String {
+        switch self {
+        case .things: return "Things 3"
+        case .reminders: return L10n.t("Reminders")
+        case .todoist: return "Todoist"
+        }
+    }
+    /// Offered in Settings. Things needs the app; Todoist works over its API
+    /// with or without the app, so it is always offered and asks for a token.
+    var isAvailable: Bool {
+        switch self {
+        case .things: return ThingsBridge.isInstalled
+        case .reminders, .todoist: return true
+        }
+    }
+    /// Able to answer right now.
+    var isReady: Bool { self == .todoist ? TodoistBridge.hasToken : isAvailable }
     static let key = "todoSource"
     static var current: TaskSource {
         if let s = TaskSource(rawValue: UserDefaults.standard.string(forKey: key) ?? ""), s.isAvailable { return s }
         return ThingsBridge.isInstalled ? .things : .reminders
     }
 
-    func todos(in list: String) -> [Todo]? { self == .things ? ThingsBridge.todos(in: list) : RemindersBridge.todos(in: list) }
-    func completedToday() -> Int { self == .things ? ThingsBridge.completedToday() : RemindersBridge.completedToday() }
-    func complete(_ id: String) -> Bool { self == .things ? ThingsBridge.complete(id) : RemindersBridge.complete(id) }
-    func create(_ name: String, in list: String, project: String? = nil) -> Bool { self == .things ? ThingsBridge.create(name, in: list, project: project) : RemindersBridge.create(name, in: list, project: project) }
-    func show(_ id: String, in list: String, name: String) { self == .things ? ThingsBridge.show(id, in: list, name: name) : RemindersBridge.show(id) }
-    func showList(_ list: String) { self == .things ? ThingsBridge.showList(list) : RemindersBridge.open() }
-    func pickableLists() -> [String] { self == .things ? ThingsBridge.pickableLists() : RemindersBridge.pickableLists() }
+    func todos(in list: String) -> [Todo]? {
+        switch self {
+        case .things: return ThingsBridge.todos(in: list)
+        case .reminders: return RemindersBridge.todos(in: list)
+        case .todoist: return TodoistBridge.todos(in: list)
+        }
+    }
+    func completedToday() -> Int {
+        switch self {
+        case .things: return ThingsBridge.completedToday()
+        case .reminders: return RemindersBridge.completedToday()
+        case .todoist: return TodoistBridge.completedToday()
+        }
+    }
+    func complete(_ id: String) -> Bool {
+        switch self {
+        case .things: return ThingsBridge.complete(id)
+        case .reminders: return RemindersBridge.complete(id)
+        case .todoist: return TodoistBridge.complete(id)
+        }
+    }
+    func create(_ name: String, in list: String, project: String? = nil) -> Bool {
+        switch self {
+        case .things: return ThingsBridge.create(name, in: list, project: project)
+        case .reminders: return RemindersBridge.create(name, in: list, project: project)
+        case .todoist: return TodoistBridge.create(name, in: list, project: project)
+        }
+    }
+    func show(_ id: String, in list: String, name: String) {
+        switch self {
+        case .things: ThingsBridge.show(id, in: list, name: name)
+        case .reminders: RemindersBridge.show(id)
+        case .todoist: TodoistBridge.show(id)
+        }
+    }
+    func showList(_ list: String) {
+        switch self {
+        case .things: ThingsBridge.showList(list)
+        case .reminders: RemindersBridge.open()
+        case .todoist: TodoistBridge.showList(list)
+        }
+    }
+    func pickableLists() -> [String] {
+        switch self {
+        case .things: return ThingsBridge.pickableLists()
+        case .reminders: return RemindersBridge.pickableLists()
+        case .todoist: return TodoistBridge.pickableLists()
+        }
+    }
     /// Built-in lists offered for the third tab.
     var builtinLists: [String] { self == .things ? ["Anytime", "Inbox", "Someday"] : [] }
 }

@@ -11,6 +11,14 @@ struct BrinkSettingsPane: View {
     @State private var command = NewSession.command
     @State private var terminal = NewSession.terminal
     @State private var accountCommand = NewSession.accountCommand
+    @State private var todoistToken = TodoistBridge.token
+
+    private func saveTodoistToken() {
+        let trimmed = todoistToken.trimmingCharacters(in: .whitespacesAndNewlines)
+        guard trimmed != TodoistBridge.token else { return }
+        TodoistBridge.token = trimmed
+        if todos.source == .todoist { todos.source = .todoist }   // re-reads with the new token
+    }
 
 
     var body: some View {
@@ -35,11 +43,25 @@ struct BrinkSettingsPane: View {
                 }
             }
             SettingsGroup(title: L10n.t("Tasks"),
-                          footer: L10n.t("Switch the Tasks ring on in Accounts. Things 3 needs the Automation permission; Reminders asks for access to your reminders.")) {
+                          footer: L10n.t("Switch the Tasks ring on in Accounts. Things 3 needs the Automation permission; Reminders asks for access to your reminders; Todoist needs an API token.")) {
                 SettingsRow(title: L10n.t("Source")) {
                     Picker("", selection: Binding(get: { todos.source }, set: { todos.source = $0 })) {
                         ForEach(TaskSource.allCases.filter { $0.isAvailable }) { Text($0.title).tag($0) }
                     }.labelsHidden().pickerStyle(.menu).fixedSize()
+                }
+                if todos.source == .todoist {
+                    SettingsRow(title: L10n.t("Todoist API token"),
+                                description: L10n.t("From Todoist → Settings → Integrations → Developer. Kept in your login keychain; the list refreshes as soon as it is pasted.")) {
+                        HStack(spacing: 8) {
+                            SecureField("", text: $todoistToken, prompt: Text(L10n.t("Paste your token")))
+                                .textFieldStyle(.roundedBorder).frame(width: 220)
+                                .onSubmit { saveTodoistToken() }
+                                .onChange(of: todoistToken) { _, _ in saveTodoistToken() }
+                            Button(L10n.t("Get one")) {
+                                NSWorkspace.shared.open(URL(string: "https://app.todoist.com/app/settings/integrations/developer")!)
+                            }
+                        }
+                    }
                 }
                 SettingsRow(title: L10n.t("Third tab")) {
                     Picker("", selection: Binding(get: { todos.customList }, set: { todos.customList = $0 })) {

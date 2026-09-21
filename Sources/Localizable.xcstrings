@@ -32817,6 +32817,61 @@
           }
         }
       }
+    },
+    "Todoist API token": {
+      "extractionState": "manual",
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Token da API do Todoist"
+          }
+        }
+      }
+    },
+    "From Todoist → Settings → Integrations → Developer. Kept in your login keychain; the list refreshes as soon as it is pasted.": {
+      "extractionState": "manual",
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Em Todoist → Ajustes → Integrações → Desenvolvedor. Fica nas suas chaves de login; a lista atualiza assim que colar."
+          }
+        }
+      }
+    },
+    "Paste your token": {
+      "extractionState": "manual",
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Cole seu token"
+          }
+        }
+      }
+    },
+    "Get one": {
+      "extractionState": "manual",
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Obter"
+          }
+        }
+      }
+    },
+    "Switch the Tasks ring on in Accounts. Things 3 needs the Automation permission; Reminders asks for access to your reminders; Todoist needs an API token.": {
+      "extractionState": "manual",
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ative o anel Tarefas em Contas. O Things 3 precisa da permissão de Automação; os Lembretes pedem acesso aos seus lembretes; o Todoist precisa de um token da API."
+          }
+        }
+      }
     }
   },
   "version": "1.0"

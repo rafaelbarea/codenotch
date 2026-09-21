@@ -39,9 +39,14 @@ struct TasksProvider: UsageProvider {
         ProviderAccount(label: nil, plan: nil, source: TaskSource.current.title, manageURL: nil)
     }
     var signInRoute: SignInRoute {
-        TaskSource.current == .things
-            ? .openApp(bundleID: ThingsBridge.bundleID, name: "Things 3")
-            : .openApp(bundleID: "com.apple.reminders", name: L10n.t("Reminders"))
+        switch TaskSource.current {
+        case .things: return .openApp(bundleID: ThingsBridge.bundleID, name: "Things 3")
+        case .reminders: return .openApp(bundleID: "com.apple.reminders", name: L10n.t("Reminders"))
+        case .todoist:
+            return TodoistBridge.isInstalled
+                ? .openApp(bundleID: TodoistBridge.bundleID, name: "Todoist")
+                : .openApp(bundleID: "com.apple.Safari", name: "Todoist")
+        }
     }
     func signOut() async {}
     func presentSignIn() { TaskSource.current.showList("Today") }
