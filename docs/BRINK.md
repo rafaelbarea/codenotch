@@ -37,6 +37,8 @@ Everything under `Sources/Brink/`, plus small hooks in `AppDelegate`, `StatusIte
 - **Notification channel** (Settings → Notifications): one choice for every notification, Mac
   banners or the notch alone (peek, cards, sounds); each event keeps its own switch (session end,
   limit reached, limit reset, focus block, 80/100% crossings).
+- **Several Claude logins**: each named profile reads its own token over the OAuth usage API; the
+  CLI's local estimate (one answer for the whole machine) is used only with a single login.
 - **Cost tabs**: Today / Week (Cycle for credit plans) / Month in each account's card. Double-click a
   ring to open a terminal on that account (its config directory exported); the tasks ring opens the
   task app.

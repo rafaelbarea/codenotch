@@ -172,11 +172,22 @@ actor ClaudeOAuthProvider: UsageProvider {
         // endpoint's, and the CLI does not share the endpoint's rate limit —
         // there is no reason for a 429 on one to darken a ring the other can
         // still fill.
-        if let windows = await cliWindows() {
+        // Only for the default login. `claude /usage` in print mode gives
+        // one answer for the whole machine whatever CLAUDE_CONFIG_DIR says
+        // (verified: identical output, requests and sessions included, for
+        // ~/.claude and ~/.claude-braspine), so with more than one login it
+        // would paint every ring with the same figure. Named profiles read
+        // their own token instead.
+        if profile.slug == nil, !Self.hasSeveralProfiles, let windows = await cliWindows() {
             return snapshot(windows: windows, plan: lastCLIPlan)
         }
         return try await fetchFromKeychain()
     }
+
+    /// More than one Claude login on this Mac. The CLI's estimate is "based
+    /// on local sessions on this machine", all of them, so with two logins
+    /// it credits each with the other's work; each reads its own token.
+    private static let hasSeveralProfiles: Bool = ClaudeProfile.discover().count > 1
 
     private func fetchFromKeychain() async throws -> ProviderSnapshot {
         if Self.shouldHoldOff(until: retryNoEarlierThan, slack: backoffSlack),

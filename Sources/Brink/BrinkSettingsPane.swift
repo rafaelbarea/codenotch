@@ -57,9 +57,8 @@ struct BrinkSettingsPane: View {
                                 .textFieldStyle(.roundedBorder).frame(width: 220)
                                 .onSubmit { saveTodoistToken() }
                                 .onChange(of: todoistToken) { _, _ in saveTodoistToken() }
-                            Button(L10n.t("Get one")) {
-                                NSWorkspace.shared.open(URL(string: "https://app.todoist.com/app/settings/integrations/developer")!)
-                            }
+                            Link(L10n.t("Get one"), destination: URL(string: "https://app.todoist.com/app/settings/integrations/developer")!)
+                                .buttonStyle(.bordered)
                         }
                     }
                 }

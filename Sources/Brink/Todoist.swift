@@ -58,8 +58,8 @@ enum TodoistBridge {
 
     // MARK: HTTP
 
-    private static let rest = URL(string: "https://api.todoist.com/rest/v2/")!
-    private static let sync = URL(string: "https://api.todoist.com/sync/v9/")!
+    /// Todoist's unified API; the REST v2 and Sync v9 endpoints answer 410.
+    private static let api = URL(string: "https://api.todoist.com/api/v1/")!
 
     private static func request(_ url: URL, method: String = "GET", json: [String: Any]? = nil) -> Data? {
         guard hasToken else { return nil }
@@ -88,10 +88,24 @@ enum TodoistBridge {
     }
 
     private static func get(_ path: String, query: [String: String] = [:]) -> Any? {
-        var comps = URLComponents(url: rest.appendingPathComponent(path), resolvingAgainstBaseURL: false)!
+        var comps = URLComponents(url: api.appendingPathComponent(path), resolvingAgainstBaseURL: false)!
         if !query.isEmpty { comps.queryItems = query.map { URLQueryItem(name: $0.key, value: $0.value) } }
         guard let url = comps.url, let data = request(url) else { return nil }
         return try? JSONSerialization.jsonObject(with: data)
+    }
+
+    /// Every page of a paginated list (`results` or `items`, then `next_cursor`).
+    private static func pages(_ path: String, query: [String: String] = [:]) -> [[String: Any]]? {
+        var all: [[String: Any]] = []
+        var cursor: String? = nil
+        var q = query; q["limit"] = "200"
+        repeat {
+            if let cursor { q["cursor"] = cursor }
+            guard let page = get(path, query: q) as? [String: Any] else { return all.isEmpty ? nil : all }
+            all += (page["results"] ?? page["items"]) as? [[String: Any]] ?? []
+            cursor = page["next_cursor"] as? String
+        } while cursor != nil && all.count < 1000
+        return all
     }
 
     // MARK: Projects
@@ -101,7 +115,7 @@ enum TodoistBridge {
     /// Project id → name, refreshed every few minutes.
     private static func projects() -> [String: String] {
         if let cache = projectCache, Date().timeIntervalSince(cache.at) < 300 { return cache.byID }
-        guard let list = get("projects") as? [[String: Any]] else { return projectCache?.byID ?? [:] }
+        guard let list = pages("projects") else { return projectCache?.byID ?? [:] }
         var byID: [String: String] = [:]
         for p in list {
             if let id = p["id"] as? String, let name = p["name"] as? String { byID[id] = name }
@@ -124,7 +138,7 @@ enum TodoistBridge {
         case "Tomorrow": filter = "tomorrow"
         default: filter = "#\(name(forFilter: list))"
         }
-        guard let items = get("tasks", query: ["filter": filter]) as? [[String: Any]] else { return nil }
+        guard let items = pages("tasks/filter", query: ["query": filter]) else { return nil }
         let names = projects()
         return items.compactMap { task -> Todo? in
             guard let id = task["id"] as? String, let content = task["content"] as? String else { return nil }
@@ -146,21 +160,17 @@ enum TodoistBridge {
 
     static func completedToday() -> Int {
         guard hasToken else { return 0 }
-        let start = Calendar.current.startOfDay(for: Date())
-        let f = DateFormatter()
-        f.timeZone = .init(identifier: "UTC")
-        f.locale = Locale(identifier: "en_US_POSIX")
-        f.dateFormat = "yyyy-MM-dd'T'HH:mm"
-        var comps = URLComponents(url: sync.appendingPathComponent("completed/get_all"), resolvingAgainstBaseURL: false)!
-        comps.queryItems = [URLQueryItem(name: "since", value: f.string(from: start)), URLQueryItem(name: "limit", value: "200")]
-        guard let url = comps.url, let data = request(url),
-              let json = try? JSONSerialization.jsonObject(with: data) as? [String: Any],
-              let items = json["items"] as? [[String: Any]] else { return 0 }
-        return items.count
+        let cal = Calendar.current
+        let start = cal.startOfDay(for: Date())
+        let end = cal.date(byAdding: .day, value: 1, to: start)!
+        let f = ISO8601DateFormatter()
+        f.formatOptions = [.withInternetDateTime]
+        return pages("tasks/completed/by_completion_date",
+                     query: ["since": f.string(from: start), "until": f.string(from: end)])?.count ?? 0
     }
 
     static func complete(_ id: String) -> Bool {
-        request(rest.appendingPathComponent("tasks/\(id)/close"), method: "POST") != nil
+        request(api.appendingPathComponent("tasks/\(id)/close"), method: "POST") != nil
     }
 
     static func create(_ name: String, in list: String, project: String? = nil) -> Bool {
@@ -172,7 +182,7 @@ enum TodoistBridge {
             if let id = projectID(named: list) { body["project_id"] = id }
         }
         if let project, let id = projectID(named: project) { body["project_id"] = id }
-        return request(rest.appendingPathComponent("tasks"), method: "POST", json: body) != nil
+        return request(api.appendingPathComponent("tasks"), method: "POST", json: body) != nil
     }
 
     // MARK: Opening
