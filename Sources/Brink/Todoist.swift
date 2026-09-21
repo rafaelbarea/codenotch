@@ -132,13 +132,18 @@ enum TodoistBridge {
 
     static func todos(in list: String) -> [Todo]? {
         guard hasToken else { return nil }
-        let filter: String
+        // Today and tomorrow are filters; a project is listed by id, every
+        // task in it whatever its date. (A `#Name` filter returns nothing
+        // for a project whose name carries an emoji.)
+        let items: [[String: Any]]?
         switch list {
-        case "Today": filter = "today | overdue"
-        case "Tomorrow": filter = "tomorrow"
-        default: filter = "#\(name(forFilter: list))"
+        case "Today": items = pages("tasks/filter", query: ["query": "today | overdue"])
+        case "Tomorrow": items = pages("tasks/filter", query: ["query": "tomorrow"])
+        default:
+            guard let id = projectID(named: list) else { return [] }
+            items = pages("tasks", query: ["project_id": id])
         }
-        guard let items = pages("tasks/filter", query: ["query": filter]) else { return nil }
+        guard let items else { return nil }
         let names = projects()
         return items.compactMap { task -> Todo? in
             guard let id = task["id"] as? String, let content = task["content"] as? String else { return nil }
@@ -150,12 +155,6 @@ enum TodoistBridge {
                         tags: labels.isEmpty ? nil : labels.joined(separator: ", "))
         }
         .sorted { ($0.due ?? "9999") < ($1.due ?? "9999") }
-    }
-
-    /// Todoist filters take a project as `#Name`; a name with spaces or an
-    /// ampersand has to be quoted.
-    private static func name(forFilter list: String) -> String {
-        list.contains(where: { !$0.isLetter && !$0.isNumber }) ? "\"\(list)\"" : list
     }
 
     static func completedToday() -> Int {

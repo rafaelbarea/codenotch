@@ -480,11 +480,14 @@ private struct LimitWindowRow: View {
                     .padding(.top, NotchLayout.labelToBar)
                 }
 
+                // One size for every line of the card: a line that does not
+                // fit is cut at its end (the pace note), not drawn smaller
+                // than its neighbours.
                 Text("\(window.usedFraction == nil ? "" : fidelity.qualifier)\(window.detail ?? window.summary)\(paceText)")
                     .font(Typography.cardBody)
                     .foregroundStyle(Palette.textPrimary)
                     .lineLimit(1)
-                    .minimumScaleFactor(0.85)
+                    .truncationMode(.tail)
                     .padding(.top, NotchLayout.barToUsed)
             }
         }
