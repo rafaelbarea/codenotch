@@ -187,7 +187,9 @@ actor ClaudeOAuthProvider: UsageProvider {
     /// More than one Claude login on this Mac. The CLI's estimate is "based
     /// on local sessions on this machine", all of them, so with two logins
     /// it credits each with the other's work; each reads its own token.
-    private static let hasSeveralProfiles: Bool = ClaudeProfile.discover().count > 1
+    /// Not under test: the suite runs on whatever Mac hosts it, and its CLI
+    /// stubs must be reached whatever that Mac's logins are.
+    private static let hasSeveralProfiles: Bool = !Runtime.isUnderTest && ClaudeProfile.discover().count > 1
 
     private func fetchFromKeychain() async throws -> ProviderSnapshot {
         if Self.shouldHoldOff(until: retryNoEarlierThan, slack: backoffSlack),
