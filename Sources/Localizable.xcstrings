@@ -32872,6 +32872,61 @@
           }
         }
       }
+    },
+    "Things 3 (not installed)": {
+      "extractionState": "manual",
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Things 3 (não instalado)"
+          }
+        }
+      }
+    },
+    "Todoist (needs a token)": {
+      "extractionState": "manual",
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Todoist (precisa de token)"
+          }
+        }
+      }
+    },
+    "Install Things 3 and open it once.": {
+      "extractionState": "manual",
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Instale o Things 3 e abra uma vez."
+          }
+        }
+      }
+    },
+    "Paste your Todoist API token in Settings → Costs & Tasks.": {
+      "extractionState": "manual",
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Cole o token da API do Todoist em Ajustes → Custos e Tarefas."
+          }
+        }
+      }
+    },
+    "Allow access to Reminders in System Settings.": {
+      "extractionState": "manual",
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Permita o acesso aos Lembretes nos Ajustes do Sistema."
+          }
+        }
+      }
     }
   },
   "version": "1.0"

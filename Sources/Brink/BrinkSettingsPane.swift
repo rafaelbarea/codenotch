@@ -46,7 +46,7 @@ struct BrinkSettingsPane: View {
                           footer: L10n.t("Switch the Tasks ring on in Accounts. Things 3 needs the Automation permission; Reminders asks for access to your reminders; Todoist needs an API token.")) {
                 SettingsRow(title: L10n.t("Source")) {
                     Picker("", selection: Binding(get: { todos.source }, set: { todos.source = $0 })) {
-                        ForEach(TaskSource.allCases.filter { $0.isAvailable }) { Text($0.title).tag($0) }
+                        ForEach(TaskSource.allCases) { Text($0.menuTitle).tag($0) }
                     }.labelsHidden().pickerStyle(.menu).fixedSize()
                 }
                 if todos.source == .todoist {

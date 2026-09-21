@@ -171,7 +171,8 @@ struct TasksCard: View {
 
     @ViewBuilder private var list: some View {
         if listed.isEmpty {
-            Text(store.refreshedAt == nil ? L10n.t("Reading \(store.source.title)…") : L10n.t("Nothing here. Enjoy it."))
+            Text(!store.source.isReady ? store.source.notReadyMessage
+                 : store.refreshedAt == nil ? L10n.t("Reading \(store.source.title)…") : L10n.t("Nothing here. Enjoy it."))
                 .font(BrinkType.font(11)).foregroundStyle(Palette.textSecondary)
                 .padding(.vertical, Self.emptyPadV)
         } else {

@@ -248,19 +248,36 @@ enum TaskSource: String, CaseIterable, Identifiable {
         case .todoist: return "Todoist"
         }
     }
-    /// Offered in Settings. Things needs the app; Todoist works over its API
-    /// with or without the app, so it is always offered and asks for a token.
-    var isAvailable: Bool {
+    /// Every source is offered in Settings, installed or not: a choice that
+    /// vanished when the app was missing read as the option having been
+    /// removed. `isReady` says whether it can answer right now.
+    var isAvailable: Bool { true }
+    var isReady: Bool {
         switch self {
         case .things: return ThingsBridge.isInstalled
-        case .reminders, .todoist: return true
+        case .reminders: return true
+        case .todoist: return TodoistBridge.hasToken
         }
     }
-    /// Able to answer right now.
-    var isReady: Bool { self == .todoist ? TodoistBridge.hasToken : isAvailable }
+    /// The picker's label, with the reason when it cannot answer yet.
+    var menuTitle: String {
+        switch self {
+        case .things where !ThingsBridge.isInstalled: return L10n.t("Things 3 (not installed)")
+        case .todoist where !TodoistBridge.hasToken: return L10n.t("Todoist (needs a token)")
+        default: return title
+        }
+    }
+    /// What the card says while the source cannot answer.
+    var notReadyMessage: String {
+        switch self {
+        case .things: return L10n.t("Install Things 3 and open it once.")
+        case .todoist: return L10n.t("Paste your Todoist API token in Settings → Costs & Tasks.")
+        case .reminders: return L10n.t("Allow access to Reminders in System Settings.")
+        }
+    }
     static let key = "todoSource"
     static var current: TaskSource {
-        if let s = TaskSource(rawValue: UserDefaults.standard.string(forKey: key) ?? ""), s.isAvailable { return s }
+        if let s = TaskSource(rawValue: UserDefaults.standard.string(forKey: key) ?? "") { return s }
         return ThingsBridge.isInstalled ? .things : .reminders
     }
 
@@ -395,6 +412,12 @@ final class TodoStore: ObservableObject {
 
     func refresh() {
         guard available, !refreshing else { return }
+        // A source that cannot answer yet says so in the card instead of
+        // reading forever.
+        guard source.isReady else {
+            todos = [:]; lists = []; completedToday = 0; refreshedAt = Date()
+            return
+        }
         refreshing = true
         let custom = customList
         let src = source
