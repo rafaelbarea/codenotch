@@ -59,6 +59,33 @@ enum NewSession {
         run(cmd)
     }
 
+    private static var installedCache: [String: (at: Date, ok: Bool)] = [:]
+    private static let cacheLock = NSLock()
+
+    /// Whether the program a command starts with is on this Mac: the first
+    /// word that is not an environment assignment, looked up on the login
+    /// shell's PATH (a settings row asks often, so the answer is kept a minute).
+    static func isInstalled(command: String) -> Bool {
+        let words = command.split(separator: " ").map(String.init)
+        guard let binary = words.first(where: { !$0.contains("=") }) else { return false }
+        cacheLock.lock(); defer { cacheLock.unlock() }
+        if let hit = installedCache[binary], Date().timeIntervalSince(hit.at) < 60 { return hit.ok }
+        let home = FileManager.default.homeDirectoryForCurrentUser.path
+        var dirs = ["/opt/homebrew/bin", "/usr/local/bin", "\(home)/.local/bin", "\(home)/.npm-global/bin",
+                    "\(home)/.bun/bin", "\(home)/.cargo/bin", "\(home)/.grok/bin", "/usr/bin"]
+        dirs += (ProcessInfo.processInfo.environment["PATH"] ?? "").split(separator: ":").map(String.init)
+        var ok = dirs.contains { FileManager.default.isExecutableFile(atPath: "\($0)/\(binary)") }
+        if !ok, !Runtime.isUnderTest {
+            let p = Process()
+            p.executableURL = URL(fileURLWithPath: "/bin/zsh")
+            p.arguments = ["-lc", "command -v \(binary) >/dev/null 2>&1"]
+            p.standardOutput = FileHandle.nullDevice; p.standardError = FileHandle.nullDevice
+            if (try? p.run()) != nil { p.waitUntilExit(); ok = p.terminationStatus == 0 }
+        }
+        installedCache[binary] = (Date(), ok)
+        return ok
+    }
+
     /// Run a command in a new window of the chosen terminal.
     @MainActor static func run(_ cmd: String) {
         let choice = terminal.isEmpty ? (installed().first?.bundleID ?? "com.apple.Terminal") : terminal

@@ -1,17 +1,6 @@
 import Foundation
 
 /// Identity and token from `~/.grok/auth.json`.
-extension GrokCredentials {
-    /// Whether the `grok` command is on this Mac, in the places package
-    /// managers put it.
-    static var cliInstalled: Bool {
-        let home = FileManager.default.homeDirectoryForCurrentUser.path
-        return ["/opt/homebrew/bin/grok", "/usr/local/bin/grok", "\(home)/.npm-global/bin/grok",
-                "\(home)/.local/bin/grok", "\(home)/.grok/bin/grok", "\(home)/.bun/bin/grok"]
-            .contains { FileManager.default.isExecutableFile(atPath: $0) }
-    }
-}
-
 ///
 /// Grok CLI signs in through `auth.x.ai` and writes the session here. Codenotch
 /// only reads it — refreshing is Grok's job, the same bargain as Claude Code's

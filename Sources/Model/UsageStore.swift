@@ -610,8 +610,12 @@ final class UsageStore: ObservableObject {
             // Claude Code: nothing to open. The row's guidance is the whole
             // answer, so the sheet has to show it rather than pretend.
             return false
-        case .command(let command, _):
-            NewSession.run(command)
+        case .command(let command, _, let install):
+            if let install, !NewSession.isInstalled(command: command) {
+                NSWorkspace.shared.open(install)
+            } else {
+                NewSession.run(command)
+            }
             return true
         }
     }

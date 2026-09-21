@@ -41,14 +41,14 @@ enum SignInRoute: Equatable {
     case guidance(String)
     /// A command-line tool signs in from the terminal: the button runs its
     /// login command in a new terminal window, which opens the browser.
-    case command(String, name: String)
+    case command(String, name: String, install: URL? = nil)
 
     var actionTitle: String? {
         switch self {
         case .modal(let name):     return L10n.t("Sign in to \(name)")
         case .openApp(_, let name): return L10n.t("Open \(name)")
         case .guidance:            return nil
-        case .command(_, let name): return L10n.t("Sign in to \(name)")
+        case .command(_, let name, _): return L10n.t("Sign in to \(name)")
         }
     }
 
@@ -61,8 +61,13 @@ enum SignInRoute: Equatable {
             }
             return L10n.t("Sign in with \(name) to read this account.")
         case .guidance(let text):   return text
-        case .command(let command, _):
-            return L10n.t("Runs \(command) in your terminal; it opens the browser to sign in and saves the session this reads.")
+        case .command(let command, let name, _):
+            guard NewSession.isInstalled(command: command) else {
+                return L10n.t("Install the \(name) CLI first; Sign in opens its install page.")
+            }
+            return command.hasSuffix("login")
+                ? L10n.t("Runs \(command) in your terminal; it opens the browser to sign in and saves the session this reads.")
+                : L10n.t("Runs \(command) in your terminal; sign in there with /login and the notch reads the session.")
         }
     }
 

@@ -32939,13 +32939,24 @@
         }
       }
     },
-    "Install the Grok CLI first (docs.x.ai); Sign in then runs grok login in your terminal, which opens the browser.": {
+    "Install the %@ CLI first; Sign in opens its install page.": {
       "extractionState": "manual",
       "localizations": {
         "pt-BR": {
           "stringUnit": {
             "state": "translated",
-            "value": "Instale a CLI do Grok primeiro (docs.x.ai); Entrar então roda grok login no seu terminal, que abre o navegador."
+            "value": "Instale a CLI do %@ primeiro; Entrar abre a página de instalação."
+          }
+        }
+      }
+    },
+    "Runs %@ in your terminal; sign in there with /login and the notch reads the session.": {
+      "extractionState": "manual",
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Roda %@ no seu terminal; entre lá com /login e o notch lê a sessão."
           }
         }
       }
