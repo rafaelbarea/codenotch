@@ -13,6 +13,7 @@ struct ProviderRing: View {
     /// there is no arc to draw, and inventing one would be a lie in a shape.
     let usedFraction: Double?
     let glyph: ProviderGlyph
+    var customIconFilename: String? = nil
     var isStale: Bool = false
     /// Blocked right now. Shown as spent whatever the arc says, because that is
     /// what it means for you — a ring reading 16% while the account is paused
@@ -33,6 +34,7 @@ struct ProviderRing: View {
     /// A colour of the provider's own for the arc, when the reading is not a
     /// share of a limit: a focus block runs violet whatever its progress.
     var tint: Color? = nil
+    var bandOverride: UsageBand? = nil
 
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
     @Environment(\.codenotchReduceTransparency) private var reduceTransparency
@@ -44,10 +46,17 @@ struct ProviderRing: View {
 
     private var band: UsageBand {
         guard !isBlocked else { return .exhausted }
+        if let bandOverride { return bandOverride }
         return UsageBand.band(for: usedFraction ?? 0, watchLimit: watchLimit, criticalLimit: criticalLimit)
     }
     private var sweep: CGFloat { CGFloat(min(max(usedFraction ?? 0, 0), 1)) }
-    private var localSweep: CGFloat { CGFloat(min(max(localContextFraction ?? 1, 0), 1)) }
+    private var localSweep: CGFloat { Self.localSweep(for: localContextFraction) }
+    /// The floor is a drawing decision only — the number under the ring and in
+    /// the card stays true.
+    static func localSweep(for contextFraction: Double?) -> CGFloat {
+        guard let contextFraction else { return 1 }
+        return max(NotchLayout.localArcMinimumSweep, CGFloat(min(max(contextFraction, 0), 1)))
+    }
     private var primaryColor: Color {
         if isStale { return Palette.textSecondary }
         if let tint { return tint }
@@ -154,7 +163,7 @@ struct ProviderRing: View {
                         .animation(NotchMotion.reading, value: weeklyBand)
                 }
 
-                ProviderGlyphView(glyph: glyph)
+                ProviderGlyphView(glyph: glyph, customIconFilename: customIconFilename)
                     .foregroundStyle(Palette.textPrimary)
                     // A spent limit dims its glyph so the ring reads as "waiting".
                     // Under reduce-transparency, boost opacity so it stays legible without low alpha.
@@ -281,6 +290,7 @@ struct ProviderCell: View {
             ProviderRing(
                 usedFraction: snapshot.localModel == nil && snapshot.hasReading ? snapshot.ringFraction : nil,
                 glyph: snapshot.glyph,
+                customIconFilename: snapshot.customIconFilename,
                 isStale: snapshot.status.isStale || !snapshot.hasReading,
                 isBlocked: snapshot.block != nil,
                 activity: activity,
@@ -289,7 +299,8 @@ struct ProviderCell: View {
                 localContextFraction: snapshot.localContextFraction,
                 weeklyFraction: snapshot.hasReading ? snapshot.weeklyFraction : nil,
                 weeklyRing: weeklyRing,
-                tint: snapshot.headlineID == "focus" ? BrinkColors.violet : nil
+                tint: snapshot.headlineID == "focus" ? BrinkColors.violet : nil,
+                bandOverride: snapshot.bandOverride
             )
             VStack(spacing: NotchLayout.resetLineGap) {
             Text(readingText)

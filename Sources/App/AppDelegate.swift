@@ -68,6 +68,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
     /// work login's sessions spin the work ring and nobody else's.
     private let claudeProfiles = ClaudeProfile.discover()
     private let codexProfiles = CodexProfile.discover()
+    private let antigravityProfiles = AntigravityProfile.discover()
     /// Held as concrete providers, not just handed to the store: the token
     /// refresher needs to ask one of them how long its token has left, and the
     /// protocol has no business carrying that.
@@ -108,6 +109,11 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
             // login is explicit, stays in Codenotch's own WKWebView store, and
             // the page-local requests are refreshed only after that login.
             let deepSeek = WebSessionProvider(site: Sites.deepSeek)
+            // QianwenAI's Token Plan is the same kind of provider: no usage API
+            // to call, only a console, readable after the user signs in inside
+            // this app's own WKWebView. Unlike MiniMax's sheet below, its ring
+            // *is* this adapter, so it belongs in `webProviders` — exactly once.
+            let qianwen = WebSessionProvider(site: Sites.qianwen)
             // MiniMax's ring is MiniMaxProvider. The sheet is the same kind of
             // WebView DeepSeek uses, but it must not join `webProviders`:
             // those are appended to `allProviders`, and two adapters with
@@ -116,8 +122,8 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
             // Settings changes it, because the fetch URLs live on the site.
             let miniMaxWeb = WebSessionProvider(site: Sites.minimax(region: preferences.minimaxRegion))
             self.miniMaxWeb = miniMaxWeb
-            let webProviders: [WebSessionProvider] = [deepSeek]
-            fleet.signInItems = [deepSeek, miniMaxWeb].map { provider in
+            let webProviders: [WebSessionProvider] = [deepSeek, qianwen]
+            fleet.signInItems = [deepSeek, miniMaxWeb, qianwen].map { provider in
                 let name = provider.displayName
                 return (title: L10n.t("Sign in to \(name)…"),
                         action: { [weak provider] in provider?.presentSignIn() })
@@ -133,13 +139,17 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
             // switched-off ones once the binding below delivered.
             Log.usage.info("claude profiles: \(self.claudeProfiles.map(\.displayPath).joined(separator: ", "), privacy: .public)")
             Log.usage.info("codex profiles: \(self.codexProfiles.map(\.displayPath).joined(separator: ", "), privacy: .public)")
+            Log.usage.info("antigravity profiles: \(self.antigravityProfiles.map(\.displayPath).joined(separator: ", "), privacy: .public)")
             let claudeProviders = claudeProfiles.map { ClaudeOAuthProvider(profile: $0) }
             self.claudeProviders = claudeProviders
+            let customProviders: [UsageProvider] = preferences.customEndpoints.filter(\.isEnabled).map { endpoint in
+                CustomEndpointProvider(endpoint: endpoint)
+            }
             let allProviders: [UsageProvider] = claudeProviders
                 + [CursorLocalProvider()]
                 + codexProfiles.map { CodexLocalProvider(profile: $0) }
-                + [AntigravityProvider(),
-                   GLMProvider(), MiniMaxProvider(web: miniMaxWeb), GrokLocalProvider(), DevinLocalProvider(), OpenCodeProvider(),
+                + antigravityProfiles.map { AntigravityProvider(profile: $0) }
+                + [GLMProvider(), MiniMaxProvider(web: miniMaxWeb), GrokLocalProvider(), DevinLocalProvider(), OpenCodeProvider(),
                    CommandCodeProvider(), GitHubCopilotProvider(), KimiProvider(), KiroProvider(),
                    OllamaLocalProvider(endpoint: URL(string: preferences.ollamaEndpoint)!),
                    LMStudioLocalProvider(endpoint: URL(string: preferences.lmstudioEndpoint)!),
@@ -151,7 +161,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
                        Preferences.storedGeminiAPIMonthlyTokenBudget()
                    })]
                 + webProviders
-                + [TasksProvider()]
+                + customProviders + [TasksProvider()]
             preferences.reconcile(discoveredIDs: allProviders.map(\.id))
             let store = UsageStore(
                 providers: allProviders,
@@ -162,9 +172,27 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
                 // order for a frame and then visibly shuffles.
                 order: preferences.providerOrder
             )
+            preferences.$customEndpoints
+                .map { endpoints in
+                    endpoints.filter(\.isEnabled).map {
+                        "\($0.id):\($0.name):\($0.baseURL):\($0.trackingUnit.rawValue):\($0.monthlyBudgetUSD ?? -1):\($0.currentSpendUSD ?? -1):\($0.monthlyBudgetTokensM ?? -1):\($0.currentTokensUsedM ?? -1):\($0.displayRemaining):\($0.showCurrency):\($0.iconPreset ?? ""):\($0.customIconFilename ?? ""):\($0.accentColorHex):\($0.selectedModel)"
+                    }
+                }
+                .removeDuplicates()
+                .receive(on: RunLoop.main)
+                .sink { [weak store] _ in
+                    let stored = Preferences.storedCustomEndpoints()
+                    let active = stored.filter(\.isEnabled)
+                    let providers: [UsageProvider] = active.map { CustomEndpointProvider(endpoint: $0) }
+                    store?.registerCustomProviders(providers)
+                }
+                .store(in: &cancellables)
             Brink.attach(to: store)
             deepSeek.onAuthenticated = { [weak store] in
                 store?.providerAuthenticationChanged(providerID: "deepseek")
+            }
+            qianwen.onAuthenticated = { [weak store] in
+                store?.providerAuthenticationChanged(providerID: "qianwenai")
             }
             miniMaxWeb.onAuthenticated = { [weak store] in
                 store?.providerAuthenticationChanged(providerID: "minimax")
@@ -391,6 +419,11 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
             // Read when the menu opens, so a model's line is as current as its cell.
             statusItem.cells = { [weak fleet] in fleet?.menuModel.snapshots ?? [] }
             statusItem.activity = { [weak fleet] in fleet?.menuModel.activity(for: $0) }
+            // Handed over up front, like the notch's edge: the sink below
+            // delivers a run loop turn later, and the item would otherwise go
+            // up as one thing and then change its mind.
+            statusItem.limits = preferences.menuBarLimits
+            statusItem.resetTimeFormat = preferences.resetTimeFormat
 
             preferences.$appPresence
                 .receive(on: RunLoop.main)
@@ -398,6 +431,17 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
                     NSApp.setActivationPolicy(presence.activationPolicy)
                     if presence.wantsStatusItem { statusItem.show() } else { statusItem.hide() }
                 }
+                .store(in: &cancellables)
+
+            // What the item shows is presentation alone. It reaches the item and
+            // nothing else — no provider is read, refreshed, or switched on or
+            // off to answer it — and the item redraws from the readings it
+            // already holds, so a change in Settings lands on the bar at once.
+            Publishers.CombineLatest(preferences.$showsLimitsInMenuBar, preferences.$menuBarProviders)
+                .map { MenuBarLimits(isOn: $0, chosen: $1) }
+                .removeDuplicates()
+                .receive(on: RunLoop.main)
+                .sink { [weak statusItem] in statusItem?.limits = $0 }
                 .store(in: &cancellables)
 
             preferences.$notchVisibility
@@ -491,11 +535,6 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
             fleet.onReposition = { [weak preferences] offset in
                 preferences?.setOffset(offset, for: preferences?.notchEdge ?? .right)
             }
-            
-            fleet.onToggleKeepOpen = { [weak preferences] in
-                guard let prefs = preferences else { return }
-                prefs.notchVisibility = (prefs.notchVisibility == .alwaysShow) ? .onHover : .alwaysShow
-            }
 
             // Writing the preference is the whole of it: `notchEdge` is
             // `@Published` and the fleet already follows it, so the notch
@@ -506,7 +545,10 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
 
             preferences.$resetTimeFormat
                 .receive(on: RunLoop.main)
-                .sink { [weak fleet] in fleet?.apply(resetTimeFormat: $0) }
+                .sink { [weak fleet, weak statusItem] in
+                    fleet?.apply(resetTimeFormat: $0)
+                    statusItem?.resetTimeFormat = $0
+                }
                 .store(in: &cancellables)
 
             preferences.$accentColor
@@ -672,11 +714,13 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
         // still working without you switching to it.
         var monitors: [String: any AgentActivityMonitor] = [
             "cursor": CursorActivityMonitor(),
-            "gemini": AntigravityActivityMonitor(),
             "grok": GrokActivityMonitor(),
             "gemini-api": GeminiAPIActivityMonitor(),
             "kimi": KimiActivityMonitor(),
         ]
+        for profile in antigravityProfiles {
+            monitors[profile.id] = AntigravityActivityMonitor(profile: profile)
+        }
         var claudeMonitors: [ClaudeSessionMonitor] = []
         for profile in claudeProfiles {
             let monitor = ClaudeSessionMonitor(

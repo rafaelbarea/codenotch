@@ -21,7 +21,7 @@ final class NotchWindowController {
     /// One "Sign in to …" item per provider that needs a browser session.
     var signInItems: [(title: String, action: () -> Void)] = []
     /// Driven by the notch's own chrome.
-    var onToggleKeepOpen: (() -> Void)?
+
     /// Refetch a single provider, asked for by clicking its ring.
     var onRefreshProvider: ((String) async -> Void)?
     /// Open the settings window, asked for by clicking the handle.
@@ -46,6 +46,10 @@ final class NotchWindowController {
     private var clearHoverWork: DispatchWorkItem?
     private var clockTimer: Timer?
     private var cursorTimer: Timer?
+    /// Full-screen state on its own, slower beat. See `startWatchingFullScreen`.
+    private var fullScreenTimer: Timer?
+    private var fullScreenFollowUp: DispatchWorkItem?
+    static let fullScreenPollInterval: TimeInterval = 2
 
     /// Hover in is quick; hover out waits, because the pointer has to cross the
     /// gap between the notch and the card without the card vanishing under it.
@@ -123,7 +127,7 @@ final class NotchWindowController {
     /// When a full-screen app is active on the current space, auto-folds the notch.
     /// When returning to a desktop space with `isAlwaysOn`, restores the unfolded state.
     func handleActiveSpaceOrAppChange() {
-        if foldsForFullScreen && isFullScreenActive() {
+        if foldsForFullScreen && isFullScreenActive() && !model.isPinned {
             if let panel {
                 let local = localCursor(in: panel.frame)
                 let overTooltip = model.hoveredIndex
@@ -134,7 +138,7 @@ final class NotchWindowController {
                 }
             }
             foldForFullScreen()
-        } else if model.isAlwaysOn && !model.isExpanded {
+        } else if (model.isAlwaysOn || model.isPinned) && !model.isExpanded {
             withAnimation(NotchMotion.unfold) {
                 model.isExpanded = true
             }
@@ -147,7 +151,6 @@ final class NotchWindowController {
         if let peekUntil, peekUntil > Date() { return }
         foldWork?.cancel()
         foldWork = nil
-        model.isPinned = false
         guard model.isExpanded else { return }
         withAnimation(NotchMotion.unfold) {
             model.isExpanded = false
@@ -175,6 +178,7 @@ final class NotchWindowController {
     func show() {
         relocate()
         startWatchingCursor()
+        startWatchingFullScreen()
         startClock()
 
         NotificationCenter.default.publisher(
@@ -214,10 +218,7 @@ final class NotchWindowController {
             for: NSWorkspace.activeSpaceDidChangeNotification
         )
         .sink { [weak self] _ in
-            MainActor.assumeIsolated {
-                self?.lastFullScreenReading = nil
-                self?.handleActiveSpaceOrAppChange()
-            }
+            MainActor.assumeIsolated { self?.fullScreenMayHaveChanged() }
         }
         .store(in: &cancellables)
 
@@ -225,10 +226,7 @@ final class NotchWindowController {
             for: NSWorkspace.didActivateApplicationNotification
         )
         .sink { [weak self] _ in
-            MainActor.assumeIsolated {
-                self?.lastFullScreenReading = nil
-                self?.handleActiveSpaceOrAppChange()
-            }
+            MainActor.assumeIsolated { self?.fullScreenMayHaveChanged() }
         }
         .store(in: &cancellables)
 
@@ -310,6 +308,10 @@ final class NotchWindowController {
         foldWork?.cancel()
         cursorTimer?.invalidate()
         cursorTimer = nil
+        fullScreenTimer?.invalidate()
+        fullScreenTimer = nil
+        fullScreenFollowUp?.cancel()
+        fullScreenFollowUp = nil
         clockTimer?.invalidate()
         mouseMonitors.forEach(NSEvent.removeMonitor)
         mouseMonitors.removeAll()
@@ -539,7 +541,7 @@ final class NotchWindowController {
             blockMessage: snapshot.block?.summary(now: model.now),
             hasTokenUsage: snapshot.tokenUsage != nil,
             hasPlan: snapshot.plan != nil,
-            hasResetCredits: snapshot.resetCredits != nil,
+            hasResetCredits: snapshot.hasAvailableResetCredits,
             localModelName: snapshot.localModel?.name,
             showsLocalPerformance: snapshot.showsLocalPerformance,
                 localLedgerRows: snapshot.localLedgerRowCount,
@@ -608,12 +610,44 @@ final class NotchWindowController {
     /// produces no events at all — so a notch that appears, resizes or is
     /// re-anchored underneath a parked pointer would otherwise sit there with
     /// stale hover state until the user jogged the mouse.
+    /// A space or app switch: answered at once, and once more a moment later,
+    /// because an app that has just come forward is often still animating
+    /// into full screen when the notification arrives.
+    private func fullScreenMayHaveChanged() {
+        lastFullScreenReading = nil
+        handleActiveSpaceOrAppChange()
+        fullScreenFollowUp?.cancel()
+        let followUp = DispatchWorkItem { [weak self] in
+            MainActor.assumeIsolated {
+                self?.lastFullScreenReading = nil
+                self?.handleActiveSpaceOrAppChange()
+            }
+        }
+        fullScreenFollowUp = followUp
+        DispatchQueue.main.asyncAfter(deadline: .now() + 0.35, execute: followUp)
+    }
+
+    /// Full screen that posts no notification — a video going full screen in
+    /// the browser already in front, a game sizing its window to the display —
+    /// is only caught by asking, and asking is a WindowServer round trip.
+    /// It rode the 0.3s cursor poll, which made it three of those a second
+    /// for as long as the app ran. Every two seconds is soon enough for a
+    /// fold nobody is waiting on, and switches are answered by the
+    /// notifications above without waiting for it. (From #202.)
+    private func startWatchingFullScreen() {
+        let poll = Timer(timeInterval: Self.fullScreenPollInterval, repeats: true) { [weak self] _ in
+            MainActor.assumeIsolated {
+                guard let self, self.foldsForFullScreen else { return }
+                self.handleActiveSpaceOrAppChange()
+            }
+        }
+        RunLoop.main.add(poll, forMode: .common)
+        fullScreenTimer = poll
+    }
+
     private func startWatchingCursor() {
         let poll = Timer(timeInterval: 0.3, repeats: true) { [weak self] _ in
-            MainActor.assumeIsolated {
-                self?.handleActiveSpaceOrAppChange()
-                self?.cursorMoved()
-            }
+            MainActor.assumeIsolated { self?.cursorMoved() }
         }
         RunLoop.main.add(poll, forMode: .common)
         cursorTimer = poll
@@ -738,13 +772,13 @@ final class NotchWindowController {
         guard model.isExpanded, foldWork == nil, !model.isPinned else { return }
         // Pinned is settled above; what is left to decide is whether "Always
         // show" holds it, and only a frontmost full-screen app overrules that.
-        let ignoresAlwaysOn = model.staysOpen && ignoreAlwaysOn()
-        guard ignoresAlwaysOn || !model.staysOpen else { return }
+        let ignoresAlwaysOn = model.isAlwaysOn && ignoreAlwaysOn()
+        guard ignoresAlwaysOn || !model.isAlwaysOn else { return }
         let work = DispatchWorkItem { [weak self] in
             MainActor.assumeIsolated {
                 guard let self else { return }
                 self.foldWork = nil
-                let stillHoldsOpen = ignoresAlwaysOn ? self.model.isPinned : self.model.staysOpen
+                let stillHoldsOpen = self.model.isPinned || (self.model.isAlwaysOn && !ignoresAlwaysOn)
                 guard !stillHoldsOpen else { return }
                 withAnimation(NotchMotion.unfold) {
                     self.model.isExpanded = false
@@ -1081,17 +1115,19 @@ final class NotchWindowController {
         switch visibility {
         case .alwaysShow:
             if !Runtime.isUnderTest { panel?.orderFrontRegardless() }
-            model.isAlwaysOn = true
-            // Any pin made by hand is subsumed by the setting; leaving it set
-            // would outlive a later switch back to hover.
+            // Any pin made by hand is subsumed by the setting, exactly as it is
+            // for the other two. Leaving it set would hold `handleActiveSpaceOrAppChange`
+            // off for the rest of the session, so a pin made in hover mode would
+            // silently disable the full-screen fold once Always show was chosen.
             model.isPinned = false
+            model.isAlwaysOn = true
             foldWork?.cancel()
             foldWork = nil
             withAnimation(NotchMotion.unfold) { model.isExpanded = true }
         case .onHover:
             if !Runtime.isUnderTest { panel?.orderFrontRegardless() }
-            model.isAlwaysOn = false
             model.isPinned = false
+            model.isAlwaysOn = false
             // Fold now rather than waiting for the pointer to leave: it may
             // already be somewhere else, in which case nothing would arrive to
             // close it and "on hover" would look exactly like "always show".
@@ -1100,8 +1136,8 @@ final class NotchWindowController {
                 model.hoveredIndex = nil
             }
         case .hidden:
-            model.isAlwaysOn = false
             model.isPinned = false
+            model.isAlwaysOn = false
             model.isExpanded = false
             model.hoveredIndex = nil
             // Ordered out rather than made transparent. An invisible panel that
@@ -1151,7 +1187,8 @@ final class NotchWindowController {
                 guard let self, let panel = self.panel else { return }
                 self.peekWork = nil
                 self.peekUntil = nil
-                guard !self.model.staysOpen else { return }
+                let stillHoldsOpen = self.model.isPinned || (self.model.isAlwaysOn && !(self.foldsForFullScreen && self.isFullScreenActive()))
+                guard !stillHoldsOpen else { return }
                 // Left open if the peek did its job and the pointer is already
                 // there; the ordinary hover fold takes it from here.
                 guard !self.liveRect.contains(self.localCursor(in: panel.frame)) else { return }
@@ -1229,13 +1266,6 @@ final class NotchWindowController {
     /// switched an always-shown notch to hover-only, and it stayed that way
     /// across restarts.
     func togglePinned() {
-        togglePinned(persist: false)
-    }
-
-    func togglePinned(persist: Bool) {
-        // Nothing to pin on a notch the setting already holds open, and a
-        // click must not be the thing that lets it go.
-        if !persist, visibility == .alwaysShow { return }
         model.isPinned.toggle()
         if model.isPinned {
             foldWork?.cancel()
@@ -1243,7 +1273,6 @@ final class NotchWindowController {
             withAnimation(NotchMotion.unfold) { model.isExpanded = true }
         }
         updateInteractiveRects()
-        if persist { onToggleKeepOpen?() }
     }
 
     func cellIndex(along: CGFloat) -> Int? {
@@ -1275,7 +1304,7 @@ final class NotchWindowController {
         let keepOpen = NSMenuItem(
             title: L10n.t("Keep open"),
             action: #selector(MenuActions.togglePinned(_:)),
-            keyEquivalent: model.isAlwaysOn ? "✓" : ""
+            keyEquivalent: model.isPinned ? "✓" : ""
         )
         keepOpen.keyEquivalentModifierMask = []
         keepOpen.target = menuActions
@@ -1332,7 +1361,7 @@ final class NotchWindowController {
     private lazy var menuActions = MenuActions(
         refresh: { [weak self] in self?.onRefresh?() },
         signIn: { [weak self] index in self?.signInItems[safe: index]?.action() },
-        togglePinned: { [weak self] in self?.togglePinned(persist: true) },
+        togglePinned: { [weak self] in self?.togglePinned() },
         openSettings: { [weak self] in self?.onOpenSettings?() }
     )
 }

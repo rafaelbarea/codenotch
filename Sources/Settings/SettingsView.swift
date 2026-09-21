@@ -26,7 +26,7 @@ extension View {
 /// crossing-and-notification machinery it switches is Notifications' to
 /// explain.
 private enum SettingsSection: String, CaseIterable, Identifiable, Hashable {
-    case accounts, phone, deepseek, ollama, lmstudio, appearance, notifications, brink, activity, focus, general
+    case accounts, phone, deepseek, ollama, lmstudio, customEndpoints, appearance, notifications, brink, activity, focus, general
 
     /// The sections the sidebar lists; Phone only once pairing is offered.
     static var visible: [SettingsSection] {
@@ -59,6 +59,7 @@ private enum SettingsSection: String, CaseIterable, Identifiable, Hashable {
         case .deepseek:      return .orange
         case .ollama:        return .teal
         case .lmstudio:      return .purple
+        case .customEndpoints: return .indigo
         case .appearance:    return .indigo
         case .notifications: return .red
         case .brink:         return .mint
@@ -70,7 +71,7 @@ private enum SettingsSection: String, CaseIterable, Identifiable, Hashable {
 
     var group: Group {
         switch self {
-        case .accounts, .phone, .deepseek, .ollama, .lmstudio: return .sources
+        case .accounts, .phone, .deepseek, .ollama, .lmstudio, .customEndpoints: return .sources
         case .appearance, .notifications: return .notch
         case .brink, .activity, .focus: return .work
         case .general: return .app
@@ -85,6 +86,7 @@ private enum SettingsSection: String, CaseIterable, Identifiable, Hashable {
         case .deepseek:      return L10n.t("Per-token prices and the off-peak discount.")
         case .ollama:        return L10n.t("The local runtime and what its models report.")
         case .lmstudio:      return L10n.t("The local runtime and what its models report.")
+        case .customEndpoints: return L10n.t("OpenAI-compatible APIs, local runtimes and custom proxies.")
         case .appearance:    return L10n.t("Where the notch sits, how big it is, and what it shows.")
         case .notifications: return L10n.t("Sounds, cards and banners when something finishes, stalls or resets.")
         case .brink:         return L10n.t("Plans and market data, the task source, focus blocks and the session launcher.")
@@ -101,6 +103,7 @@ private enum SettingsSection: String, CaseIterable, Identifiable, Hashable {
         case .deepseek:      return "DeepSeek"
         case .ollama:        return "Ollama"   // a product name, the same in every language
         case .lmstudio:      return "LM Studio"
+        case .customEndpoints: return L10n.t("Custom Endpoints")
         case .appearance:    return L10n.t("Appearance")
         case .notifications: return L10n.t("Notifications")
         case .brink:         return L10n.t("Costs & Tasks")
@@ -117,6 +120,7 @@ private enum SettingsSection: String, CaseIterable, Identifiable, Hashable {
         case .deepseek:      return "chart.line.uptrend.xyaxis"
         case .ollama:        return "desktopcomputer"
         case .lmstudio:      return "cpu"
+        case .customEndpoints: return "network"
         case .appearance:    return "paintbrush"
         case .notifications: return "bell.badge"
         case .brink:         return "checklist"
@@ -202,6 +206,7 @@ struct SettingsView: View {
     /// makes returning focus the exact moment the old value is wrong.
     @State private var accounts: [ProviderSummary] = []
     @State private var displays: [DisplayOption] = []
+    @State private var menuBarChoices: [MenuBarChoice] = []
     @State private var selection: SettingsSection = .accounts
     /// The provider being dragged right now.
     ///
@@ -316,6 +321,17 @@ struct SettingsView: View {
         .onReceive(NotificationCenter.default.publisher(
             for: NSApplication.didChangeScreenParametersNotification
         )) { _ in displays = DisplayOption.connected }
+        .onReceive(preferences.$customEndpoints.receive(on: RunLoop.main)) { _ in
+            accounts = providers()
+        }
+        .onReceive((usageStore?.$snapshots.eraseToAnyPublisher()
+                    ?? Empty<[ProviderSnapshot], Never>().eraseToAnyPublisher())
+            .receive(on: RunLoop.main)) { snapshots in
+                // Every reading lands here. The rows only change when who can
+                // be listed does, not whenever a figure moves.
+                let choices = MenuBarChoice.listed(in: snapshots)
+                if choices != menuBarChoices { menuBarChoices = choices }
+            }
         .onReceive(NotificationCenter.default.publisher(for: SettingsView.openSection)) { note in
             if let raw = note.userInfo?["section"] as? String,
                let section = SettingsSection(rawValue: raw) {
@@ -572,6 +588,7 @@ struct SettingsView: View {
         case .phone:         phonePane
         case .deepseek:      DeepSeekPricingSettingsView(preferences: preferences)
         case .brink:         BrinkSettingsPane()
+        case .customEndpoints: CustomEndpointsSettingsView(preferences: preferences)
         case .activity:      TimelinePane()
         case .focus:         FocusPane()
         case .ollama:
@@ -830,6 +847,34 @@ struct SettingsView: View {
                     Button(L10n.t("Reset")) {
                         preferences.criticalLimit = 0.70
                         preferences.watchLimit = 0.50
+                    }
+                }
+            }
+
+            if preferences.appPresence == .menuBar {
+                SettingsGroup(title: L10n.t("Menu bar"),
+                              footer: menuBarChoices.isEmpty
+                                  ? L10n.t("Nothing Codenotch reads has a five-hour limit to show yet. Claude and Codex do — switch one on in Accounts.")
+                                  : L10n.t("Leaving a provider out keeps it off the menu bar only — Codenotch still reads it. With none chosen, the icon comes back.")) {
+                    SettingsToggleRow(title: L10n.t("Show limit information in menu bar"),
+                                      description: L10n.t("Swaps the icon for each chosen provider's five-hour limit — how much is used and how long until it resets."),
+                                      isOn: $preferences.showsLimitsInMenuBar)
+                    if preferences.showsLimitsInMenuBar {
+                        ForEach(menuBarChoices) { choice in
+                            SettingsRow(title: choice.name) {
+                                HStack(spacing: 10) {
+                                    ProviderGlyphView(glyph: choice.glyph, size: 16).accessibilityHidden(true)
+                                    Toggle("", isOn: Binding(
+                                        get: { preferences.isInMenuBar(choice.id) },
+                                        set: { preferences.setInMenuBar($0, for: choice.id, among: menuBarChoices.map(\.id)) }
+                                    ))
+                                    .labelsHidden().toggleStyle(.switch)
+                                }
+                            }
+                        }
+                        if menuBarChoices.filter({ preferences.isInMenuBar($0.id) }).count > StatusItemSummary.fullEntryLimit {
+                            SettingsNote(text: L10n.t("Past two, each shows its share alone and the countdowns move to the tooltip. Past four, the rest are in the menu."))
+                        }
                     }
                 }
             }
@@ -1101,7 +1146,7 @@ struct SettingsView: View {
     /// it return on every read, which is what "it asks every time" turns out to
     /// be.
     static var keychainCopy: String {
-        L10n.t("macOS will ask once for permission to read Claude Code's, Antigravity's and cursor-agent's saved logins. Choose Always Allow — plain Allow makes it ask again every time.")
+        L10n.t("macOS may ask before Codenotch reads Claude Code's, Antigravity's or cursor-agent's saved login. Background refreshes never show that question; it appears only when you click Allow access…, and Deny stops Codenotch reading that login until you ask again.")
     }
 
     /// A provider has just been switched on: put it after the ones already
@@ -1402,7 +1447,7 @@ private struct AccountRow: View {
 
                     // The mark on a tile, the way an app lists what it has
                     // installed: one size for every source, whatever its glyph.
-                    ProviderGlyphView(glyph: provider.glyph, size: 18)
+                    ProviderGlyphView(glyph: provider.glyph, customIconFilename: provider.customIconFilename, size: 18)
                         .foregroundStyle(isConnected ? .primary : .tertiary)
                         .frame(width: 36, height: 36)
                         .background(

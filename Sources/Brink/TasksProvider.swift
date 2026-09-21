@@ -20,14 +20,14 @@ struct TasksProvider: UsageProvider {
             windows.append(LimitWindow(id: "focus", label: L10n.t("Focus"),
                                        usedFraction: focus.fraction,
                                        usedText: FocusStore.clock(focus.elapsed),
-                                       detail: focus.taskName))
+                                       detail: focus.taskName, prefersUsedText: true))
         }
         let done = todos.completedToday, open = todos.openToday
         let total = done + open
         windows.append(LimitWindow(id: "today", label: L10n.t("Today"),
                                    usedFraction: total == 0 ? 0 : Double(done) / Double(total),
                                    remaining: open, used: done,
-                                   usedText: "\(done)/\(total)"))
+                                   usedText: "\(done)/\(total)", prefersUsedText: true))
         let ringGlyph: ProviderGlyph = focus.isActive ? (focus.isRunning ? .focus : .focusPaused) : .tasks
         var snapshot = ProviderSnapshot(id: id, displayName: displayName, glyph: ringGlyph,
                                         fidelity: .official, status: .ok, windows: windows)

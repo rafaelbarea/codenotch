@@ -107,8 +107,6 @@ final class NotchViewModel: ObservableObject {
     /// toggles a pin; only Settings moves this.
     @Published var isAlwaysOn = false
 
-    /// Held open, by either route. What the folding logic actually asks.
-    var staysOpen: Bool { isPinned || isAlwaysOn }
     /// Providers with a fetch in flight, driven by the store.
     @Published var refreshing: Set<String> = []
     /// Bumped each time the settings orb is clicked, by either route.
@@ -664,7 +662,7 @@ final class NotchViewModel: ObservableObject {
     }
 
     private var hasResetCredits: Bool {
-        snapshots.contains { $0.resetCredits != nil }
+        snapshots.contains(where: \.hasAvailableResetCredits)
     }
 
     func sessionCap(cellCount: Int) -> Int { memo("sessionCap\(cellCount)") { computeSessionCap(cellCount: cellCount) } }
@@ -733,7 +731,7 @@ final class NotchViewModel: ObservableObject {
                 blockMessage: snapshot.block?.summary(now: now),
                 hasTokenUsage: snapshot.tokenUsage != nil,
                 hasPlan: snapshot.plan != nil,
-                hasResetCredits: snapshot.resetCredits != nil,
+                hasResetCredits: snapshot.hasAvailableResetCredits,
                 localModelName: snapshot.localModel?.name,
                 showsLocalPerformance: snapshot.showsLocalPerformance,
                 localLedgerRows: snapshot.localLedgerRowCount,
