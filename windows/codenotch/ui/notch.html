@@ -326,6 +326,111 @@ let uiLang='en';
 // words the card writes itself. A language with no table falls back to English rather than
 // showing half a translation, so adding one is only ever data.
 const TEXT={
+  ko:{
+    'Included usage':'포함 사용량',
+    'API usage':'API 사용량',
+    'On demand':'온디맨드',
+    'Usage':'사용량',
+    'Current session':'현재 세션',
+    'Weekly (all models)':'주간 (모든 모델)',
+    'Weekly (Opus)':'주간 (Opus)',
+    'Weekly (model-scoped)':'주간 (모델별)',
+    'Weekly limit':'주간 제한',
+    'Weekly Limit':'주간 제한',
+    '5-Hour Limit':'5시간 제한',
+    '5-hour Limit':'5시간 제한',
+    'Gemini Models':'Gemini 모델',
+    'Claude and GPT models':'Claude 및 GPT 모델',
+    'Monthly limit':'월간 제한',
+    'Monthly Limit':'월간 제한',
+    'Longer window':'장기 사용 기간',
+    'Requests today · no limit published':'오늘 요청 수 · 한도 미공개',
+    'Resetting…':'재설정 중…',
+    'Resets at':'재설정 시각',
+    'Resets':'재설정',
+    'Working':'작업 중',
+    'Waiting':'대기 중',
+    'Streaming (network)':'스트리밍 중 (네트워크)',
+    'Rate limited, retrying in':'요청 제한, 재시도까지',
+    'Rate limited — retrying in':'요청 제한 — 재시도까지',
+    'request today':'오늘 요청',
+    'requests today':'오늘 요청',
+    'no requests today':'오늘 요청 없음',
+    'Waiting for first reading…':'첫 측정값을 기다리는 중…',
+    'Sign in to Claude Code to see usage.':'사용량을 확인하려면 Claude Code에 로그인하십시오.',
+    'Sign in to Cursor to see usage.':'사용량을 확인하려면 Cursor에 로그인하십시오.',
+    'Sign in to Codex to see usage.':'사용량을 확인하려면 Codex에 로그인하십시오.',
+    'Sign in to Antigravity to see usage.':'사용량을 확인하려면 Antigravity에 로그인하십시오.',
+    'needs your input':'응답을 기다리는 중',
+    'Working in':'작업 위치:',
+    'Sign in':'로그인',
+    'Signing in...':'로그인 중…',
+    'Refresh':'새로 고침',
+    'Browser sign-in through Claude Code':'Claude Code를 통한 브라우저 로그인',
+    'Complete sign-in in the browser or terminal window.':'브라우저나 터미널 창에서 로그인을 완료하십시오.',
+    'Sign-in complete. Refreshing usage...':'로그인되었습니다. 사용량을 새로 고치는 중…',
+    'Sign-in cancelled, failed or timed out. Try again.':'로그인이 취소되거나 실패했거나 시간이 초과되었습니다. 다시 시도하십시오.',
+    'Checking usage...':'사용량 확인 중…',
+    'Rate limited. Wait for the retry deadline.':'요청이 제한되었습니다. 재시도 시점까지 기다리십시오.',
+    'Claude Code CLI not found. Install the standalone CLI first.':'Claude Code CLI를 찾을 수 없습니다. 먼저 독립 실행형 CLI를 설치하십시오.',
+    'Claude sign-in or renewal is already running.':'Claude 로그인 또는 갱신이 이미 진행 중입니다.',
+    'Unable to open Claude sign-in window.':'Claude 로그인 창을 열 수 없습니다.',
+    'Claude HTTP 403: access denied. Check network or account access; sign-in may still be valid.':'Claude HTTP 403: 접근이 거부되었습니다. 네트워크나 계정의 접근 권한을 확인하십시오. 로그인은 여전히 유효할 수 있습니다.',
+    'Run grok login to see usage.':'사용량을 확인하려면 grok login을 실행하십시오.',
+  },
+  'pt-BR':{
+    'Included usage':'Uso incluído',
+    'Sign in':'Entrar',
+    'Signing in...':'Entrando...',
+    'Refresh':'Atualizar',
+    'Browser sign-in through Claude Code':'Login pelo navegador via Claude Code',
+    'Complete sign-in in the browser or terminal window.':'Conclua o login no navegador ou na janela do terminal.',
+    'Sign-in complete. Refreshing usage...':'Login concluído. Atualizando uso...',
+    'Sign-in cancelled, failed or timed out. Try again.':'O login foi cancelado, falhou ou expirou. Tente novamente.',
+    'Checking usage...':'Verificando uso...',
+    'Rate limited. Wait for the retry deadline.':'Limite de requisições atingido. Aguarde o prazo para nova tentativa.',
+    'Claude Code CLI not found. Install the standalone CLI first.':'CLI do Claude Code não encontrada. Instale primeiro a CLI independente.',
+    'Claude sign-in or renewal is already running.':'O login ou a renovação do Claude já está em andamento.',
+    'Unable to open Claude sign-in window.':'Não foi possível abrir a janela de login do Claude.',
+    'Claude HTTP 403: access denied. Check network or account access; sign-in may still be valid.':'Claude HTTP 403: acesso negado. Verifique a rede ou o acesso da conta; o login ainda pode ser válido.',
+    'API usage':'Uso da API',
+    'On demand':'Sob demanda',
+    'Usage':'Uso',
+    'Current session':'Sessão atual',
+    'Weekly (all models)':'Semanal (todos os modelos)',
+    'Weekly (Opus)':'Semanal (Opus)',
+    'Weekly (model-scoped)':'Semanal (por modelo)',
+    'Weekly limit':'Limite semanal',
+    'Weekly Limit':'Limite semanal',
+    '5-Hour Limit':'Limite de 5 horas',
+    '5-hour Limit':'Limite de 5 horas',
+    'Gemini Models':'Modelos Gemini',
+    'Claude and GPT models':'Modelos Claude e GPT',
+    'Monthly limit':'Limite mensal',
+    'Monthly Limit':'Limite mensal',
+    'Longer window':'Janela mais longa',
+    'Requests today · no limit published':'Solicitações hoje · nenhum limite publicado',
+    'Updated':'Atualizado',
+    'Resetting…':'Renovando…',
+    'Resets at':'Redefine às',
+    'Resets':'Redefine',
+    'Working':'Trabalhando',
+    'Waiting':'Aguardando',
+    'Streaming (network)':'Transmitindo (rede)',
+    'Rate limited, retrying in':'Limite atingido, nova tentativa em',
+    'Rate limited — retrying in':'Limite atingido — nova tentativa em',
+    'request today':'requisição hoje',
+    'requests today':'requisições hoje',
+    'no requests today':'nenhuma solicitação hoje',
+    'Waiting for first reading…':'Aguardando a primeira leitura…',
+    'Sign in to Claude Code to see usage.':'Entre no Claude Code para ver o uso.',
+    'Sign in to Cursor to see usage.':'Entre no Cursor para ver o uso.',
+    'Sign in to Codex to see usage.':'Entre no Codex para ver o uso.',
+    'Sign in to Antigravity to see usage.':'Entre no Antigravity para ver o uso.',
+    'Run grok login to see usage.':'Execute grok login para ver o uso.',
+    'needs your input':'precisa da sua resposta',
+    'Working in':'Em execução em'
+  },
   uk:{
     'Included usage':'Використання в тарифі',
     'API usage':'Використання API',
@@ -345,7 +450,6 @@ const TEXT={
     'Monthly Limit':'Місячний ліміт',
     'Longer window':'Довше вікно',
     'Requests today · no limit published':'Запитів сьогодні · ліміт не опубліковано',
-    'Updated':'Оновлено',
     'Resetting…':'Скидання…',
     'Resets at':'Скидання о',
     'Resets':'Скидання',
@@ -369,13 +473,10 @@ const TEXT={
     'Included usage':'Включённое использование',
     'Sign in':'Авторизоваться',
     'Signing in...':'Вход…',
-    'Refresh':'Обновить',
     'Browser sign-in through Claude Code':'Вход через браузер с помощью Claude Code',
     'Complete sign-in in the browser or terminal window.':'Подтвердите вход в браузере или окне терминала.',
     'Sign-in complete. Refreshing usage...':'Вход выполнен. Обновляю лимиты…',
     'Sign-in cancelled, failed or timed out. Try again.':'Вход отменён, завершился ошибкой или истекло время ожидания. Попробуйте ещё раз.',
-    'Checking usage...':'Проверяю лимиты…',
-    'Rate limited. Wait for the retry deadline.':'Слишком много запросов. Дождитесь срока повтора.',
     'Claude Code CLI not found. Install the standalone CLI first.':'Claude Code CLI не найден. Установите отдельный CLI.',
     'Claude sign-in or renewal is already running.':'Вход или обновление авторизации Claude уже выполняется.',
     'Unable to open Claude sign-in window.':'Не удалось открыть окно входа Claude.',
@@ -397,7 +498,6 @@ const TEXT={
     'Monthly Limit':'Месячный лимит',
     'Longer window':'Более длительный период',
     'Requests today · no limit published':'Запросы сегодня · лимит не опубликован',
-    'Updated':'Обновлено',
     'Resetting…':'Сброс…',
     'Resets at':'Сброс в',
     'Resets':'Сброс',
@@ -437,7 +537,6 @@ const TEXT={
     'Monthly Limit':'每月限额',
     'Longer window':'更长的周期',
     'Requests today · no limit published':'今日请求数 · 未公布限额',
-    'Updated':'更新于',
     'Resetting…':'正在重置…',
     'Resets at':'重置于',
     'Resets':'重置',
@@ -477,7 +576,6 @@ const TEXT={
     'Monthly Limit':'每月限額',
     'Longer window':'更長的週期',
     'Requests today · no limit published':'今日要求數 · 未公布限額',
-    'Updated':'更新於',
     'Resetting…':'正在重置…',
     'Resets at':'重置於',
     'Resets':'重置',
@@ -502,6 +600,82 @@ const TEXT={
 // Kept as patterns rather than exact keys: each one carries a number, a plan name or an error
 // the provider wrote, so the whole string can never be a dictionary key.
 const PATTERNS={
+  ko:[
+    [/^(\d+)m limit$/,'$1분 제한'],
+    [/^(\d+)h limit$/,'$1시간 제한'],
+    [/^(\d+)d limit$/,'$1일 제한'],
+    [/^Rate limited, retrying in (\d+)s$/,'요청 제한, $1초 후 재시도'],
+    [/^Rate limited — retrying in (\d+)s$/,'요청 제한 — $1초 후 재시도'],
+    [/^Unlimited on the (.+) plan — nothing to meter$/,'$1 요금제는 무제한입니다 — 측정할 사용량이 없습니다'],
+    [/^The (.+) plan has nothing for Cursor to meter yet$/,'$1 요금제에는 아직 Cursor가 측정할 사용량이 없습니다'],
+    [/^(.+) · Google publishes no quota for this account$/,'$1 · Google이 이 계정의 할당량을 공개하지 않습니다'],
+    [/^Live read failed \((.+)\)$/,'실시간 조회 실패 ($1)'],
+    [/Weekly \(all models\)/g,'주간 (모든 모델)'],
+    [/Weekly \(Opus\)/g,'주간 (Opus)'],
+    [/Weekly \(model-scoped\)/g,'주간 (모델별)'],
+    [/Weekly limit/g,'주간 제한'],
+    [/Monthly limit/g,'월간 제한'],
+    [/\bWeekly\b/g,'주간'],
+    [/\bMonthly\b/g,'월간'],
+    [/ · via /g,' · 경유: '],
+    [/needs your input/g,'응답을 기다리는 중'],
+    [/^Working in /,'작업 위치: '],
+    [/via Antigravity CLI/g,'Antigravity CLI 경유'],
+    [/via Antigravity/g,'Antigravity 경유'],
+    [/via Google/g,'Google 경유'],
+    [/No Claude Code credential found/g,'Claude Code 자격 증명을 찾을 수 없습니다'],
+    [/Credential expired — run claude once in a terminal to renew it/g,'자격 증명이 만료되었습니다 — 터미널에서 claude를 한 번 실행해 갱신하십시오'],
+    [/Credential rejected \(switched accounts\?\)/g,'자격 증명이 거부되었습니다 (계정을 전환하셨습니까?)'],
+    [/Codex sign-in expired — open Codex once to refresh it/g,'Codex 로그인이 만료되었습니다 — Codex를 한 번 열어 갱신하십시오'],
+    [/Codex rejected its sign-in — sign in to Codex again/g,'Codex 로그인이 거부되었습니다 — Codex에 다시 로그인하십시오'],
+    [/Codex reported no usage windows/g,'Codex가 사용량 집계 기간을 보고하지 않았습니다'],
+    [/Codex has not recorded a usage snapshot yet/g,'Codex가 아직 사용량 스냅샷을 기록하지 않았습니다'],
+    [/from last Codex run/g,'마지막 Codex 실행 기준'],
+    [/Waiting for Antigravity CLI quota/g,'Antigravity CLI 할당량을 기다리는 중'],
+    [/Open Antigravity to read its quota/g,'할당량을 확인하려면 Antigravity를 여십시오'],
+    [/Antigravity's Google session was rejected — sign in again in Antigravity/g,'Antigravity의 Google 세션이 거부되었습니다 — Antigravity에서 다시 로그인하십시오'],
+    [/Antigravity is closed — last reading kept/g,'Antigravity가 닫혀 있습니다 — 마지막 측정값 유지'],
+    [/Sign in to Cursor \(the editor\) to see usage\./g,'사용량을 확인하려면 Cursor 편집기에 로그인하십시오.'],
+    [/Cursor session was rejected — sign in again in the editor/g,'Cursor 세션이 거부되었습니다 — 편집기에서 다시 로그인하십시오'],
+  ],
+  'pt-BR':[
+    [/^(\d+)m limit$/,'Limite de $1 min'],
+    [/^(\d+)h limit$/,'Limite de $1 h'],
+    [/^(\d+)d limit$/,'Limite de $1 d'],
+    [/^Rate limited, retrying in (\d+)s$/,'Limite atingido, nova tentativa em $1 s'],
+    [/^Rate limited — retrying in (\d+)s$/,'Limite atingido — nova tentativa em $1 s'],
+    [/^Unlimited on the (.+) plan — nothing to meter$/,'Ilimitado no plano $1 — nada para medir'],
+    [/^The (.+) plan has nothing for Cursor to meter yet$/,'O plano $1 ainda não tem uso para o Cursor medir'],
+    [/^(.+) · Google publishes no quota for this account$/,'$1 · Google não publica cota para esta conta'],
+    [/^Live read failed \((.+)\)$/,'Falha na leitura em tempo real ($1)'],
+    [/Weekly \(all models\)/g,'Semanal (todos os modelos)'],
+    [/Weekly \(Opus\)/g,'Semanal (Opus)'],
+    [/Weekly \(model-scoped\)/g,'Semanal (por modelo)'],
+    [/Weekly limit/g,'Limite semanal'],
+    [/Monthly limit/g,'Limite mensal'],
+    [/\bWeekly\b/g,'Semanal'],
+    [/\bMonthly\b/g,'Mensal'],
+    [/ · via /g,' · via '],
+    [/needs your input/g,'precisa da sua resposta'],
+    [/^Working in /,'Em execução em '],
+    [/via Antigravity CLI/g,'via Antigravity CLI'],
+    [/via Antigravity/g,'via Antigravity'],
+    [/via Google/g,'via Google'],
+    [/No Claude Code credential found/g,'Credencial do Claude Code não encontrada'],
+    [/Credential expired — run claude once in a terminal to renew it/g,'A credencial expirou — execute claude uma vez no terminal para renová-la'],
+    [/Credential rejected \(switched accounts\?\)/g,'Credencial rejeitada (você trocou de conta?)'],
+    [/Codex sign-in expired — open Codex once to refresh it/g,'O login do Codex expirou — abra o Codex uma vez para atualizá-lo'],
+    [/Codex rejected its sign-in — sign in to Codex again/g,'O Codex rejeitou o login — entre novamente no Codex'],
+    [/Codex reported no usage windows/g,'O Codex não informou nenhuma janela de uso'],
+    [/Codex has not recorded a usage snapshot yet/g,'O Codex ainda não registrou um retrato de uso'],
+    [/from last Codex run/g,'da última execução do Codex'],
+    [/Waiting for Antigravity CLI quota/g,'Aguardando a cota da CLI do Antigravity'],
+    [/Open Antigravity to read its quota/g,'Abra o Antigravity para ler a cota'],
+    [/Antigravity's Google session was rejected — sign in again in Antigravity/g,'A sessão Google do Antigravity foi rejeitada — entre novamente no Antigravity'],
+    [/Antigravity is closed — last reading kept/g,'O Antigravity está fechado — última leitura mantida'],
+    [/Sign in to Cursor \(the editor\) to see usage\./g,'Entre no Cursor (o editor) para ver o uso.'],
+    [/Cursor session was rejected — sign in again in the editor/g,'A sessão do Cursor foi rejeitada — entre novamente no editor'],
+  ],
   uk:[
     [/^(\d+)m limit$/,'Ліміт $1 хв'],
     [/^(\d+)h limit$/,'Ліміт $1 год'],
@@ -658,26 +832,34 @@ const PATTERNS={
 // Grammar differs enough that a format string would not carry it — Russian puts the verb last,
 // Chinese puts it after the time — so each language writes its own short functions.
 const UI={
+  ko:{locale:'ko-KR',title:n=>n+' 사용량',resetting:'재설정 중…',resetsIn:m=>`${m}분 후 재설정`,
+      resetsAt:t=>`${t}에 재설정`,resetsOn:(d,t)=>`${d} ${t}에 재설정`,resetsDate:d=>`${d}에 재설정`,
+      ago:m=>m<60?`${m}분 전`:`${Math.round(m/60)}시간 전`,
+      usedLeft:(used,left)=>`${used}% 사용 · ${left}% 남음`,andMore:n=>`외 ${n}개`,updated:a=>`${a}에 마지막 업데이트됨`},
+  'pt-BR':{locale:'pt-BR',title:n=>'Uso do '+n,resetting:'Renovando…',resetsIn:m=>`Renova em ${m} min`,
+      resetsAt:t=>`Renova às ${t}`,resetsOn:(d,t)=>`Renova ${d} às ${t}`,resetsDate:d=>`Renova ${d}`,
+      ago:m=>m<60?`há ${m} min`:`há ${Math.round(m/60)} h`,
+      usedLeft:(used,left)=>`${used}% usado · ${left}% restante`,andMore:n=>`e mais ${n}`},
   en:{locale:'en-US',title:n=>n+' Usage',resetting:'Resetting…',resetsIn:m=>`Resets in ${m} min`,
       resetsAt:t=>`Resets at ${t}`,resetsOn:(d,t)=>`Resets ${d} ${t}`,resetsDate:d=>`Resets ${d}`,
       ago:m=>m<60?`${m}m ago`:`${Math.round(m/60)}h ago`,
-      usedLeft:(used,left)=>`${used}% Used · ${left}% left`,andMore:n=>`and ${n} more`},
+      usedLeft:(used,left)=>`${used}% Used · ${left}% left`,andMore:n=>`and ${n} more`,updated:a=>`Updated ${a}`},
   uk:{locale:'uk-UA',title:n=>'Використання '+n,resetting:'Скидання…',resetsIn:m=>`Скидання через ${m} хв`,
       resetsAt:t=>`Скидання о ${t}`,resetsOn:(d,t)=>`Скидання: ${d} ${t}`,resetsDate:d=>`Скидання: ${d}`,
       ago:m=>m<60?`${m} хв тому`:`${Math.round(m/60)} год тому`,
-      usedLeft:(used,left)=>`Використано ${used}% · лишилось ${left}%`,andMore:n=>`і ще ${n}`},
+      usedLeft:(used,left)=>`Використано ${used}% · лишилось ${left}%`,andMore:n=>`і ще ${n}`,updated:a=>`Оновлено ${a}`},
   ru:{locale:'ru-RU',title:n=>'Использование '+n,resetting:'Сброс…',resetsIn:m=>`Сброс через ${m} мин`,
       resetsAt:t=>`Сброс в ${t}`,resetsOn:(d,t)=>`Сброс: ${d} ${t}`,resetsDate:d=>`Сброс: ${d}`,
       ago:m=>m<60?`${m} мин назад`:`${Math.round(m/60)} ч назад`,
-      usedLeft:(used,left)=>`Использовано ${used}% · осталось ${left}%`,andMore:n=>`и ещё ${n}`},
+      usedLeft:(used,left)=>`Использовано ${used}% · осталось ${left}%`,andMore:n=>`и ещё ${n}`,updated:a=>`Обновлено ${a}`},
   zh:{locale:'zh-CN',title:n=>n+' 用量',resetting:'正在重置…',resetsIn:m=>`${m} 分钟后重置`,
       resetsAt:t=>`${t} 重置`,resetsOn:(d,t)=>`${d} ${t} 重置`,resetsDate:d=>`${d} 重置`,
       ago:m=>m<60?`${m} 分钟前`:`${Math.round(m/60)} 小时前`,
-      usedLeft:(used,left)=>`已用 ${used}% · 剩余 ${left}%`,andMore:n=>`另有 ${n} 个`},
+      usedLeft:(used,left)=>`已用 ${used}% · 剩余 ${left}%`,andMore:n=>`另有 ${n} 个`,updated:a=>`更新于 ${a}`},
   'zh-Hant':{locale:'zh-TW',title:n=>n+' 用量',resetting:'正在重置…',resetsIn:m=>`${m} 分鐘後重置`,
       resetsAt:t=>`${t} 重置`,resetsOn:(d,t)=>`${d} ${t} 重置`,resetsDate:d=>`${d} 重置`,
       ago:m=>m<60?`${m} 分鐘前`:`${Math.round(m/60)} 小時前`,
-      usedLeft:(used,left)=>`已用 ${used}% · 剩餘 ${left}%`,andMore:n=>`另有 ${n} 個`},
+      usedLeft:(used,left)=>`已用 ${used}% · 剩餘 ${left}%`,andMore:n=>`另有 ${n} 個`,updated:a=>`更新於 ${a}`},
 };
 function ui(){return UI[uiLang]||UI.en;}
 function textCopy(value){
@@ -900,21 +1082,19 @@ let hoverId='claude';
 let claudeAuth={busy:false,message:''};
 let claudeActionMessage='';
 // CLAUDE_AUTH_ACTIONS_START
+// Only while signed out, where the Mac shows its sign-in line; and only on the default account,
+// since the CLI's login runs without CLAUDE_CONFIG_DIR and would sign in ~/.claude whichever card asked
+function offersClaudeSignIn(p){ return p.id==='claude'&&p.snap.status==='needsAuth'; }
 function claudeAuthHtml(auth, message=''){
-  return `<div class="c-auth"><button id="claude-sign-in" ${auth.busy?'disabled':''}>${esc(textCopy(auth.busy?'Signing in...':'Sign in'))}</button><button id="claude-refresh" ${auth.busy?'disabled':''}>${esc(textCopy('Refresh'))}</button></div><div class="c-auth-status" role="status">${esc(textCopy(message||auth.message||'Browser sign-in through Claude Code'))}</div>`;
+  return `<div class="c-auth"><button id="claude-sign-in" ${auth.busy?'disabled':''}>${esc(textCopy(auth.busy?'Signing in...':'Sign in'))}</button></div><div class="c-auth-status" role="status">${esc(textCopy(message||auth.message||'Browser sign-in through Claude Code'))}</div>`;
 }
-async function runClaudeAction(action){
+async function signInClaude(){
   if(claudeAuth.busy) return;
   claudeActionMessage='';
   try{
-    if(action==='sign-in'){
-      claudeAuth={busy:true,message:'Complete sign-in in the browser or terminal window.'};
-      renderCard();
-      await invoke('claude_sign_in');
-    }else{
-      const requested=await invoke('refresh_claude_usage');
-      claudeActionMessage=requested?'Checking usage...':'Rate limited. Wait for the retry deadline.';
-    }
+    claudeAuth={busy:true,message:'Complete sign-in in the browser or terminal window.'};
+    renderCard();
+    await invoke('claude_sign_in');
   }catch(e){
     claudeAuth.busy=false;
     claudeActionMessage=String(e?.message||e);
@@ -930,7 +1110,7 @@ function renderCard(){
   // p.name is no longer a constant: for a second account it is built from the home
   // directory's slug and the subscriptionType read out of .credentials.json.
   let html=`<div class="c-head">${headIcon}<span class="c-title">${esc(ui().title(p.name))}</span></div>`;
-  if(staleOf(snap)&&snap.fetched_at) html+=`<div class="c-sub">${textCopy('Updated')} ${ago(snap.fetched_at)}</div>`;
+  if(staleOf(snap)&&snap.fetched_at) html+=`<div class="c-sub">${ui().updated(ago(snap.fetched_at))}</div>`;
   if(snap.status==='needsAuth'){
     const who={claude:'Sign in to Claude Code to see usage.',cursor:'Sign in to Cursor to see usage.',codex:'Sign in to Codex to see usage.',grok:'Run grok login to see usage.',gemini:'Sign in to Antigravity to see usage.'}[p.base]||'';
     html+=`<div class="c-note">${textCopy(who)}<br>${esc(textCopy(snap.note||''))}</div>`;
@@ -959,7 +1139,7 @@ function renderCard(){
     if(group) html+=`</div>`;
     if(snap.note) html+=`<div class="c-note">${esc(textCopy(snap.note))}</div>`;
   }
-  if(p.base==='claude') html+=claudeAuthHtml(claudeAuth,claudeActionMessage);
+  if(offersClaudeSignIn(p)) html+=claudeAuthHtml(claudeAuth,claudeActionMessage);
   if(p.base==='claude'){ // live sessions (a full list with jump-to-session is a follow-up)
     const act=stateSnap.sessions.filter(s=>s.state!=='idle');
     if(act.length){
@@ -982,9 +1162,8 @@ function renderCard(){
     }
   }
   c.innerHTML=html;
-  const signIn=c.querySelector('#claude-sign-in'), refresh=c.querySelector('#claude-refresh');
-  if(signIn) signIn.onclick=e=>{e.stopPropagation();runClaudeAction('sign-in');};
-  if(refresh) refresh.onclick=e=>{e.stopPropagation();runClaudeAction('refresh');};
+  const signIn=c.querySelector('#claude-sign-in');
+  if(signIn) signIn.onclick=e=>{e.stopPropagation();signInClaude();};
   placeCard();
 }
 // The card follows the hovered cell: centred on it along the pill (kept inside the window), tail pointing at it.
@@ -1069,9 +1248,10 @@ function armWatchdog(){
 // page is as wide as the design, so if the CSS viewport is not that wide the WebView's DPR disagrees
 // with the monitor; CSS zoom pulls the layout back to the design size.
 // The design width is the window's, and the window is not the same shape on every edge — see
-// `notch_window_size` in main.rs: NOTCH_W upright, NOTCH_H lying flat. Dividing by 360 on a flat edge
-// read the wider window as a DPR error and zoomed the whole notch by 520/360.
-const DESIGN_W_UPRIGHT=360, DESIGN_W_FLAT=520;
+// `notch_window_size` in main.rs: NOTCH_W upright, NOTCH_LONG lying flat. Dividing by 360 on a
+// flat edge read the wider window as a DPR error and zoomed the whole notch by 520/360. Either number
+// left behind when the window changes width does the same thing, so a test in main.rs pins both.
+const DESIGN_W_UPRIGHT=360, DESIGN_W_FLAT=650;
 function designWidth(){ return edgeIsVertical()?DESIGN_W_UPRIGHT:DESIGN_W_FLAT; }
 function fitZoom(){
   const z=innerWidth/designWidth();

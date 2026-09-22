@@ -860,6 +860,9 @@ struct SettingsView: View {
                                       description: L10n.t("Swaps the icon for each chosen provider's five-hour limit — how much is used and how long until it resets."),
                                       isOn: $preferences.showsLimitsInMenuBar)
                     if preferences.showsLimitsInMenuBar {
+                        SettingsToggleRow(title: L10n.t("Show weekly limit in menu bar"),
+                                          description: L10n.t("Adds a compact weekly-usage ring around each chosen provider that publishes it."),
+                                          isOn: $preferences.showsWeeklyLimitInMenuBar)
                         ForEach(menuBarChoices) { choice in
                             SettingsRow(title: choice.name) {
                                 HStack(spacing: 10) {
